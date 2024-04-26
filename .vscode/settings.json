@@ -18,5 +18,6 @@
         "titleBar.inactiveBackground": "#83256199",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.remoteColor": "#832561"
+    "peacock.remoteColor": "#832561",
+    "cmake.sourceDirectory": "/home/shuyumo/research/GAO/external/mesh-fusion/libfusioncpu"
 }
