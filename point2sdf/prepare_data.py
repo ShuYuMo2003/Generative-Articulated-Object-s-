@@ -7,14 +7,14 @@ import os
 import glob
 
 MESH_FUSION_PATH = Path('/home/shuyumo/research/GAO/external/mesh-fusion')
-
+USE_GPU = False
+PROCESS_COUNT = 8 # cpu_count()
 
 def create_folder(path):
     try: os.makedirs(str(path))
     except FileExistsError: pass
 
 def process_obj(objs_dir, out_dir):
-    cpu_cnt = 8 # cpu_count()
     total_stemname = [file.stem for file in objs_dir.iterdir() if file.suffix == '.obj']
     transform_dir = out_dir / 'trans'
 
@@ -30,8 +30,9 @@ def process_obj(objs_dir, out_dir):
     scaled_dir = out_dir / 'sacled'
     create_folder(scaled_dir)
     print('=== Scaling meshes...')
-    assert os.system(f'''python {MESH_FUSION_PATH / '1_scale.py'}  \\
-                        --n_proc {cpu_cnt}                         \\
+    assert os.system(f'''export use_gpu={int(USE_GPU)};            \\
+                        python {MESH_FUSION_PATH / '1_scale.py'}   \\
+                        --n_proc {PROCESS_COUNT}                   \\
                         --in_dir {offs_dir}                        \\
                         --out_dir {scaled_dir}                     \\
                         --t_dir {transform_dir} ''') == 0
@@ -40,21 +41,24 @@ def process_obj(objs_dir, out_dir):
     depth_dir = out_dir / 'depth'
     create_folder(depth_dir)
     print('=== Create depths maps...')
-    assert os.system(f'''python {MESH_FUSION_PATH / '2_fusion.py'}  \\
-                          --mode=render --n_proc {cpu_cnt}          \\
-                          --in_dir {scaled_dir}                     \\
-                          --out_dir {depth_dir}''') == 0
+    assert os.system(f'''export use_gpu={int(USE_GPU)};            \\
+                        python {MESH_FUSION_PATH / '2_fusion.py'}  \\
+                        --mode=render --n_proc {PROCESS_COUNT}     \\
+                        --in_dir {scaled_dir}                      \\
+                        --out_dir {depth_dir}''') == 0
     print('done')
 
     watertight_dir = out_dir / 'watertight'
     create_folder(depth_dir)
     print('=== Produce watertight meshes...')
-    assert os.system(f'''python {MESH_FUSION_PATH / '2_fusion.py'}  \\
-                        --mode=fuse --n_proc {cpu_cnt}              \\
-                        --in_dir {depth_dir}                        \\
-                        --out_dir {watertight_dir}                  \\
+    assert os.system(f'''export use_gpu={int(USE_GPU)};            \\
+                        python {MESH_FUSION_PATH / '2_fusion.py'}  \\
+                        --mode=fuse --n_proc {PROCESS_COUNT}       \\
+                        --in_dir {depth_dir}                       \\
+                        --out_dir {watertight_dir}                 \\
                         --t_dir {transform_dir}''') == 0
     print('done')
+
 
 
 

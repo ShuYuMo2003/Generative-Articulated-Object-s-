@@ -12,7 +12,7 @@ import librender
 import libmcubes
 from multiprocessing import Pool
 
-use_gpu = True
+use_gpu = bool(int(os.environ.get('use_gpu', '0')))
 if use_gpu:
     import libfusiongpu as libfusion
     from libfusiongpu import tsdf_gpu as compute_tsdf
