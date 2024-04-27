@@ -634,7 +634,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord, 
+void search_splitnode_float(Node_float *root, float *pa, uint32_t *pidx, int8_t no_dims, float *point_coord,
                       float min_dist, uint32_t k, float distance_upper_bound, float eps_fac, uint8_t *mask,
                       uint32_t *closest_idx, float *closest_dist)
 {
@@ -1278,7 +1278,7 @@ Params:
     closest_idx : index of closest data point found (return)
     closest_dist : distance to closest point (return)
 ************************************************/
-void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord, 
+void search_splitnode_double(Node_double *root, double *pa, uint32_t *pidx, int8_t no_dims, double *point_coord,
                       double min_dist, uint32_t k, double distance_upper_bound, double eps_fac, uint8_t *mask,
                       uint32_t *closest_idx, double *closest_dist)
 {

@@ -142,7 +142,7 @@ def read_as_3d_array(fp, fix_coords=True):
     # j -> y
     # k -> z
     values, counts = raw_data[::2], raw_data[1::2]
-    data = np.repeat(values, counts).astype(np.bool)
+    data = np.repeat(values, counts).astype(np.int32)
     data = data.reshape(dims)
     if fix_coords:
         # xzy to xyz TODO the right thing
@@ -177,7 +177,7 @@ def read_as_coord_array(fp, fix_coords=True):
     end_indices = np.cumsum(counts)
     indices = np.concatenate(([0], end_indices[:-1])).astype(end_indices.dtype)
 
-    values = values.astype(np.bool)
+    values = values.astype(np.int32)
     indices = indices[values]
     end_indices = end_indices[values]
 

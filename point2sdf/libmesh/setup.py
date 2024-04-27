@@ -10,7 +10,7 @@ setup(
   ext_modules=cythonize([
     Extension('triangle_hash',
       sources=['triangle_hash.pyx'],
-      library_dirs=['./build/'],
+      libraries=['m'],  # Unix-like specific
       include_dirs=[np.get_include()]
     )
   ])
