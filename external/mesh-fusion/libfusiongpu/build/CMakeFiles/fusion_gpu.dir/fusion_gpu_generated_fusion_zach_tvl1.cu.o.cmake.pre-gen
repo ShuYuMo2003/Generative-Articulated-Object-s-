@@ -71,15 +71,15 @@ set(generated_file_path "/home/shuyumo/research/GAO/external/mesh-fusion/libfusi
 set(generated_file_internal "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o") # path
 set(generated_cubin_file_internal "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o.cubin.txt") # path
 
-set(CUDA_NVCC_EXECUTABLE "/usr/bin/nvcc") # path
-set(CUDA_NVCC_FLAGS ;-std=c++11; -gencode=arch=compute_30,code=sm_30; -gencode=arch=compute_30,code=compute_30 ;; ) # list
+set(CUDA_NVCC_EXECUTABLE "/usr/local/cuda-12.4/bin/nvcc") # path
+set(CUDA_NVCC_FLAGS ;-std=c++11; -gencode=arch=compute_50,code=sm_50; -gencode=arch=compute_50,code=compute_50 ;; ) # list
 # Build specific configuration flags
 set(CUDA_NVCC_FLAGS_RELEASE  ; )
 set(CUDA_NVCC_FLAGS_DEBUG  ; )
 set(CUDA_NVCC_FLAGS_MINSIZEREL  ; )
 set(CUDA_NVCC_FLAGS_RELWITHDEBINFO  ; )
 set(nvcc_flags -m64;-Dfusion_gpu_EXPORTS) # list
-set(CUDA_NVCC_INCLUDE_DIRS [==[/usr/include;$<TARGET_PROPERTY:fusion_gpu,INCLUDE_DIRECTORIES>]==]) # list (needs to be in lua quotes to address backslashes)
+set(CUDA_NVCC_INCLUDE_DIRS [==[/usr/local/cuda-12.4/include;$<TARGET_PROPERTY:fusion_gpu,INCLUDE_DIRECTORIES>]==]) # list (needs to be in lua quotes to address backslashes)
 string(REPLACE "\\" "/" CUDA_NVCC_INCLUDE_DIRS "${CUDA_NVCC_INCLUDE_DIRS}")
 set(CUDA_NVCC_COMPILE_DEFINITIONS [==[$<TARGET_PROPERTY:fusion_gpu,COMPILE_DEFINITIONS>]==]) # list (needs to be in lua quotes see #16510 ).
 set(format_flag "-c") # string
@@ -188,7 +188,7 @@ cuda_execute_process(
 # For CUDA 2.3 and below, -G -M doesn't work, so remove the -G flag
 # for dependency generation and hope for the best.
 set(depends_CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}")
-set(CUDA_VERSION 11.5)
+set(CUDA_VERSION 12.4)
 if(CUDA_VERSION VERSION_LESS "3.0")
   # Note that this will remove all occurrences of -G.
   list(REMOVE_ITEM depends_CUDA_NVCC_FLAGS "-G")

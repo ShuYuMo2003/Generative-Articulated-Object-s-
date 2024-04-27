@@ -157,7 +157,7 @@ class Fusion:
             outpath = os.path.join(self.options.out_dir, modelname + '.npz')
 
         return outpath
-        
+
     def get_points(self):
         """
         See https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere.
@@ -246,7 +246,7 @@ class Fusion:
             # (by subtracting a constant from the depth map).
             # Dilation additionally enlarges thin structures (e.g. for chairs).
             depthmap -= self.options.depth_offset_factor * self.voxel_size
-            depthmap = ndimage.morphology.grey_erosion(depthmap, size=(3, 3))
+            depthmap = ndimage.grey_erosion(depthmap, size=(3, 3))
 
             depthmaps.append(depthmap)
 

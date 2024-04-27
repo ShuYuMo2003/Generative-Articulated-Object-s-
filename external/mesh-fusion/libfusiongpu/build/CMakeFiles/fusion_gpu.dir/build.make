@@ -27,6 +27,9 @@
 
 .SUFFIXES: .hpux_make_needs_suffix_list
 
+# Produce verbose output by default.
+VERBOSE = 1
+
 # Command-line flag to silence nested $(MAKE).
 $(VERBOSE)MAKESILENT = -s
 
@@ -94,9 +97,9 @@ fusion_gpu_EXTERNAL_OBJECTS = \
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/build.make
-libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/libcudart_static.a
+libfusion_gpu.so: /usr/local/cuda-12.4/lib64/libcudart_static.a
 libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/librt.a
-libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/libcudart_static.a
+libfusion_gpu.so: /usr/local/cuda-12.4/lib64/libcudart_static.a
 libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/librt.a
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libfusion_gpu.so"

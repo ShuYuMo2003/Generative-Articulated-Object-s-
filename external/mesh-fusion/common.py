@@ -116,9 +116,8 @@ def read_off(file):
 
         # Fix for ModelNet bug were 'OFF' and the number of vertices and faces are
         # all in the first line.
-        if len(lines[0]) > 3:
-            assert lines[0][:3] == 'OFF' or lines[0][:3] == 'off', 'invalid OFF file %s' % file
-
+        assert lines[0][:4] == 'NOFF' or lines[0][:3] == 'OFF' or lines[0][:3] == 'off', 'invalid OFF file %s' % file
+        if len(lines[0]) > 4:
             parts = lines[0][3:].split(' ')
             assert len(parts) == 3
 
@@ -131,8 +130,6 @@ def read_off(file):
             start_index = 1
         # This is the regular case!
         else:
-            assert lines[0] == 'OFF' or lines[0] == 'off', 'invalid OFF file %s' % file
-
             parts = lines[1].split(' ')
             assert len(parts) == 3
 
@@ -148,7 +145,10 @@ def read_off(file):
         for i in range(num_vertices):
             vertex = lines[start_index + i].split(' ')
             vertex = [float(point.strip()) for point in vertex if point != '']
-            assert len(vertex) == 3
+            assert len(vertex) == 3 or len(vertex) == 6
+
+            if len(vertex) == 6:
+                vertex = vertex[:3]
 
             vertices.append(vertex)
 
@@ -163,7 +163,9 @@ def read_off(file):
 
             face = [int(index) for index in face]
 
-            assert face[0] == len(face) - 1, 'face should have %d vertices but as %d (%s)' % (face[0], len(face) - 1, file)
+            # assert face[0] == len(face) - 1, 'face should have %d vertices but as %d (%s)' % (face[0], len(face) - 1, file)
+            if face[0] != len(face) - 1:
+                face = face[:face[0] + 1]
             assert face[0] == 3, 'only triangular meshes supported (%s)' % file
             for index in face:
                 assert index >= 0 and index < num_vertices, 'vertex %d (of %d vertices) does not exist (%s)' % (index, num_vertices, file)
@@ -524,7 +526,7 @@ class Timer:
         Initialize and start timer.
         """
 
-        self.start = time.clock()
+        self.start = time.time()
         """ (float) Seconds. """
 
     def reset(self):
@@ -532,7 +534,7 @@ class Timer:
         Reset timer.
         """
 
-        self.start = time.clock()
+        self.start = time.time()
 
     def elapsed(self):
         """
@@ -542,4 +544,4 @@ class Timer:
         :rtype: float
         """
 
-        return (time.clock() - self.start)
+        return (time.time() - self.start)
