@@ -13,6 +13,9 @@ import sys
 sys.path.append('..')
 from point2sdf.libmesh import check_mesh_contains
 
+from rich.progress import Progress
+import time
+
 
 parser = argparse.ArgumentParser('Sample a watertight mesh.')
 parser.add_argument('in_folder', type=str,
@@ -69,15 +72,29 @@ parser.add_argument('--packbits', action='store_true',
 def main(args):
     input_files = glob.glob(os.path.join(args.in_folder, '*.off'))
     if args.n_proc != 0:
-        with Pool(args.n_proc) as p:
-            results = [p.apply_async(process_path, (input_file, args))
+        # with Pool(args.n_proc) as p:
+        #     results = [p.apply_async(process_path, (input_file, args))
+        #                  for input_file in input_files]
+        #     for res in results: #, description='Final Data Processing'):
+        #         res.get()
+
+        with Progress() as progress:
+            task = progress.add_task('sampleing', total=len(input_files))
+            with Pool(args.n_proc) as p:
+                results = [p.apply_async(process_path, (input_file, args))
                          for input_file in input_files]
-            for res in results: #, description='Final Data Processing'):
-                res.get()
+                while not progress.finished:
+                    for res in results:
+                        if res.ready():
+                            progress.update(task, advance=1)
+                            results.remove(res)
+                    time.sleep(0.5)
+                    progress.refresh()
 
     else:
         for p in input_files:
             process_path(p, args)
+
 
 
 def process_path(in_path, args):

@@ -33,6 +33,10 @@ class PartnetMobilityDataset(Dataset):
             occ = np.unpackbits(occ)[:sampled_point_cnt]
         occ = occ.astype(np.float32)
 
+        # print(pointcloud.shape)
+        # print(samplepoints.shape)
+        # print(occ.shape)
+
         return (
             torch.from_numpy(pointcloud),
             torch.from_numpy(samplepoints),

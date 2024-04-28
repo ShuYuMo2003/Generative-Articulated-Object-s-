@@ -11,6 +11,8 @@ import ntpath
 import librender
 import libmcubes
 from multiprocessing import Pool
+from rich.progress import Progress
+import time
 
 use_gpu = bool(int(os.environ.get('use_gpu', '0')))
 if use_gpu:
@@ -307,8 +309,17 @@ class Fusion:
             for filepath in files:
                 method(filepath)
         else:
-            with Pool(self.options.n_proc) as p:
-                p.map(method, files)
+            with Progress() as progress:
+                task = progress.add_task(self.options.mode, total=len(files))
+                with Pool(self.options.n_proc) as p:
+                    muti_res = [p.apply_async(method, (file,)) for file in files]
+                    while not progress.finished:
+                        for res in muti_res:
+                            if res.ready():
+                                progress.update(task, advance=1)
+                                muti_res.remove(res)
+                        time.sleep(0.5)
+                        progress.refresh()
 
     def run_render(self, filepath):
         """
