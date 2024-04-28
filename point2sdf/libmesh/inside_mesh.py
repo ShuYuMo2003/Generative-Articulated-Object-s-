@@ -36,7 +36,7 @@ class MeshIntersector:
         points = self.rescale(points)
 
         # placeholder result with no hits we'll fill in later
-        contains = np.zeros(len(points), dtype=np.int32)
+        contains = np.zeros(len(points), dtype=np.bool_)
 
         # cull points outside of the axis aligned bounding box
         # this avoids running ray tests unless points are close
@@ -48,6 +48,8 @@ class MeshIntersector:
         # Only consider points inside bounding box
         mask = inside_aabb
         points = points[mask]
+
+        # print('inside mesh = ', inside_aabb.sum(), ' total = ', mask.shape)
 
         # Compute intersection depth and check order
         points_indices, tri_indices = self._tri_intersector2d.query(points[:, :2])
@@ -73,6 +75,7 @@ class MeshIntersector:
         if (contains1 != contains2).any():
             print('Warning: contains1 != contains2 for some points.')
         contains[mask] = (contains1 & contains2)
+        print(contains1.sum(), '&', contains2.sum(), ' = (', contains.sum(), '/', inside_aabb.sum(), ') inside rate = ', contains.sum() / inside_aabb.sum())
         return contains
 
     def compute_intersection_depth(self, points, triangles):
@@ -130,7 +133,7 @@ class TriangleIntersector2d:
         return point_indices, tri_indices
 
     def check_triangles(self, points, triangles):
-        contains = np.zeros(points.shape[0], dtype=np.int32)
+        contains = np.zeros(points.shape[0], dtype=np.bool_)
         A = triangles[:, :2] - triangles[:, 2:]
         A = A.transpose([0, 2, 1])
         y = points - triangles[:, 2]

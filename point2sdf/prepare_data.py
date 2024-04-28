@@ -82,7 +82,7 @@ def process_obj(objs_dir, out_dir, step_mask=(1<<5)-1):
                                 --pointcloud_folder {pointcloud_dir}            \\
                                 --points_folder {point_dir}                     \\
                                 --mesh_folder {watertight_scaled_dir}           \\
-                                --packbits --float16''') == 0
+                                --packbits --float16 --overwrite''') == 0
         print('done')
 
 

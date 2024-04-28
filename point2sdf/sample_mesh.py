@@ -5,6 +5,7 @@ import os
 import glob
 import sys
 from multiprocessing import Pool
+from rich.progress import track
 from functools import partial
 import binvox_rw
 import voxels
@@ -45,13 +46,13 @@ parser.add_argument('--points_folder', type=str,
                     help='Output path for points.')
 parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
-parser.add_argument('--points_uniform_ratio', type=float, default=1.,
+parser.add_argument('--points_uniform_ratio', type=float, default=0.95,
                     help='Ratio of points to sample uniformly'
                          'in bounding box.')
-parser.add_argument('--points_sigma', type=float, default=0.01,
+parser.add_argument('--points_sigma', type=float, default=0.03,
                     help='Standard deviation of gaussian noise added to points'
                          'samples on the surfaces.')
-parser.add_argument('--points_padding', type=float, default=0.1,
+parser.add_argument('--points_padding', type=float, default=0.05,
                     help='Additional padding applied to the uniformly'
                          'sampled points on both sides (in total).')
 
@@ -69,7 +70,11 @@ def main(args):
     input_files = glob.glob(os.path.join(args.in_folder, '*.off'))
     if args.n_proc != 0:
         with Pool(args.n_proc) as p:
-            p.map(partial(process_path, args=args), input_files)
+            results = [p.apply_async(process_path, (input_file, args))
+                         for input_file in input_files]
+            for res in results: #, description='Final Data Processing'):
+                res.get()
+
     else:
         for p in input_files:
             process_path(p, args)
@@ -92,6 +97,8 @@ def process_path(in_path, args):
             bbox = mesh_tmp.bounding_box.bounds
         else:
             bbox = mesh.bounding_box.bounds
+
+        # print('bbox = ', bbox)
 
         # Compute location and scale
         loc = (bbox[0] + bbox[1]) / 2
@@ -184,7 +191,10 @@ def export_points(mesh, modelname, loc, scale, args):
     boxsize = 1 + args.points_padding
     points_uniform = np.random.rand(n_points_uniform, 3)
     points_uniform = boxsize * (points_uniform - 0.5)
+
     points_surface = mesh.sample(n_points_surface)
+    # print(points_surface)
+
     points_surface += args.points_sigma * np.random.randn(n_points_surface, 3)
     points = np.concatenate([points_uniform, points_surface], axis=0)
 

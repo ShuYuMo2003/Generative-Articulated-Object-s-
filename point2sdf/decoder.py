@@ -5,6 +5,9 @@ copy from https://github.com/autonomousvision/occupancy_networks by ShuYuMo on 2
 import torch.nn as nn
 import torch.nn.functional as F
 
+import sys
+sys.path.append('..')
+
 from utils.ResNet import ResnetBlockFC, CResnetBlockConv1d, ResnetBlockConv1d
 from utils.utils_layers import CBatchNorm1d, CBatchNorm1d_legacy
 
