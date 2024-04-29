@@ -1,6 +1,4 @@
 dataset/
-build/
 __pycache__/
-*.so
 output/
 events.out.tfevents.*
