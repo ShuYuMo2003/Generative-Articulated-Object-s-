@@ -56,8 +56,6 @@ def validate(encoder, decoder, val_dataloader):
         'acc': torch.tensor(accurancys).mean()
     }
 
-
-
 setup_seed(hash('ytq') & ((1 << 32) - 1))
 
 train_dataset = PartnetMobilityDataset(dataset_path,

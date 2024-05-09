@@ -2,3 +2,4 @@ dataset/
 __pycache__/
 output/
 events.out.tfevents.*
+input_objs/

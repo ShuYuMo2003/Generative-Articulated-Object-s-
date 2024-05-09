@@ -5,5 +5,7 @@ https://stackoverflow.com/questions/72110384/libgl-error-mesa-loader-failed-to-o
 sudo apt-get install libgl1-mesa-dri
 ```
 
- - 什么叫后验，KL散度（？）
- - 怎么判断过拟合
+## 准备数据集
+ - `setup_dataset/gen.py`: 最原始的数据集 --> 格式化的数据，输出在 `setup_dataset/output`.
+ - `point2sdf/convert2dataset.py`: 格式化的数据集 --> 可以被 pointnet-onet 训练的数据集，输入 `setup_dataset/output`，输出 `point2sdf/output`
+ - `train.py`：训练 pointnet-onet，输入 `point2sdf/output`，拟合 part。
