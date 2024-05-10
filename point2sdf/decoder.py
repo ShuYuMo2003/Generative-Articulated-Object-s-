@@ -20,22 +20,22 @@ class Decoder(nn.Module):
 
     Args:
         dim (int): input dimension
-        ///// z_dim (int): dimension of latent code z
+        z_dim (int): dimension of latent code z
         c_dim (int): dimension of latent conditioned code c
         hidden_size (int): hidden size of Decoder network
         leaky (bool): whether to use leaky ReLUs
     '''
 
-    def __init__(self, dim=3, c_dim=128, hidden_size=128, leaky:float=None):
+    def __init__(self, dim=3, z_dim=128, c_dim=128, hidden_size=128, leaky:float=None):
         super().__init__()
-        # self.z_dim = z_dim
+        self.z_dim = z_dim
         self.c_dim = c_dim
 
         # Submodules
         self.fc_p = nn.Linear(dim, hidden_size)
 
-        # if not z_dim == 0:
-        #     self.fc_z = nn.Linear(z_dim, hidden_size)
+        if not z_dim == 0:
+            self.fc_z = nn.Linear(z_dim, hidden_size)
 
         if not c_dim == 0:
             self.fc_c = nn.Linear(c_dim, hidden_size)
@@ -53,14 +53,14 @@ class Decoder(nn.Module):
         else:
             self.actvn = lambda x: F.leaky_relu(x, leaky)
 
-    def forward(self, c, p):
+    def forward(self, p, z, c=None):
         batch_size, T, D = p.size()
 
         net = self.fc_p(p)
 
-        # if self.z_dim != 0:
-        #     net_z = self.fc_z(z).unsqueeze(1)
-        #     net = net + net_z
+        if self.z_dim != 0:
+            net_z = self.fc_z(z).unsqueeze(1)
+            net = net + net_z
 
         if self.c_dim != 0:
             net_c = self.fc_c(c).unsqueeze(1)

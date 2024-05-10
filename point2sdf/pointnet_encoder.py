@@ -21,19 +21,22 @@ class SimplePointnet(nn.Module):
         hidden_dim (int): hidden dimension of the network
     '''
 
-    def __init__(self, c_dim=128, dim=3, hidden_dim=128):
+    def __init__(self, z_dim=128, dim=3, hidden_dim=128):
         super().__init__()
-        self.c_dim = c_dim
+        self.z_dim = z_dim
 
         self.fc_pos = nn.Linear(dim, 2*hidden_dim)
         self.fc_0 = nn.Linear(2*hidden_dim, hidden_dim)
         self.fc_1 = nn.Linear(2*hidden_dim, hidden_dim)
         self.fc_2 = nn.Linear(2*hidden_dim, hidden_dim)
         self.fc_3 = nn.Linear(2*hidden_dim, hidden_dim)
-        self.fc_c = nn.Linear(hidden_dim, c_dim)
+        self.fc_c = nn.Linear(hidden_dim, hidden_dim)
 
         self.actvn = nn.ReLU()
         self.pool = maxpool
+
+        self.fc_mean = nn.Linear(hidden_dim, z_dim)
+        self.fc_logstd = nn.Linear(hidden_dim, z_dim)
 
     def forward(self, p):
         batch_size, T, D = p.size()
@@ -59,7 +62,10 @@ class SimplePointnet(nn.Module):
 
         c = self.fc_c(self.actvn(net))
 
-        return c
+        mean = self.fc_mean(c)
+        logstd = self.fc_logstd(c)
+
+        return mean, logstd
 
 
 class ResnetPointnet(nn.Module):
@@ -71,9 +77,9 @@ class ResnetPointnet(nn.Module):
         hidden_dim (int): hidden dimension of the network
     '''
 
-    def __init__(self, c_dim=128, dim=3, hidden_dim=128):
+    def __init__(self, z_dim=128, dim=3, hidden_dim=128):
         super().__init__()
-        self.c_dim = c_dim
+        self.z_dim = z_dim
 
         self.fc_pos = nn.Linear(dim, 2*hidden_dim)
         self.block_0 = ResnetBlockFC(2*hidden_dim, hidden_dim)
@@ -81,10 +87,13 @@ class ResnetPointnet(nn.Module):
         self.block_2 = ResnetBlockFC(2*hidden_dim, hidden_dim)
         self.block_3 = ResnetBlockFC(2*hidden_dim, hidden_dim)
         self.block_4 = ResnetBlockFC(2*hidden_dim, hidden_dim)
-        self.fc_c = nn.Linear(hidden_dim, c_dim)
+        self.fc_c = nn.Linear(hidden_dim, hidden_dim)
 
         self.actvn = nn.ReLU()
         self.pool = maxpool
+
+        self.fc_mean = nn.Linear(hidden_dim, z_dim)
+        self.fc_logstd = nn.Linear(hidden_dim, z_dim)
 
     def forward(self, p):
         batch_size, T, D = p.size()
@@ -114,4 +123,7 @@ class ResnetPointnet(nn.Module):
 
         c = self.fc_c(self.actvn(net))
 
-        return c
+        mean = self.fc_mean(c)
+        logstd = self.fc_logstd(c)
+
+        return mean, logstd
