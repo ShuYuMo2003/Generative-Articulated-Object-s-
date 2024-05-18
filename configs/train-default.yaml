@@ -1,0 +1,38 @@
+action:
+  type: train
+  args:
+    n_epoch: 1000
+    ckpt_save_name: checkpoints/native-{epoch:05d}.pt
+    lr: 1e-4
+    optimizer: adam
+
+usewandb: false
+
+tokenizer:
+  type: NativeMLPTokenizer
+  args:
+    d_model: 256
+    hidden_dim: 128
+    leaky_relu: 0.01
+    latent_code_dim: 128
+
+dataset:
+  type: redis
+  args:
+    host: localhost
+    port: 6379
+    db: 0
+
+dataloader:
+  args:
+    batch_size: 3
+    num_workers: 4
+
+decoder:
+  type: NativeDecoder
+  args:
+    n_head: 8
+    n_layer: 6
+    d_model: 256
+    max_len: 128
+

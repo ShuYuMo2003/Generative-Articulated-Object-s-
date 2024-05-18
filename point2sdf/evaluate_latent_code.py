@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from glob import glob
 import torch
 from encoder_latent import Encoder
+import numpy as np
 
 check_point_path = '/home/shuyumo/research/GAO/point2sdf/ckpt/sgd-e-d-201-0.9589649438858032.ckpt'
 dataset_root_path = '/home/shuyumo/research/GAO/point2sdf/output'
@@ -37,6 +38,6 @@ with torch.no_grad():
 
         latent = mean_z[0, ...]
 
-        print(latent.shape)
-
-        latent.cpu().numpy().tofile(str(Path(latent_code_output_path) / f'latent_{path}.npz'))
+        latent_numpy = latent.cpu().numpy()
+        print(latent_numpy.shape, str(Path(latent_code_output_path) / f'latent_{path}'))
+        np.save(str(Path(latent_code_output_path) / f'latent_{path}'), latent_numpy)

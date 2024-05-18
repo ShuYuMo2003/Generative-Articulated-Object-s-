@@ -1,7 +1,9 @@
+import yaml
+import wandb
 import torch
 import argparse
-import yaml
 
+from rich import print
 from torch.utils.data import DataLoader
 
 from transformer.dataset import get_dataset
@@ -18,21 +20,25 @@ config.update({
     'device': 'cuda' if torch.cuda.is_available() else 'cpu'
 })
 
-dataloader = DataLoader(dataset=get_dataset(config), **config['DataLoader'])
+dataloader = DataLoader(dataset=get_dataset(config), **config['dataloader']['args'])
 decoder = get_decoder(config)
 
 def train(config):
     from transformer.action.trainer import Trainer
+    print("start to train with config: ", config)
     train_args = config['action']['args']
     train_args.update({
         'model': decoder,
         'dataloader': dataloader,
         'device': config['device'],
     })
-    trainer = Trainer(**train_args)
+    wandb_instance = wandb.init(project='transformer', config=config) if config['usewandb'] else None
+    trainer = Trainer(config=config, wandb_instance=wandb_instance, **train_args)
     trainer()
 
-
+if __name__ == '__main__':
+    if config['action']['type'] == 'train':
+        train(config)
 
 
 
