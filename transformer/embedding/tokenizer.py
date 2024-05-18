@@ -17,7 +17,6 @@ class NativeMLPTokenizer(nn.Module):
 
 
     def forward(self, raw_parts):
-        # print(raw_parts)
         tokenized_parts = []
         for data_n_parent in raw_parts['part']:
             part_tensor = torch.cat((
@@ -29,5 +28,5 @@ class NativeMLPTokenizer(nn.Module):
             , dim=-1)
             tokenized_parts_latent = self.combine_fc(self.activ(part_tensor))
             tokenized_parts.append((data_n_parent['parent'], tokenized_parts_latent))
-        # print(tokenized_parts)
+
         return tokenized_parts

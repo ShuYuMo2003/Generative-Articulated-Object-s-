@@ -39,5 +39,6 @@ with torch.no_grad():
         latent = mean_z[0, ...]
 
         latent_numpy = latent.cpu().numpy()
+        print(latent_numpy)
         print(latent_numpy.shape, str(Path(latent_code_output_path) / f'latent_{path}'))
         np.save(str(Path(latent_code_output_path) / f'latent_{path}'), latent_numpy)

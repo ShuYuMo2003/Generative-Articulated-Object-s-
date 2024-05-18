@@ -29,8 +29,8 @@ class NativeCatPositionEmbedding(SinusoidalPositionEmbedding):
         parts = []
 
         for part_idx in range(n_part):
-            parent_embedding  = self.encoding[total_parts[part_idx][0] + 1, :]
-            current_embedding = self.encoding[[part_idx + 1] * n_batch, :]
+            parent_embedding   = self.encoding[total_parts[part_idx][0] + 1, :]
+            current_embedding  = self.encoding[[part_idx + 1] * n_batch, :]
             position_embedding = self.position_embedding_combine(torch.cat((parent_embedding, current_embedding), dim=-1))
             total = position_embedding + total_parts[part_idx][1]
             print(total.shape)
