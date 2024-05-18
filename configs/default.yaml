@@ -1,0 +1,24 @@
+action: train
+
+tokenlizer:
+  type: 'MLPTokenizer'
+  args:
+    d_model: 256
+    hidden_dim: 512
+    leaky_relu: 0.01
+
+position_embedding:
+  type: 'NonePositionEmbedding'
+  args: null
+
+dataset:
+  type: 'redis'
+  args:
+    host: 'localhost'
+    port: 6379
+    db: 0
+
+dataloader:
+  args:
+    batch_size: 32
+    num_workers: 4

@@ -23,18 +23,17 @@ val_dataset = PartnetMobilityDataset(dataset_path, train_ratio=train_ratio, trai
 val_dataloader = DataLoader(val_dataset, batch_size=1, shuffle=False)
 
 
-device = 'cpu' # ('cuda' if torch.cuda.is_available() else 'cpu')
+device = ('cuda' if torch.cuda.is_available() else 'cpu')
 decoder         = Decoder(z_dim=128, c_dim=0, leaky=0.02).to(device) # unconditional
 encoder         = Encoder(z_dim=128, c_dim=0, leaky=0.02).to(device)
 generator       = Generator3D(device=device)
 
-checkpoint_state = torch.load(checkpoint_output + '/e-d-400.ckpt')
+checkpoint_state = torch.load(checkpoint_output + '/sgd-e-d-201-0.9589649438858032.ckpt')
 decoder.load_state_dict(checkpoint_state['decoder'])
 encoder.load_state_dict(checkpoint_state['encoder'])
 
 decoder.eval()
 encoder.eval()
-
 
 with torch.no_grad():
     for idx, (cp, sp, occ) in enumerate(val_dataloader):

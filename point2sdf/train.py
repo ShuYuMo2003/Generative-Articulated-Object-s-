@@ -68,14 +68,15 @@ run = wandb.init(
     project="Pointnet encoder N ONet decoder",
     config=dict(
         batch_size = 8,
-        lr_rate = 4e-3,
+        lr_rate = 2e-3,
         total_epoch = 2001,
         train_ratio = 0.9,
         seed = hash('ytq') & ((1 << 32) - 1),
         dataset_root_path = '/home/shuyumo/research/GAO/point2sdf/output',
         checkpoint_output = '/home/shuyumo/research/GAO/point2sdf/ckpt',
         z_dim = 128,
-        leaky = 0.02
+        leaky = 0.02,
+        optimizer = 'adam'
     )
 )
 _ = run.config
@@ -105,23 +106,32 @@ encoder         = Encoder(z_dim=_.z_dim, c_dim=0, leaky=_.leaky).to(device) # un
 decoder         = Decoder(z_dim=_.z_dim, c_dim=0, leaky=_.leaky).to(device) # unconditional
 generator       = Generator3D(decoder)
 
-optimizer       = torch.optim.Adam(
-    list(encoder.parameters()) + list(decoder.parameters()),
-    lr=_.lr_rate
-)
+if _.optimizer == 'sgd':
+    optimizer       = torch.optim.SGD(
+        list(encoder.parameters()) + list(decoder.parameters()),
+        lr=_.lr_rate
+    )
+elif _.optimizer == 'adam':
+    optimizer       = torch.optim.Adam(
+        list(encoder.parameters()) + list(decoder.parameters()),
+        lr=_.lr_rate
+    )
+else:
+    raise ValueError(f'optimizer {_.optimizer} not supported')
 
 losses = []
 
 print('training on device = ', device)
 print('train dataset length = ', len(train_dataset))
 print('valda dataset length = ', len(val_dataset))
-
+best_val_acc = -1
 for epoch in range(_.total_epoch):
     encoder.train()
     decoder.train()
 
     batch_loss = []
     batch_acc = []
+
     for batch, (cp, sp, occ) in enumerate(train_dataloader):
         cp = cp.to(device)
         sp = sp.to(device)
@@ -142,11 +152,12 @@ for epoch in range(_.total_epoch):
         'val_loss' : validation_dict['loss'],
         'train_loss' : torch.tensor(batch_loss).mean(),
         'train_acc' : torch.tensor(batch_acc).mean()
-
     })
     print(f'epoch {epoch} loss = {torch.tensor(batch_loss).mean()}')
-    if epoch % 200 == 0:
+    if best_val_acc < validation_dict['acc'] or epoch % 100 == 0:
+        print('save from best_val_acc =', best_val_acc, ' to ', validation_dict['acc'], 'epoch = ', epoch)
+        best_val_acc = validation_dict['acc']
         torch.save({
             'encoder': encoder.state_dict(),
             'decoder': decoder.state_dict(),
-        }, str(Path(_.checkpoint_output) / f'e-d-{epoch}.ckpt'))
+        }, str(Path(_.checkpoint_output) / f'sgd-e-d-{epoch}-{best_val_acc}.ckpt'))

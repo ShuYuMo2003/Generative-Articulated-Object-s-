@@ -90,12 +90,12 @@ def process_obj(objs_dir, out_dir, step_mask=(1<<5)-1):
 
 
 if __name__ == '__main__':
-    in_dir  = Path('/home/shuyumo/research/GAO/dataset/100013/textured_objs')
-    out_dir = Path('/home/shuyumo/research/GAO/point2sdf/output')
+    # in_dir  = Path('/home/shuyumo/research/GAO/dataset/100013/textured_objs')
+    # out_dir = Path('/home/shuyumo/research/GAO/point2sdf/output')
 
-    shutil.rmtree(str(out_dir))
-    create_folder(out_dir)
+    # shutil.rmtree(str(out_dir))
+    # create_folder(out_dir)
 
-    process_obj(in_dir, out_dir, SCALE_STEP | DEPTH_STEP | WATER_STEP | SAMPL_STEP)
+    # process_obj(in_dir, out_dir, SCALE_STEP | DEPTH_STEP | WATER_STEP | SAMPL_STEP)
 
     os.system('cp -r output /mnt/d/Research/data/output')
