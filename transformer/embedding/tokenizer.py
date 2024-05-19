@@ -16,7 +16,7 @@ example:
 
 
 class NativeMLPTokenizer(nn.Module):
-    def __init__(self, d_model, hidden_dim, latent_code_dim, leaky_relu=None):
+    def __init__(self, d_model, hidden_dim, latent_code_dim, drop_out, leaky_relu=None):
         super().__init__()
         self.origin_fc      = nn.Linear(3, hidden_dim)
         self.direction_fc   = nn.Linear(3, hidden_dim)
@@ -26,6 +26,7 @@ class NativeMLPTokenizer(nn.Module):
         self.latent_code_fc = nn.Linear(latent_code_dim, hidden_dim)
         self.combine_fc     = nn.Linear(hidden_dim * 6, d_model)
         self.activ          = nn.LeakyReLU(leaky_relu) if leaky_relu else nn.ReLU()
+        self.dropout       = nn.Dropout(drop_out)
 
     def forward(self, raw_parts):
         # raw_parts: attribute_name * batch * (part_idx==fix_length) * attribute_dim
@@ -41,7 +42,9 @@ class NativeMLPTokenizer(nn.Module):
             self.latent_code_fc(raw_parts['latent'].float()),)
         , dim=-1)
         # print(part_tensor.shape)
-        tokenized_parts_latent = self.combine_fc(self.activ(part_tensor))
+        x = self.activ(part_tensor)
+        x = self.dropout(x)
+        tokenized_parts_latent = self.combine_fc(x)
         # tokenized_parts_latent: batch * part_idx * d_model
         print('tokenized_parts_latent: ', tokenized_parts_latent.shape)
         dfn = raw_parts['dfn']

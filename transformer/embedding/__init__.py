@@ -1,7 +1,7 @@
-def get_tokenizer(config):
+def get_tokenizer(config, **add_args):
     type = config['tokenizer']['type']
     if type == 'NativeMLPTokenizer':
         from transformer.embedding.tokenizer import NativeMLPTokenizer
-        return NativeMLPTokenizer(**config['tokenizer']['args'])
+        return NativeMLPTokenizer(**add_args, **config['tokenizer']['args'])
     else:
         raise NotImplementedError(f"{type} is not implemented")

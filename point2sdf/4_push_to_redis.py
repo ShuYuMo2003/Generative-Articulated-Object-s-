@@ -22,3 +22,5 @@ for raw_shape_info_path in tqdm(raw_shape_info_paths):
 
     _r.set(Path(raw_shape_info_path).stem, pickle.dumps(raw_shape_info))
 
+_r.save()
+

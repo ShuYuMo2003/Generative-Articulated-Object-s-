@@ -11,10 +11,9 @@ usewandb: false
 tokenizer:
   type: NativeMLPTokenizer
   args:
-    d_model: 256
-    hidden_dim: 128
+    hidden_dim: 256
     leaky_relu: 0.01
-    latent_code_dim: 128
+    drop_out: 0.1
 
 dataset:
   type: redis
@@ -34,6 +33,15 @@ decoder:
   args:
     n_head: 8
     n_layer: 6
-    d_model: 256
+    d_model: 512
     max_len: 128
+    dropout: 0.05
+    expanded_d_model: 2048
+    latent_code_dim: 128
+
+feedforward: # TODO: try KAN.
+  args:
+    hidden_dim: 2048
+    dropout: 0.1
+
 
