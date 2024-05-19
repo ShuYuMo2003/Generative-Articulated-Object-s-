@@ -31,7 +31,8 @@ config.update({
     'device': 'cuda' if torch.cuda.is_available() else 'cpu'
 })
 
-dataloader = DataLoader(dataset=get_dataset(config), **config['dataloader']['args'])
+dataset = get_dataset(config)
+dataloader = DataLoader(dataset, **config['dataloader']['args'])
 decoder = get_decoder(config)
 
 def train(config):
@@ -40,8 +41,7 @@ def train(config):
     train_args = config['action']['args']
     train_args.update({
         'model': decoder,
-        'dataloader': dataloader,
-        'device': config['device'],
+        'dataloader': dataloader
     })
     wandb_instance = wandb.init(project='transformer', config=config) if config['usewandb'] else None
     trainer = Trainer(config=config, wandb_instance=wandb_instance, **train_args)

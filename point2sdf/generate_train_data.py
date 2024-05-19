@@ -22,16 +22,15 @@ def create_folder(*paths):
         except FileExistsError: pass
 
 def process_obj(objs_dir, out_dir, step_mask=(1<<5)-1):
-    total_stemname = [file.stem for file in objs_dir.iterdir() if file.suffix == '.obj']
+    total_stemname = [file.stem for file in objs_dir.iterdir() if file.suffix == '.ply']
     transform_dir = out_dir / 'trans'
 
     offs_dir = out_dir / 'offs'
     create_folder(offs_dir)
     for stemname in track(total_stemname, description="Convert objs 2 offs"):
         ms = pymeshlab.MeshSet()
-        ms.load_new_mesh(str(objs_dir / (stemname + '.obj')))
+        ms.load_new_mesh(str(objs_dir / (stemname + '.ply')))
         ms.save_current_mesh(str(out_dir / 'offs' / (stemname + '.off')))
-
 
     scaled_dir = out_dir / 'sacled'
     create_folder(scaled_dir)

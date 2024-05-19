@@ -12,8 +12,10 @@ class NativeDecoder(nn.Module):
         self.layers = nn.ModuleList([NativeDecoderLayer(n_head, d_model) for _ in range(n_layer)])
 
     def forward(self, raw_parts, mask=None):
-        total_parts = self.tokenizer(raw_parts)
-        tokens = self.position_embedding(total_parts)
+        tokenized_with_tree_info = self.tokenizer(raw_parts)
+
+        # n_batch, n_part, d_model
+        tokens = self.position_embedding(tokenized_with_tree_info)
 
         # print(parent, '\n\n', part_latent)
         # for layer in self.layers:

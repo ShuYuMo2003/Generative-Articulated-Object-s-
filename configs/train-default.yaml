@@ -22,7 +22,7 @@ dataset:
     host: localhost
     port: 6379
     db: 0
-    fix_lenth: 5
+    fix_length: 5
 
 dataloader:
   args:

@@ -5,12 +5,12 @@ from transformer.utils.utils import to_cuda
 
 class Trainer():
     def __init__(self, wandb_instance, config, model, dataloader, n_epoch,
-                 ckpt_save_name, lr, optimizer, device):
+                 ckpt_save_name, lr, optimizer):
         self.n_epoch = n_epoch
         self.ckpt_save_name = ckpt_save_name
         self.lr = lr
-        self.device = device
-        self.model = model.to(device)
+        self.device = config['device']
+        self.model = model.to(self.device)
         self.dataloader = dataloader
         self.wandb_instance = wandb_instance
         self.called = False
@@ -19,8 +19,9 @@ class Trainer():
         else:
             raise NotImplemented(f'{optimizer}: optimizer is not supported')
 
-    def compute_loss(self, batched_data):
-        predicted = self.model(batched_data)
+    def compute_loss(self, input, output):
+        predicted = self.model(input)
+        # TODO: loss between predicted and output
 
     def __call__(self):
         assert not self.called, 'Trainer can only be called once'
@@ -28,10 +29,11 @@ class Trainer():
 
         for epoch in range(self.n_epoch):
             self.model.train()
-            for idx, batched_data in enumerate(self.dataloader):
-                if self.device == 'cuda': batched_data = to_cuda(batched_data)
+            for idx, (input, output) in enumerate(self.dataloader):
+                if self.device == 'cuda':
+                    (input, output) = to_cuda((input, output))
 
-                loss = self.compute_loss(batched_data)
+                loss = self.compute_loss(input, output)
 
                 self.optimizer.zero_grad()
                 loss.backward()

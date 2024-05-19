@@ -6,10 +6,10 @@ import torch
 from encoder_latent import Encoder
 import numpy as np
 
-check_point_path = '/home/shuyumo/research/GAO/point2sdf/ckpt/sgd-e-d-201-0.9589649438858032.ckpt'
-dataset_root_path = '/home/shuyumo/research/GAO/point2sdf/output'
-checkpoint_output = '/home/shuyumo/research/GAO/point2sdf/ckpt'
-latent_code_output_path = '/home/shuyumo/research/GAO/point2sdf/output/generation_latent_code'
+check_point_path = 'ckpt/sgd-e-d-201-0.9589649438858032.ckpt'
+dataset_root_path = 'output/2_dataset'
+
+latent_code_output_path = 'output/3_generation_latent_code'
 Path(latent_code_output_path).mkdir(exist_ok=True)
 
 dataset_path = list(zip(
@@ -17,8 +17,8 @@ dataset_path = list(zip(
     glob(dataset_root_path + '/point/*')
 ))
 
-dataset = PartnetMobilityDataset(dataset_path, train_ratio=1, train=True, return_path_name=True)
-dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+dataset         = PartnetMobilityDataset(dataset_path, train_ratio=1, train=True, return_path_name=True)
+dataloader      = DataLoader(dataset, batch_size=1, shuffle=False)
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -39,6 +39,6 @@ with torch.no_grad():
         latent = mean_z[0, ...]
 
         latent_numpy = latent.cpu().numpy()
-        print(latent_numpy)
+        # print(latent_numpy)
         print(latent_numpy.shape, str(Path(latent_code_output_path) / f'latent_{path}'))
         np.save(str(Path(latent_code_output_path) / f'latent_{path}'), latent_numpy)

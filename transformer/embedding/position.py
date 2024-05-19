@@ -16,33 +16,27 @@ class SinusoidalPositionEmbedding(nn.Module):
 class NativeCatPositionEmbedding(SinusoidalPositionEmbedding):
     def __init__(self, d_model, max_len, device):
         super().__init__(d_model, max_len, device)
-        self.position_embedding_combine = nn.Linear(2 * d_model, d_model)
+        # self.position_embedding_combine = nn.Linear(2 * d_model, d_model)
         self.combine = nn.Linear(2 * d_model, d_model)
 
-    def forward(self, total_parts):
-        # total_parts：
-        # part_idx, 2(parent_idx / latent_code), batch
+    def forward(self, tokenized_with_tree_info):
+        dfn, dfn_fa, tokenized_parts_latent = tokenized_with_tree_info
 
-        n_batch = total_parts[0][0].size(0)
-        n_part  = len(total_parts)
+        n_batch, n_part, d_model = tokenized_parts_latent.size()
 
-        parts = []
+        tokenized_parts_list = tokenized_parts_latent.view(-1, d_model)
+        dfn_list = dfn.view(-1)
+        dfn_fa_list = dfn_fa.view(-1)
 
-        for part_idx in range(n_part):
-            parent_embedding   = self.encoding[total_parts[part_idx][0] + 1, :]
-            current_embedding  = self.encoding[[part_idx + 1] * n_batch, :]
-            position_embedding = self.position_embedding_combine(torch.cat((parent_embedding, current_embedding), dim=-1))
-            total = position_embedding + total_parts[part_idx][1]
-            print(total.shape)
-            parts.append(total)
+        dfn_embedding = self.encoding[dfn_list, :]
+        dfn_fa_embedding = self.encoding[dfn_fa_list, :]
 
-        # part_idx, batch, d_model
-        embedded_tokens = torch.stack(parts, dim=0)
+        position_embedding = dfn_embedding + dfn_fa_embedding
+        embedded_tokenized_parts_list = torch.cat(position_embedding, tokenized_parts_list, dim=-1)
 
-        # batch, part_idx, d_model
-        embedded_tokens = embedded_tokens.permute(1, 0, 2).contiguous()
-
-        return embedded_tokens
+        embedded_tokenized_parts = embedded_tokenized_parts_list.view(n_batch, n_part, d_model)
+        return embedded_tokenized_parts
+        # self.encoding[:seq_len, :]
 
 # class NativeAddtionPositionEmbedding(SinusoidalPositionEmbedding):
 #     def __init__(self, d_model, max_len, device):

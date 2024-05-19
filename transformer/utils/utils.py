@@ -7,5 +7,7 @@ def to_cuda(obj):
         return {k: to_cuda(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [to_cuda(v) for v in obj]
+    elif isinstance(obj, tuple):
+        return (to_cuda(v) for v in obj)
     else:
         return obj
