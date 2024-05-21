@@ -14,3 +14,13 @@ sudo apt-get install libgl1-mesa-dri
 ```
 python main.py -c configs/default.yaml
 ```
+
+## 看点好的
+./logs/interp_test/interp.gif
+![./logs/interp_test/interp.gif](./logs/interp_test/interp.gif)
+
+./logs/interp_test/usb-body-noise-higher.gif
+![./logs/interp_test/usb-body-noise-higher.gif](./logs/interp_test/usb-body-noise-higher.gif)
+
+./logs/interp_test/usb-cap-noise-higher.gif
+![./logs/interp_test/usb-cap-noise-higher.gif](./logs/interp_test/usb-cap-noise-higher.gif)

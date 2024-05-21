@@ -1,10 +1,10 @@
 from torch import nn
 
 class PositionWiseFeedForward(nn.Module):
-    def __init__(self, d_model, hidden, dropout):
+    def __init__(self, d_model, hidden_dim, dropout):
         super().__init__()
-        self.fc1 = nn.Linear(d_model, hidden)
-        self.fc2 = nn.Linear(hidden, d_model)
+        self.fc1 = nn.Linear(d_model, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, d_model)
         self.dropout = nn.Dropout(dropout)
         self.acti = nn.ReLU()
 

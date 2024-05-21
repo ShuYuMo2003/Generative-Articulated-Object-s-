@@ -46,9 +46,9 @@ class NativeMLPTokenizer(nn.Module):
         x = self.dropout(x)
         tokenized_parts_latent = self.combine_fc(x)
         # tokenized_parts_latent: batch * part_idx * d_model
-        print('tokenized_parts_latent: ', tokenized_parts_latent.shape)
+        # print('tokenized_parts_latent: ', tokenized_parts_latent.shape)
         dfn = raw_parts['dfn']
         dfn_fa = raw_parts['dfn_fa']
-        print('dfn   :', dfn.shape)    # batch * (part_idx==fix_length)
-        print('dfn_fa:', dfn_fa.shape) # batch * (part_idx==fix_length)
+        # print('dfn   :', dfn.shape)    # batch * (part_idx==fix_length)
+        # print('dfn_fa:', dfn_fa.shape) # batch * (part_idx==fix_length)
         return dfn, dfn_fa, tokenized_parts_latent

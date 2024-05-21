@@ -32,7 +32,9 @@ class NativeCatPositionEmbedding(SinusoidalPositionEmbedding):
         dfn_fa_embedding = self.encoding[dfn_fa_list, :]
 
         position_embedding = dfn_embedding + dfn_fa_embedding
-        embedded_tokenized_parts_list = torch.cat(position_embedding, tokenized_parts_list, dim=-1)
+        embedded_tokenized_parts_list = torch.cat((position_embedding, tokenized_parts_list), dim=-1)
+
+        embedded_tokenized_parts_list = self.combine(embedded_tokenized_parts_list)
 
         embedded_tokenized_parts = embedded_tokenized_parts_list.view(n_batch, n_part, d_model)
         return embedded_tokenized_parts

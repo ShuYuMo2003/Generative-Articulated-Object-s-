@@ -2,9 +2,10 @@ from torch import nn
 
 from transformer.attention.single_attention_module import DotProductAttention
 
-class multi_head_attention(nn.Module):
+class MultiHeadAttention(nn.Module):
     def __init__(self, n_head, d_model):
         super().__init__()
+        self.d_model        = d_model
         self.n_head         = n_head
         self.q_fc           = nn.Linear(d_model, d_model)
         self.k_fc           = nn.Linear(d_model, d_model)
@@ -21,7 +22,7 @@ class multi_head_attention(nn.Module):
         n_batch, n_head, n_part, d_model_per_head = out.size()
         d_model = d_model_per_head * n_head
 
-        assert d_model_per_head * n_head == q.size(-1), 'd_model should be divided by n_head'
+        assert d_model == self.d_model, 'd_model should be divided by n_head'
 
         out = out.transpose(1, 2).contiguous().view(n_batch, n_part, d_model)
         out = self.combine_fc(out)

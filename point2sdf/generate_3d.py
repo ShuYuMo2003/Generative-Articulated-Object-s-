@@ -121,7 +121,7 @@ class Generator3D(object):
                 pointsf = pointsf / mesh_extractor.resolution
                 pointsf = box_size * (pointsf - 0.5)
                 # Evaluate model and update
-                print(type(decoder), type(pointsf), type(z))
+                # print(type(decoder), type(pointsf), type(z))
                 values = self.eval_points(
                     decoder, pointsf, z, c, **kwargs).cpu().numpy()
                 values = values.astype(np.float64)
@@ -150,7 +150,7 @@ class Generator3D(object):
         for pi in p_split:
             pi = pi.unsqueeze(0).to(self.device)
             with torch.no_grad():
-                print(type(pi), pi.shape)
+                # print(type(pi), pi.shape)
                 occ_hat = decoder(pi, z, c, **kwargs)
 
             occ_hats.append(occ_hat.squeeze(0).detach().cpu())

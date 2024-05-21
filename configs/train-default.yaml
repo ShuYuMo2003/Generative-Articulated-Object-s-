@@ -3,10 +3,11 @@ action:
   args:
     n_epoch: 1000
     ckpt_save_name: checkpoints/native-{epoch:05d}.pt
-    lr: 1e-4
+    lr: 1e-5
     optimizer: adam
 
-usewandb: false
+usewandb: true
+random_seed: love ytq forever.
 
 tokenizer:
   type: NativeMLPTokenizer
@@ -25,8 +26,9 @@ dataset:
 
 dataloader:
   args:
-    batch_size: 3
+    batch_size: 8
     num_workers: 4
+    shuffle: true
 
 decoder:
   type: NativeDecoder

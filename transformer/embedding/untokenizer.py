@@ -3,6 +3,7 @@ from torch import nn
 
 class UnTokenizer(nn.Module):
     def __init__(self, d_model, expanded_d_model, latent_code_dim, dropout):
+        super().__init__()
         self.expand_layer = nn.Linear(d_model, expanded_d_model)
         self.activ = nn.ReLU()
         self.origin_fc = nn.Linear(expanded_d_model, 3)

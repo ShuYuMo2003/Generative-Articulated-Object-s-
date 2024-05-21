@@ -19,7 +19,6 @@ def setup_seed(seed):
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
 
-setup_seed(hash('Love ytq forever.') & ((1 << 20) - 1))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', '-c', dest='config',
@@ -27,6 +26,7 @@ parser.add_argument('--config', '-c', dest='config',
                     type=argparse.FileType('r'), required=True)
 args = parser.parse_args()
 config = yaml.safe_load(args.config.read())
+setup_seed(hash(config['random_seed']) & ((1 << 20) - 1))
 config.update({
     'device': 'cuda' if torch.cuda.is_available() else 'cpu'
 })

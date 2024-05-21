@@ -1,6 +1,7 @@
 from rich import print
 import torch
 from transformer.utils.utils import to_cuda
+from tqdm import tqdm
 
 
 class Trainer():
@@ -20,8 +21,17 @@ class Trainer():
             raise NotImplemented(f'{optimizer}: optimizer is not supported')
 
     def compute_loss(self, input, output):
-        predicted = self.model(input)
-        # TODO: loss between predicted and output
+        predicted_shape = self.model(input)
+        n_batch = predicted_shape['origin'].size(0)
+        keys = ['origin', 'direction', 'bounds', 'tran', 'limit', 'latent']
+        loss = torch.zeros(1, device=self.device)
+        for key in keys:
+            loss += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
+        return loss
+
+    def feed_to_wandb(self, args):
+        if self.wandb_instance:
+            self.wandb_instance.log(args)
 
     def __call__(self):
         assert not self.called, 'Trainer can only be called once'
@@ -29,7 +39,10 @@ class Trainer():
 
         for epoch in range(self.n_epoch):
             self.model.train()
-            for idx, (input, output) in enumerate(self.dataloader):
+
+            train_losses = []
+            for idx, (input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
+                # print(f'idx = {idx}')
                 if self.device == 'cuda':
                     (input, output) = to_cuda((input, output))
 
@@ -38,5 +51,12 @@ class Trainer():
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
+                train_losses.append(loss.item())
+
+            print(f'epoch {epoch} loss = {torch.tensor(train_losses).mean()}')
+
+            self.feed_to_wandb({
+                'train_loss': torch.tensor(train_losses).mean()
+            })
 
 
