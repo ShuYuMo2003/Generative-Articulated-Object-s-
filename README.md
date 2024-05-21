@@ -6,9 +6,13 @@ sudo apt-get install libgl1-mesa-dri
 ```
 
 ## 准备数据集
- - `setup_dataset/gen.py`: 最原始的数据集 --> 格式化的数据，输出在 `setup_dataset/output`.
- - `point2sdf/convert2dataset.py`: 格式化的数据集 --> 可以被 pointnet-onet 训练的数据集，输入 `setup_dataset/output`，输出 `point2sdf/output`
- - `train.py`：训练 pointnet-onet，输入 `point2sdf/output`，拟合 part。
+```
+1_extract_from_raw_dataset.py
+2_convert_to_onet_dataset.py
+3_evaluate_latent_code.py
+4_push_to_redis.py
+```
+
 
 ## 训练
 ```
