@@ -51,12 +51,12 @@ class Trainer():
             self.model.train()
 
             train_losses = []
-            for idx, (idx, input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
+            for idx, (d_idx, input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
                 # print(f'idx = {idx}')
                 if self.device == 'cuda':
-                    (idx, input, output) = to_cuda((idx, input, output))
+                    (d_idx, input, output) = to_cuda((d_idx, input, output))
 
-                loss = self.compute_loss(idx, input, output)
+                loss = self.compute_loss(d_idx, input, output)
 
                 self.optimizer.zero_grad()
                 loss.backward()
