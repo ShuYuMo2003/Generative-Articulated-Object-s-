@@ -2,6 +2,7 @@ from rich import print
 import torch
 from transformer.utils.utils import to_cuda
 from tqdm import tqdm
+from torch import distributions
 
 
 class Trainer():
@@ -11,22 +12,31 @@ class Trainer():
         self.ckpt_save_name = ckpt_save_name
         self.lr = lr
         self.device = config['device']
+        self.input_structure = config['part_structure']
         self.model = model.to(self.device)
         self.dataloader = dataloader
+        self.d_model = config['decoder']['args']['d_model']
         self.wandb_instance = wandb_instance
         self.called = False
+        self.g_token0_z = distributions.Normal(torch.zeros(self.d_model, device=self.device),
+                                               torch.ones(self.d_model, device=self.device))
         if optimizer == 'adam':
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=float(self.lr))
         else:
             raise NotImplemented(f'{optimizer}: optimizer is not supported')
 
-    def compute_loss(self, input, output):
-        predicted_shape = self.model(input)
+    def compute_loss(self, index, input, output):
+        predicted_shape, g_token_dist = self.model(index, input)
+        loss_kl = distributions.kl_divergence(g_token_dist, self.g_token0_z).sum(dim=-1).mean()
+
         n_batch = predicted_shape['origin'].size(0)
-        keys = ['origin', 'direction', 'bounds', 'tran', 'limit', 'latent']
-        loss = torch.zeros(1, device=self.device)
+        keys = list(self.input_structure['non_latent_info'].keys())
+
+        loss_pred = torch.zeros(1, device=self.device)
         for key in keys:
-            loss += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
+            loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
+
+        loss = loss_pred + loss_kl
         return loss
 
     def feed_to_wandb(self, args):
@@ -41,12 +51,12 @@ class Trainer():
             self.model.train()
 
             train_losses = []
-            for idx, (input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
+            for idx, (idx, input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
                 # print(f'idx = {idx}')
                 if self.device == 'cuda':
-                    (input, output) = to_cuda((input, output))
+                    (idx, input, output) = to_cuda((idx, input, output))
 
-                loss = self.compute_loss(input, output)
+                loss = self.compute_loss(idx, input, output)
 
                 self.optimizer.zero_grad()
                 loss.backward()

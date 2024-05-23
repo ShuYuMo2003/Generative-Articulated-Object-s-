@@ -7,21 +7,32 @@ action:
     optimizer: adam
 
 usewandb: true
-random_seed: love ytq forever.
+random_seed: love ytq forever
+
+part_structure:
+  non_latent_info:
+    origin: 3
+    direction: 3
+    bounds: 6
+    tran: 3
+    limit: 4
+  latent_info:
+    latent: 128
 
 tokenizer:
   type: NativeMLPTokenizer
   args:
-    hidden_dim: 256
+    part_hidden_dim: 512
+    hidden_dim: 512
     leaky_relu: 0.01
     drop_out: 0.1
 
 dataset:
   type: redis
   args:
+    db: 0
     host: localhost
     port: 6379
-    db: 0
     fix_length: 5
 
 dataloader:
@@ -40,6 +51,8 @@ decoder:
     dropout: 0.05
     expanded_d_model: 2048
     latent_code_dim: 128
+    vocab_size: 1048576 # >>> 2048 * 512
+
 
 feedforward: # TODO: try KAN.
   args:
