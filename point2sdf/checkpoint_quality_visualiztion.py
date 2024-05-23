@@ -30,11 +30,11 @@ val_dataloader = DataLoader(val_dataset, batch_size=1, shuffle=False)
 
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
-decoder         = Decoder(z_dim=128, c_dim=0, leaky=0.02).to(device) # unconditional
-encoder         = Encoder(z_dim=128, c_dim=0, leaky=0.02).to(device)
+decoder         = Decoder(z_dim=128, c_dim=0, emb_sigma=0.1, leaky=0.02).to(device) # unconditional
+encoder         = Encoder(z_dim=128, c_dim=0, emb_sigma=0.1, leaky=0.02).to(device)
 generator       = Generator3D(device=device)
 
-checkpoint_state = torch.load(checkpoint_output + '/sgd-e-d-201-0.9589649438858032.ckpt')
+checkpoint_state = torch.load(checkpoint_output + '/sgd-e-d-0.1-455-0.9807546138763428.ckpt')
 decoder.load_state_dict(checkpoint_state['decoder'])
 encoder.load_state_dict(checkpoint_state['encoder'])
 
@@ -52,15 +52,20 @@ with torch.no_grad():
         occ = occ.to(device)
 
         mean_z, logstd_z = encoder(sp, occ)
+        print(idx, mean_z.shape, logstd_z.shape)
+        mesh = generator.generate_from_latent(decoder, mean_z)
+        stem_name = str(Path(mesh_output_path) / f'{idx}')
+        mesh.export(stem_name + '.obj')
+        shutil.copy(stem_name + '.obj', f'/mnt/d/Research/transfer/sdfs/{idx}.obj')
         latentcode.append(mean_z)
-        if idx == 6: break
+        # if idx == 6: break
 
 torch.manual_seed(20031011)
 noise = torch.randn_like(mean_z)
-start, end = latentcode[3], latentcode[3] + noise
-# start, end = latentcode[0], latentcode[3]
+# start, end = latentcode[3], latentcode[3] + noise
+start, end = latentcode[0], latentcode[3]
 
-for noise_sigma in np.linspace(0, 3, 40):
+for noise_sigma in np.linspace(0, 1, 40):
     # zero_noise = torch.randn_like(mean_z)
     print('calc sigma:', noise_sigma)
 

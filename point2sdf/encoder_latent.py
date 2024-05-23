@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from fourier_feature import GaussianFourierFeatureEmbedding
 
 
 # Max Pooling operation
@@ -21,13 +22,16 @@ class Encoder(nn.Module):
         dim (int): input dimension
         leaky (bool): whether to use leaky ReLUs
     '''
-    def __init__(self, z_dim=128, c_dim=128, dim=3, leaky:float=None):
+    def __init__(self, z_dim=128, c_dim=128, dim=3, emb_sigma=12., leaky:float=None):
         super().__init__()
         self.z_dim = z_dim
         self.c_dim = c_dim
 
         # Submodules
-        self.fc_pos = nn.Linear(dim, 128)
+        self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=256, d_in=dim, emb_sigma=emb_sigma)
+        self.fc_pos_0 = nn.Linear(256, 256)
+        self.pos_acti = nn.ReLU()
+        self.fc_pos_1 = nn.Linear(256, 128)
 
         if c_dim != 0:
             self.fc_c = nn.Linear(c_dim, 128)
@@ -50,8 +54,12 @@ class Encoder(nn.Module):
         batch_size, T, D = p.size()
 
         # output size: B x T X F
-        net = self.fc_0(x.unsqueeze(-1))
-        net = net + self.fc_pos(p)
+        p = self.fourier_feature(p)
+        # p = self.fc_pos_0(p)
+        # p = self.pos_acti(p)
+        p = self.fc_pos_1(p)
+        x = self.fc_0(x.unsqueeze(-1))
+        net = x + p
 
         if self.c_dim != 0:
             net = net + self.fc_c(c).unsqueeze(1)

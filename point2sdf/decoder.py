@@ -10,6 +10,7 @@ sys.path.append('..')
 
 from utils.ResNet import ResnetBlockFC, CResnetBlockConv1d, ResnetBlockConv1d
 from utils.utils_layers import CBatchNorm1d, CBatchNorm1d_legacy
+from fourier_feature import GaussianFourierFeatureEmbedding
 
 
 
@@ -26,13 +27,17 @@ class Decoder(nn.Module):
         leaky (bool): whether to use leaky ReLUs
     '''
 
-    def __init__(self, dim=3, z_dim=128, c_dim=128, hidden_size=128, leaky:float=None):
+    def __init__(self, dim=3, z_dim=128, c_dim=128, hidden_size=128, emb_sigma=12., leaky:float=None):
         super().__init__()
         self.z_dim = z_dim
         self.c_dim = c_dim
 
+        self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=hidden_size * 2, d_in=dim, emb_sigma=emb_sigma)
+
         # Submodules
-        self.fc_p = nn.Linear(dim, hidden_size)
+        self.fc_p_0 = nn.Linear(hidden_size * 2, hidden_size * 2)
+        self.acti = nn.ReLU()
+        self.fc_p_1 = nn.Linear(hidden_size * 2, hidden_size)
 
         if not z_dim == 0:
             self.fc_z = nn.Linear(z_dim, hidden_size)
@@ -56,7 +61,11 @@ class Decoder(nn.Module):
     def forward(self, p, z, c=None):
         batch_size, T, D = p.size()
 
-        net = self.fc_p(p)
+        p = self.fourier_feature(p)
+        # p = self.fc_p_0(p)
+        # p = self.acti(p)
+        net = self.fc_p_1(p)
+
 
         if self.z_dim != 0:
             net_z = self.fc_z(z).unsqueeze(1)

@@ -1,11 +1,15 @@
 import torch
 import numpy as np
 import random
+import argparse
 from torch.utils.data import DataLoader
 from torch import distributions
 from torch.nn import functional as F
 from glob import glob
 from pathlib import Path
+
+from tqdm import tqdm
+import pyvista as pv
 
 from decoder import Decoder
 from pointnet_encoder import SimplePointnet as Condition_Encoder
@@ -13,6 +17,14 @@ from encoder_latent import Encoder
 from dataset import PartnetMobilityDataset
 from visualization import visualization_as_pointcloud
 from generate_3d import Generator3D
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--embsigma', '-e', dest='emb_sigma',
+                    help=('emb_sigma'),
+                    type=float, default=0.2)
+args = parser.parse_args()
+emb_sigma = args.emb_sigma
+
 
 import wandb
 
@@ -34,8 +46,8 @@ def compute_loss_n_acc(encoder, decoder, sp, occ, visualization=False):
     kl = distributions.kl_divergence(q_z, p0_z).sum(dim=-1)
     loss = kl.mean()
 
-    if visualization:
-        visualization_as_pointcloud(decoder, z, None, device)
+    # if visualization:
+    #     visualization_as_pointcloud(decoder, z, None, device)
 
     logits = decoder(sp, z)
     loss_i = F.binary_cross_entropy_with_logits(
@@ -44,9 +56,26 @@ def compute_loss_n_acc(encoder, decoder, sp, occ, visualization=False):
 
     acc = ((logits > 0) == occ).float().mean()
 
-    return loss, acc
+    return loss, acc, mean_z
 
-def validate(encoder, decoder, val_dataloader, visualization=False):
+def gen_image_from_latent(decoder, mean_z):
+    # mean_z should be with batch size 1.
+    with torch.no_grad():
+        mesh = generator.generate_from_latent(decoder, mean_z)
+        mesh.export('temp-validate.obj')
+        plotter = pv.Plotter()
+        try:
+            pv_mesh = pv.read('temp-validate.obj')
+            plotter.add_mesh(pv_mesh)
+        except ValueError:
+            print('error')
+            pass
+        plotter.show()
+        screenshot = plotter.screenshot()
+        return screenshot
+
+def validate(encoder, decoder, val_dataloader):
+    latents = []
     losses = []
     accurancys = []
     with torch.no_grad():
@@ -55,27 +84,34 @@ def validate(encoder, decoder, val_dataloader, visualization=False):
             sp = sp.to(device)
             occ = occ.to(device)
 
-            loss, accurancy = compute_loss_n_acc(encoder, decoder, sp, occ, visualization)
+            loss, accurancy, mean_z = compute_loss_n_acc(encoder, decoder, sp, occ)
+
+            latents.append(mean_z)
 
             losses.append(loss)
             accurancys.append(accurancy)
+
+    img = gen_image_from_latent(decoder, latents[0][[0], ...])
     return {
         'loss': torch.tensor(losses).mean(),
-        'acc': torch.tensor(accurancys).mean()
+        'acc': torch.tensor(accurancys).mean(),
+        'img': img
     }
 
 run = wandb.init(
     project="Pointnet encoder N ONet decoder",
+    name=f"with-foutier-embedding-emb_sigma={emb_sigma}",
     config=dict(
         batch_size = 8,
-        lr_rate = 2e-3,
-        total_epoch = 2001,
+        lr_rate = 1.5e-3,
+        total_epoch = 1000,
         train_ratio = 0.9,
-        seed = hash('ytq') & ((1 << 32) - 1),
-        dataset_root_path = '/home/shuyumo/research/GAO/point2sdf/output',
-        checkpoint_output = '/home/shuyumo/research/GAO/point2sdf/ckpt',
+        seed = hash('ytq') & ((1 << 30) - 1),
+        dataset_root_path = 'output/2_dataset',
+        checkpoint_output = 'ckpt',
         z_dim = 128,
-        leaky = 0.02,
+        leaky = 0.05,
+        emb_sigma=emb_sigma,
         optimizer = 'adam'
     )
 )
@@ -102,9 +138,9 @@ val_dataloader = DataLoader(val_dataset,
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-encoder         = Encoder(z_dim=_.z_dim, c_dim=0, leaky=_.leaky).to(device) # unconditional
-decoder         = Decoder(z_dim=_.z_dim, c_dim=0, leaky=_.leaky).to(device) # unconditional
-generator       = Generator3D(decoder)
+encoder         = Encoder(z_dim=_.z_dim, c_dim=0, emb_sigma=_.emb_sigma, leaky=_.leaky).to(device) # unconditional
+decoder         = Decoder(z_dim=_.z_dim, c_dim=0, emb_sigma=_.emb_sigma, leaky=_.leaky).to(device) # unconditional
+generator       = Generator3D(device=device)
 
 if _.optimizer == 'sgd':
     optimizer       = torch.optim.SGD(
@@ -125,7 +161,7 @@ print('training on device = ', device)
 print('train dataset length = ', len(train_dataset))
 print('valda dataset length = ', len(val_dataset))
 best_val_acc = -1
-for epoch in range(_.total_epoch):
+for epoch in tqdm(range(_.total_epoch), desc="Training"):
     encoder.train()
     decoder.train()
 
@@ -137,7 +173,7 @@ for epoch in range(_.total_epoch):
         sp = sp.to(device)
         occ = occ.to(device)
 
-        loss, acc = compute_loss_n_acc(encoder, decoder, sp, occ)
+        loss, acc, mean_z = compute_loss_n_acc(encoder, decoder, sp, occ)
 
         optimizer.zero_grad()
         loss.backward()
@@ -145,13 +181,14 @@ for epoch in range(_.total_epoch):
         batch_loss.append(loss.item())
         batch_acc.append(acc.item())
 
-    validation_dict = validate(encoder, decoder, val_dataloader, visualization=False)
+    validation_dict = validate(encoder, decoder, val_dataloader)
 
     wandb.log({
         'val_acc' : validation_dict['acc'],
         'val_loss' : validation_dict['loss'],
         'train_loss' : torch.tensor(batch_loss).mean(),
-        'train_acc' : torch.tensor(batch_acc).mean()
+        'train_acc' : torch.tensor(batch_acc).mean(),
+        'val_img' : wandb.Image(validation_dict['img'], caption='validation image: val[0]'),
     })
     print(f'epoch {epoch} loss = {torch.tensor(batch_loss).mean()}')
     if best_val_acc < validation_dict['acc'] or epoch % 100 == 0:
@@ -160,4 +197,4 @@ for epoch in range(_.total_epoch):
         torch.save({
             'encoder': encoder.state_dict(),
             'decoder': decoder.state_dict(),
-        }, str(Path(_.checkpoint_output) / f'sgd-e-d-{epoch}-{best_val_acc}.ckpt'))
+        }, str(Path(_.checkpoint_output) / f'sgd-e-d-{emb_sigma}-{epoch}-{best_val_acc}.ckpt'))
