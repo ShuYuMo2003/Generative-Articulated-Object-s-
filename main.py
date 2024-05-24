@@ -8,7 +8,7 @@ import numpy as np
 from rich import print
 from torch.utils.data import DataLoader
 
-from transformer.dataset import get_dataset
+from transformer.loaddataset import get_dataset
 from transformer.model import get_decoder
 
 
