@@ -2,6 +2,7 @@ from torch import nn
 from transformer.attention.multi_head_attention import MultiHeadAttention
 from transformer.layers.feed_forward import PositionWiseFeedForward
 from transformer.layers.norm import LayerNorm
+from transformer.utils import parse_args
 
 class NativeDecoderLayer(nn.Module):
     def __init__(self, config, n_head, d_model, dropout):
@@ -10,7 +11,7 @@ class NativeDecoderLayer(nn.Module):
         self.d_model = d_model
         self.self_attention = MultiHeadAttention(n_head, d_model)
 
-        self.ffn = PositionWiseFeedForward(d_model=d_model, **config['feedforward']['args'])
+        self.ffn = PositionWiseFeedForward(**parse_args(config, config['feedforward']['args']))
 
         self.dropout_0 = nn.Dropout(dropout)
         self.norm_0 = LayerNorm(d_model)

@@ -16,9 +16,9 @@ example:
 
 
 class NativeMLPTokenizer(nn.Module):
-    def __init__(self, config, d_model, part_hidden_dim, hidden_dim, latent_code_dim, drop_out, leaky_relu=None):
+    def __init__(self, input_structure, d_model, hidden_dim, latent_code_dim, leaky_relu, drop_out):
         super().__init__()
-        self.structure      = config['part_structure']
+        self.structure      = input_structure
         self.part_info_dim  = sum(self.structure['non_latent_info'].values())
 
         self.part_info_fc   = nn.Linear(self.part_info_dim, hidden_dim)
@@ -35,10 +35,7 @@ class NativeMLPTokenizer(nn.Module):
 
         latent_tensor   = self.latent_code_fc(raw_parts['latent'])
 
-        # print('part_tensor', part_tensor.size())
-        # print('latent_tensor', latent_tensor.size())
         x = torch.cat((part_tensor, latent_tensor), dim=-1)
-        # print('x', x.size())
         x = self.activ(x)
         x = self.dropout(x)
         x = self.combine_fc(x)       # x: batch * part_idx * d_model

@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch import distributions
 
-class GTokenEmbedding(nn.Module):
+class NativeGEmbedding(nn.Module):
     def __init__(self, vocab_size, d_model):
         super().__init__()
         self.embedding_mean = nn.Embedding(vocab_size, d_model)

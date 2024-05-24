@@ -1,10 +1,10 @@
 from torch import nn
 
 
-class UnTokenizer(nn.Module):
-    def __init__(self, config, d_model, expanded_d_model, latent_code_dim, dropout):
+class NativeMLPUnTokenizer(nn.Module):
+    def __init__(self, input_structure, d_model, expanded_d_model, latent_code_dim, dropout):
         super().__init__()
-        self.structure      = config['part_structure']
+        self.structure      = input_structure
         self.part_info_dim  = sum(self.structure['non_latent_info'].values())
 
         self.expand_layer   = nn.Linear(d_model, expanded_d_model)

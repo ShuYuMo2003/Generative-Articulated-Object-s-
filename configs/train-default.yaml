@@ -1,13 +1,31 @@
+usewandb: true
+random_seed: love ytq forever
+device: null
+
 action:
   type: train
   args:
-    n_epoch: 1000
+    n_epoch: 1000000
     ckpt_save_name: checkpoints/native-{epoch:05d}.pt
-    lr: 1e-5
-    optimizer: adam
+    betas: [0.9, 0.98]
+    eps: 1e-9
+    scheduler_factor: 0.8
+    scheduler_warmup: 200
 
-usewandb: true
-random_seed: love ytq forever
+# Dataset & Dataloader config
+dataset:
+  type: redis
+  args:
+    db: 0
+    port: 6379
+    host: localhost
+    fix_length: 5
+
+dataloader:
+  args:
+    batch_size: 16
+    num_workers: 4
+    shuffle: true
 
 part_structure:
   non_latent_info:
@@ -18,45 +36,73 @@ part_structure:
     limit: 4
   latent_info:
     latent: 128
+  vocab_size: 16384 # >>> 2048 * 8
 
+# Global Model Parameters
+model_parameter:
+  tokenizer_hidden_dim: 512
+  tokenizer_leaky_relu: 0.1
+
+  n_head: 8
+  n_layer: 8
+  d_model: 512
+  max_part_len_embedding: 128
+  decoder_dropout: 0.1
+  expanded_d_model: 4096
+
+  ffd_hidden_dim: 4096
+  ffd_dropout: 0.1
+
+## Module Parameter Config.
+## It will read from above parameter.
+## No need to change here.
 tokenizer:
   type: NativeMLPTokenizer
   args:
-    part_hidden_dim: 512
-    hidden_dim: 512
-    leaky_relu: 0.01
-    drop_out: 0.1
+    input_structure: part_structure
+    d_model: model_parameter.d_model
+    hidden_dim: model_parameter.tokenizer_hidden_dim
+    latent_code_dim: part_structure.latent_info.latent
+    leaky_relu: model_parameter.tokenizer_leaky_relu
+    drop_out: model_parameter.decoder_dropout
 
-dataset:
-  type: redis
+position_embedding:
+  type: NativeCatPositionEmbedding
   args:
-    db: 0
-    host: localhost
-    port: 6379
-    fix_length: 5
+    d_model: model_parameter.d_model
+    max_len: model_parameter.max_part_len_embedding
+    device: device
 
-dataloader:
+g_embedding:
+  type: NativeGEmbedding
   args:
-    batch_size: 4
-    num_workers: 4
-    shuffle: true
+    vocab_size: part_structure.vocab_size
+    d_model: model_parameter.d_model
+
+untokenizer:
+  type: NativeMLPUnTokenizer
+  args:
+    input_structure: part_structure
+    d_model: model_parameter.d_model
+    expanded_d_model: model_parameter.expanded_d_model
+    latent_code_dim: part_structure.latent_info.latent
+    dropout: model_parameter.decoder_dropout
 
 decoder:
   type: NativeDecoder
   args:
-    n_head: 8
-    n_layer: 6
-    d_model: 512
-    max_len: 128
-    dropout: 0.05
-    expanded_d_model: 2048
-    latent_code_dim: 128
-    vocab_size: 1048576 # >>> 2048 * 512
-
+    config: '.'
+    n_layer: model_parameter.n_layer
+    device: device
+  layer_arges:
+    n_head: model_parameter.n_head
+    d_model: model_parameter.d_model
+    dropout: model_parameter.decoder_dropout
 
 feedforward: # TODO: try KAN.
   args:
-    hidden_dim: 2048
-    dropout: 0.1
+    d_model: model_parameter.d_model
+    hidden_dim: model_parameter.ffd_hidden_dim
+    dropout: model_parameter.ffd_dropout
 
 
