@@ -28,14 +28,14 @@ class Trainer():
     def compute_loss(self, index, input, output):
         predicted_shape, g_token_dist = self.model(index, input)
         loss_kl = distributions.kl_divergence(g_token_dist, self.g_token0_z).sum(dim=-1).mean()
+        print('loss_kl', loss_kl)
 
-        n_batch = predicted_shape['origin'].size(0)
         keys = list(self.input_structure['non_latent_info'].keys())
 
         loss_pred = torch.zeros(1, device=self.device)
         for key in keys:
             loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
-
+        print('loss_pred', loss_pred)
         loss = loss_pred + loss_kl
         return loss
 

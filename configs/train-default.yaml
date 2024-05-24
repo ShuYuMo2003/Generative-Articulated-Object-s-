@@ -37,7 +37,7 @@ dataset:
 
 dataloader:
   args:
-    batch_size: 8
+    batch_size: 4
     num_workers: 4
     shuffle: true
 
