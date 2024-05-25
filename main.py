@@ -32,24 +32,39 @@ config.update({
 })
 
 dataset = get_dataset(config)
-dataloader = DataLoader(dataset, **config['dataloader']['args'])
-decoder = get_decoder(config)
 
 def train(config):
     from transformer.action.trainer import Trainer
+    dataloader = DataLoader(dataset, **config['dataloader']['args'])
+    decoder = get_decoder(config)
+
+    val_dataset = get_dataset(config, train=False)
     print("start to train with config: ", config)
     train_args = config['action']['args']
     train_args.update({
         'model': decoder,
-        'dataloader': dataloader
+        'dataloader': dataloader,
+        'validate_dataset': val_dataset
     })
     wandb_instance = wandb.init(project='transformer', config=config) if config['usewandb'] else None
     trainer = Trainer(config=config, wandb_instance=wandb_instance, **train_args)
     trainer()
 
+def eval(config):
+    from transformer.action.evaluater import Evaluater
+    print('start to eval with config: ', config)
+    eval_args = config['action']['args']
+    evaler = Evaluater(config=config, dataset=dataset, **eval_args)
+    evaler.visualize_generated_shape()
+
+
 if __name__ == '__main__':
     if config['action']['type'] == 'train':
         train(config)
+    elif config['action']['type'] == 'eval':
+        eval(config)
+    else:
+        raise NotImplementedError("?? QAQ ?? T_T ??")
 
 
 

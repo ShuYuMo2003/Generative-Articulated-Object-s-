@@ -1,4 +1,4 @@
-def get_dataset(config):
+def get_dataset(config, **args):
     dataset = config['dataset']['type']
     if dataset == 'redis':
         from .redis import FromRedisNativeDataset

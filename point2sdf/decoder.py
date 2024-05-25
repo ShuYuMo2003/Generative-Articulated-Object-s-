@@ -10,7 +10,7 @@ sys.path.append('..')
 
 from utils.ResNet import ResnetBlockFC, CResnetBlockConv1d, ResnetBlockConv1d
 from utils.utils_layers import CBatchNorm1d, CBatchNorm1d_legacy
-from fourier_feature import GaussianFourierFeatureEmbedding
+from .fourier_feature import GaussianFourierFeatureEmbedding
 
 
 

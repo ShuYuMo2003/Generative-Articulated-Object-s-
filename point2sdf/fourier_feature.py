@@ -1,3 +1,4 @@
+import os
 import torch
 from torch import nn
 
@@ -13,7 +14,9 @@ def seed_torch(seed):
 
 def get_or_generate_fourier_matrix_B(d_out_emb, d_in_emb):
     seed_torch(hash('ytq') & ((1 << 25) - 1))
-    cache_file = f'fourier_marix_cache/fourier_matrix_B_{d_out_emb}_{d_in_emb}.pth'
+    current_file_path = os.path.realpath(__file__)
+    current_file_path = os.path.dirname(current_file_path)
+    cache_file = os.path.join(current_file_path, f'fourier_marix_cache/fourier_matrix_B_{d_out_emb}_{d_in_emb}.pth')
     try:
         B = torch.load(cache_file)
     except FileNotFoundError:

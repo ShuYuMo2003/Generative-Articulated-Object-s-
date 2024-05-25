@@ -3,21 +3,14 @@ random_seed: love ytq forever
 device: null
 
 action:
-  type: train
+  type: eval
   args:
-    n_epoch: 1000000
-    ckpt_save_name: checkpoints/native-{epoch:05d}.pt
-    per_epoch_save: 1000
-    betas: [0.9, 0.98]
-    eps: 1e-9
-    scheduler_factor: 0.8
-    scheduler_warmup: 200
-    evaluetaion: true
+    ckpt_path: /home/shuyumo/research/GAO/checkpoints/native-02000.pt
+    eval_output: eval_output
 
 ######### For evaluation ONLY, the paramerters for latentcode decoder.
 # cuz, I wrongly save the state_dict of the decoder instead of the whole pickled model.
 # TODO: save the whole model.
-n_latent_code_validation_samples: 10000
 latent_decoder:
   type: null
   ckpt_path: /home/shuyumo/research/GAO/point2sdf/ckpt/sgd-e-d-0.2-432-0.9829541444778442.ckpt
@@ -26,6 +19,7 @@ latent_decoder:
     c_dim: 0
     emb_sigma: 0.1
     leaky: 0.02
+
 ######### END
 
 # Dataset & Dataloader config
@@ -40,7 +34,7 @@ dataset:
 dataloader:
   args:
     batch_size: 16
-    num_workers: 4
+    num_workers: 2
     shuffle: true
 
 part_structure:

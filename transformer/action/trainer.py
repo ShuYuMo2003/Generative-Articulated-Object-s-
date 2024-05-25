@@ -3,13 +3,18 @@ import torch
 from transformer.utils import to_cuda
 from tqdm import tqdm
 from torch import distributions
+from point2sdf.decoder import Decoder as LatentDecoder
+from torch.utils.data import DataLoader
 import os
 
 
 class Trainer():
-    def __init__(self, wandb_instance, config, model, dataloader, n_epoch,
-                 ckpt_save_name, betas, eps, scheduler_factor, scheduler_warmup):
+    def __init__(self, validate_dataset, wandb_instance, config, model, dataloader, n_epoch,
+                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
+                 scheduler_warmup, evaluetaion):
+        self.validate_dataset = validate_dataset
         self.n_epoch = n_epoch
+        self.per_epoch_save = per_epoch_save
         self.ckpt_save_name = ckpt_save_name
         self.device = config['device']
         self.input_structure = config['part_structure']
@@ -26,6 +31,13 @@ class Trainer():
         self.lr_scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer,
                                                               lr_lambda=lambda step:
                                                                   self.rate(step, self.d_model, scheduler_factor, scheduler_warmup))
+        self.run_latent_eval = evaluetaion
+        if evaluetaion:
+            self.latent_decoder = LatentDecoder(**config['latent_decoder']['args'])
+            self.latent_decoder.load_state_dict(torch.load(config['latent_decoder']['ckpt_path']))
+            self.latent_decoder = self.latent_decoder.to(self.device)
+            self.latent_decoder.eval()
+            self.n_latent_code_validation_samples = config['latent_decoder']['n_latent_code_validation_samples']
 
 
     # @from: https://nlp.seas.harvard.edu/annotated-transformer/#batches-and-masking
@@ -40,6 +52,34 @@ class Trainer():
         return factor * (
             model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5))
         )
+
+    def validate_shape_acc(self, pred_latent, actu_latent):
+        self.latent_decoder.eval()
+        batch_size, latent_dim = pred_latent.shape
+        assert (batch_size, latent_dim) == actu_latent.shape, 'pred_latent and actu_latent should have the same shape'
+        sampled_point = torch.rand((self.n_latent_code_validation_samples, 3)) - 0.5
+
+        with torch.no_grad():
+            pred_occ_logits = self.latent_decoder(pred_latent, sampled_point)
+            actu_occ_logits = self.latent_decoder(actu_latent, sampled_point)
+
+        acc = ((pred_occ_logits > 0) == (actu_occ_logits > 0)).float().mean()
+
+        return acc
+
+    def run_valiate_shape_acc(self):
+        validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1)
+        acc = []
+        for idx, (d_idx, input, output) in enumerate(validate_dataloader):
+            if self.device == 'cuda':
+                (d_idx, input, output) = to_cuda((d_idx, input, output))
+
+            predicted_shape, _ = self.model(d_idx, input)
+            shape_acc = self.validate_shape_acc(predicted_shape['latent'], output['latent'])
+            acc.append(shape_acc)
+            if idx > 10: # TODO: write in config
+                break
+        return torch.tensor(acc).mean()
 
     def compute_loss(self, index, input, output):
         predicted_shape, g_token_dist = self.model(index, input)
@@ -57,9 +97,11 @@ class Trainer():
         return loss
 
     def save_checkpoint(self, epoch):
-        ckptpath = self.ckpt_save_name % epoch
+        print('save checkpoint at epoch', epoch, '...', end='')
+        ckptpath = self.ckpt_save_name.format(epoch=epoch)
         os.makedirs(os.path.dirname(ckptpath), exist_ok=True)
         torch.save(self.model, ckptpath)
+        print('done')
 
     def feed_to_wandb(self, args):
         if self.wandb_instance:
@@ -69,11 +111,11 @@ class Trainer():
         assert not self.called, 'Trainer can only be called once'
         self.called = True
 
-        for epoch in range(self.n_epoch):
+        for epoch_idx in range(self.n_epoch):
             self.model.train()
 
             train_losses = []
-            for idx, (d_idx, input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch}', total=len(self.dataloader)):
+            for idx, (d_idx, input, output) in tqdm(enumerate(self.dataloader), desc=f'epoch = {epoch_idx}', total=len(self.dataloader)):
                 # print(f'idx = {idx}')
                 if self.device == 'cuda':
                     (d_idx, input, output) = to_cuda((d_idx, input, output))
@@ -85,13 +127,19 @@ class Trainer():
                 self.optimizer.step()
                 train_losses.append(loss.item())
 
+            shape_acc = self.run_valiate_shape_acc()
+
+            if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
+                self.save_checkpoint(epoch_idx)
+
             self.lr_scheduler.step()
             lr = self.optimizer.param_groups[0]['lr']
-            print(f'epoch =', epoch, 'loss =', torch.tensor(train_losses).mean(), 'lr =', lr)
+            print(f'epoch =', epoch_idx, 'loss =', torch.tensor(train_losses).mean(), 'lr =', lr)
 
             self.feed_to_wandb({
                 'train_loss': torch.tensor(train_losses).mean(),
-                'lr': self.optimizer.param_groups[0]['lr']
+                'lr': self.optimizer.param_groups[0]['lr'],
+                'shape_acc': shape_acc
             })
 
 
