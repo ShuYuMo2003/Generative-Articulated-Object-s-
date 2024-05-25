@@ -7,3 +7,4 @@ wandb/
 ckpt/
 ckpt.bak/
 eval_output/
+checkpoints/
