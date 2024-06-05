@@ -1,3 +1,0 @@
-/home/shuyumo/research/GAO/external/mesh-fusion/libfusioncpu/build/CMakeFiles/fusion_cpu.dir
-/home/shuyumo/research/GAO/external/mesh-fusion/libfusioncpu/build/CMakeFiles/edit_cache.dir
-/home/shuyumo/research/GAO/external/mesh-fusion/libfusioncpu/build/CMakeFiles/rebuild_cache.dir

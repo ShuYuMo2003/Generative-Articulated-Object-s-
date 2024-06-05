@@ -13,6 +13,10 @@ sudo apt-get install libgl1-mesa-dri
 4_push_to_redis.py
 ```
 
+## 准备数据
+```
+python main-onet.py -c configs/onet/generate_onet_dataset.yaml
+```
 
 ## 训练
 ```

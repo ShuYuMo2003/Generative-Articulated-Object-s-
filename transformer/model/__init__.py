@@ -5,5 +5,8 @@ def get_decoder(config):
     if type == 'NativeDecoder':
         from transformer.model.decoder import NativeDecoder
         return NativeDecoder(**parse_args(config, config['decoder']['args']))
+    elif type == 'ParallelDecoder':
+        from transformer.model.decoder import ParallelDecoder
+        return ParallelDecoder(**parse_args(config, config['decoder']['args']))
     else:
         raise NotImplementedError(f"{type} is not implemented")

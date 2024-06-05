@@ -4,8 +4,8 @@ import torch
 from rich import print
 from torch.utils.data import DataLoader
 from transformer.utils import to_cuda
-from point2sdf.generate_3d import Generator3D
-from point2sdf.decoder import Decoder
+from onet.generate_3d import Generator3D
+from onet.decoder import Decoder
 
 class LatentCodeParser():
     def __init__(self, config):
@@ -45,6 +45,8 @@ class Evaluater():
 
             with torch.no_grad():
                 predicted_shape, _ = self.model(d_idx, input)
+                # print(idx, 'predpredpred', predicted_shape)
+                # print(idx, 'oringoringir', output)
                 mesh = self.visual_generator(predicted_shape['latent'])
-                mesh.export(os.path.join(self.eval_output.item(), f'{d_idx}.obj'))
+                mesh.export(os.path.join(self.eval_output, f'{d_idx.item()}.obj'))
                 print(d_idx, mesh, 'saved')

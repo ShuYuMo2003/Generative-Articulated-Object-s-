@@ -14,8 +14,9 @@ class NativeMLPUnTokenizer(nn.Module):
         self.activ = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, p_token):
-        x = self.expand_layer(p_token)
+    def forward(self, tokens):
+        # n_batch, n_part, d_model
+        x = self.expand_layer(tokens)
         x = self.activ(x)
         x = self.dropout(x)
 
@@ -27,6 +28,7 @@ class NativeMLPUnTokenizer(nn.Module):
         for key, dim in self.structure['non_latent_info'].items():
             result[key] = part_info[..., d:d+dim]
             d += dim
+        # attribute_name, n_batch, n_part * attribute_dim
         assert d == part_info.size(-1)
 
         result['latent'] = latent

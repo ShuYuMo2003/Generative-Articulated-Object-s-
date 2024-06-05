@@ -30,6 +30,7 @@ class NativeMLPTokenizer(nn.Module):
 
     def forward(self, raw_parts):
         # raw_parts: attribute_name * batch * (part_idx==fix_length) * attribute_dim
+        # print(raw_parts)
         part_tensor     = torch.cat([raw_parts[key] for key, value in self.structure['non_latent_info'].items()], dim=-1)
         part_tensor     = self.part_info_fc(part_tensor)
 
