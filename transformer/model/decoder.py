@@ -70,11 +70,11 @@ class ParallelDecoder(nn.Module):
         ])
 
     def generate_mask(self, n_part):
-        mask = torch.ones(n_part, n_part, device=self.device)
+        mask = torch.ones(n_part, n_part, device=self.device, dtype=torch.int16)
         mask = torch.tril(mask)
         return mask
 
-    def forward(self, index, raw_parts, mask=None):
+    def forward(self, index, raw_parts, key_padding_mask):
         dfn, dfn_fa, tokens = self.tokenizer(raw_parts)
 
         # print(dfn.shape, dfn_fa.shape, tokens.shape)
@@ -84,10 +84,10 @@ class ParallelDecoder(nn.Module):
 
         n_batch, n_part, d_model = tokens.size()
 
-        mask = self.generate_mask(n_part)
+        attn_mask = self.generate_mask(n_part)
 
         for layer in self.layers:
-            tokens = layer(tokens, mask)
+            tokens = layer(tokens, key_padding_mask, attn_mask)
 
         part_info = self.untokenizer(tokens)
 

@@ -1,18 +1,26 @@
-from rich import print
+import os
 import torch
-from transformer.utils import to_cuda
+import wandb
+import pyvista as pv
+import numpy   as np
+
+from rich import print
 from tqdm import tqdm
 from torch import distributions
+from torch.nn import functional as F
+
 from onet.decoder import Decoder as LatentDecoder
+from onet.generate_3d import Generator3D
+
+from transformer.utils import to_cuda
 from torch.utils.data import DataLoader
 from transformer.model import get_decoder
 from transformer.loaddataset import get_dataset
-import os
 
 
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch,
-                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
+                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save, train_with_decoder,
                  scheduler_warmup, evaluetaion, n_validation_sample, main_loss_ratio):
 
         self.n_epoch = n_epoch
@@ -21,6 +29,7 @@ class Trainer():
         self.device = config['device']
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
+        self.train_with_decoder = train_with_decoder
 
         self.model_type = config['decoder']['type']
         if self.model_type == 'NativeDecoder':
@@ -49,11 +58,30 @@ class Trainer():
         self.run_latent_eval = evaluetaion
         if evaluetaion:
             self.latent_decoder = torch.load(self.train_dataset.onet_decoder_path).to(self.device)
-            self.latent_decoder.eval()
-
+            # freeze latent decoder, we don't want to train it in this stage.
+            for param in self.latent_decoder.parameters():
+                param.requires_grad = False
             self.n_latent_code_validation_samples = config['n_latent_code_validation_samples']
             self.n_validation_sample = n_validation_sample
 
+        self.generator       = Generator3D(device=self.device)
+
+    def gen_image_from_latent(self, decoder, mean_z):
+        with torch.no_grad():
+            # print('gen latent mesh')
+            mesh = self.generator.generate_from_latent(decoder, mean_z)
+            # print('gened')
+            mesh.export('logs/temp-validate.obj')
+            plotter = pv.Plotter()
+            try:
+                pv_mesh = pv.read('logs/temp-validate.obj')
+                plotter.add_mesh(pv_mesh)
+            except ValueError:
+                print('error')
+                pass
+            plotter.show()
+            screenshot = plotter.screenshot()
+            return screenshot
 
     # @from: https://nlp.seas.harvard.edu/annotated-transformer/#batches-and-masking
     @classmethod
@@ -92,7 +120,7 @@ class Trainer():
         return acc
 
     def run_valiate_shape_acc(self):
-        validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1)
+        validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1, shuffle=False)
         acc = []
         for idx, (d_idx, input, output) in tqdm(enumerate(validate_dataloader),
                                                 desc='validate shape quality.',
@@ -106,16 +134,23 @@ class Trainer():
             predicted_shape, _ = self.model(d_idx, input)
             # attribute_name * n_batch * (part_idx==fix_length) * attribute_dim
             shape_acc = self.validate_shape_acc(predicted_shape['latent'], output['latent'])
+            actually_shape =  output
             acc.append(shape_acc)
 
-        return torch.tensor(acc).mean()
+        # batch_size, n_part, latent_dim
+        latent = predicted_shape['latent'][[0], 0, :]
+        img0 = self.gen_image_from_latent(self.latent_decoder, latent)
+        latent = actually_shape['latent'][[0], 0, :]
+        img1 = self.gen_image_from_latent(self.latent_decoder, latent)
+        img = np.concatenate([img0, img1], axis=1)
+        return torch.tensor(acc).mean(), img
 
-    def compute_loss_g_token(self, index, input, output):
+    def compute_loss_g_token(self, index, input, output, key_padding_mask):
         predicted_shape, g_token_dist = self.model(index, input)
 
         loss_kl = distributions.kl_divergence(g_token_dist, self.g_token0_z).sum(dim=-1).mean()
 
-        keys = list(self.input_structure['non_latent_info'].keys())
+        keys = list(self.input_structure['non_latent_info'].keys()) + list(self.input_structure['latent_info'].keys())
 
         loss_pred = torch.zeros(1, device=self.device)
         for key in keys:
@@ -124,15 +159,45 @@ class Trainer():
         loss = loss_pred + loss_kl
         return loss, loss_pred, loss_kl
 
-    def compute_loss_parallel(self, index, input, output):
-        predicted_shape, _ = self.model(index, input)
+    def compute_loss_parallel(self, index, input, output, key_padding_mask):
+        predicted_shape, _ = self.model(index, input, key_padding_mask)
 
-        keys = list(self.input_structure['non_latent_info'].keys())
+        keys = list(self.input_structure['non_latent_info'].keys()) + list(self.input_structure['latent_info'].keys())
 
         loss_pred = torch.zeros(1, device=self.device)
+        loss_latent = torch.zeros(1, device=self.device)
+
         for key in keys:
-            loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
-        return loss_pred
+            if key == 'latent':
+                loss_latent += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
+            else:
+                loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
+
+        if self.train_with_decoder:
+            n_batch, n_part, n_latent_dim = predicted_shape['latent'].shape
+            pred_latents = predicted_shape['latent'].view(-1, n_latent_dim)
+
+            n_batch, n_part, n_sample_point, dim_point = output['dec_samplepoint'].shape
+
+            dec_samplepoint = output['dec_samplepoint'].view(-1, n_sample_point, dim_point)
+            dec_occ = output['dec_occ'].view(n_batch * n_part, n_sample_point)
+
+            dfn = output['dfn'].view(n_batch * n_part, 1)
+            mask = ((dfn == 0) | (dfn == self.validate_dataset.fix_length)).repeat(1, n_latent_dim)
+
+            # 对特殊 token 截断 decoder 梯度
+            pred_latents[mask] = 0
+
+            self.latent_decoder.train()
+            occ_logits = self.latent_decoder(dec_samplepoint, pred_latents)
+            #TODO: Check how to freeze the latent decoder
+
+            loss_latent_from_dec = F.binary_cross_entropy_with_logits(
+                occ_logits, dec_occ, reduction='none').sum(-1).mean()
+
+            loss_latent += loss_latent_from_dec
+
+        return loss_latent + loss_pred
 
     def save_checkpoint(self, epoch):
         print('save checkpoint at epoch', epoch, '...', end='')
@@ -155,14 +220,17 @@ class Trainer():
             self.model.train()
 
             train_losses = []
-            for idx, (d_idx, input, output) in tqdm(enumerate(self.train_dataloader),
+            for idx, (d_idx, input, output, key_padding_mask) in tqdm(enumerate(self.train_dataloader),
                                                     desc=f'epoch = {epoch_idx}',
                                                     total=len(self.train_dataloader)):
-                # print(f'idx = {idx}')
-                if self.device == 'cuda':
-                    (d_idx, input, output) = to_cuda((d_idx, input, output))
 
-                loss = self.compute_loss(d_idx, input, output)
+                # print(f'idx = {idx}')
+
+                if self.device == 'cuda':
+                    (d_idx, input, output, key_padding_mask) =  \
+                        to_cuda((d_idx, input, output, key_padding_mask))
+
+                loss = self.compute_loss(d_idx, input, output, key_padding_mask)
 
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -170,7 +238,7 @@ class Trainer():
                 self.optimizer.step()
                 train_losses.append(loss.item())
 
-            shape_acc = self.run_valiate_shape_acc()
+            shape_acc, img = self.run_valiate_shape_acc()
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
@@ -180,7 +248,6 @@ class Trainer():
             self.feed_to_wandb({
                 'train_loss': torch.tensor(train_losses).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
-                'shape_acc': shape_acc
+                'shape_acc': shape_acc,
+                'img': wandb.Image(img, caption='validation image: val[0]'),
             })
-
-

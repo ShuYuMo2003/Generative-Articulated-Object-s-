@@ -11,7 +11,7 @@ class NativeMLPUnTokenizer(nn.Module):
         self.latent_code_fc = nn.Linear(expanded_d_model, latent_code_dim)
         self.part_info_fc   = nn.Linear(expanded_d_model, self.part_info_dim)
 
-        self.activ = nn.ReLU()
+        self.activ = nn.GELU()
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, tokens):

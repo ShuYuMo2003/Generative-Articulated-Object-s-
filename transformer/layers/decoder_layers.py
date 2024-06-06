@@ -9,19 +9,22 @@ class NativeDecoderLayer(nn.Module):
         super().__init__()
         self.n_head = n_head
         self.d_model = d_model
-        self.self_attention = MultiHeadAttention(n_head, d_model)
+        self.self_attention = nn.MultiheadAttention(embed_dim=d_model, num_heads=n_head,
+                                                    dropout=dropout, batch_first=True)
 
         self.ffn = PositionWiseFeedForward(**parse_args(config, config['feedforward']['args']))
 
         self.dropout_0 = nn.Dropout(dropout)
-        self.norm_0 = LayerNorm(d_model)
+        self.norm_0 = nn.LayerNorm(d_model)
 
         self.dropout_1 = nn.Dropout(dropout)
-        self.norm_1 = LayerNorm(d_model)
+        self.norm_1 = nn.LayerNorm(d_model)
 
-    def forward(self, x, mask):
+    def forward(self, x, key_padding_mask, attn_mask):
         before_x = x
-        x = self.self_attention(x, x, x, mask)
+        x = self.self_attention(x, x, x,
+                                key_padding_mask=(key_padding_mask == 0),
+                                attn_mask=(attn_mask == 0))
 
         x = self.dropout_0(x)
         x = self.norm_0(x + before_x)

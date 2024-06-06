@@ -26,6 +26,7 @@ class FromRedisParallelDataset(Dataset):
         self.basic_shape_structure = {'dfn': 1, 'dfn_fa': 1}
         self.basic_shape_structure.update(part_structure['non_latent_info'])
         self.basic_shape_structure.update(part_structure['latent_info'])
+        self.basic_shape_structure.update(part_structure['other_info'])
 
         torch.manual_seed(seed); torch.cuda.manual_seed_all(seed)
         self.s_part = self.generate_random_part();  self.s_part['dfn'], self.s_part['dfn_fa'] = 0,          0
@@ -58,11 +59,13 @@ class FromRedisParallelDataset(Dataset):
         for part in shape_data['part']:
             raw_input.append(part)
 
-
         for i in range(self.fix_length - len(raw_input)):
             raw_input.append(E)
 
         raw_output = raw_input[1:] + [E]
+
+        key_padding_mask = torch.tensor([1] + [1] * len(shape_data['part']) +
+                                        [0] * (self.fix_length - len(shape_data['part']) - 1), dtype=torch.int16)
 
         # convert to: attribute_name * (part_idx==fix_length) * attribute_dim
         input = {
@@ -81,7 +84,7 @@ class FromRedisParallelDataset(Dataset):
 
         # print('oup shape:', output)
 
-        return index, input, output
+        return index, input, output, key_padding_mask
 
 
 

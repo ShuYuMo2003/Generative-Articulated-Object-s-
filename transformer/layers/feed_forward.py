@@ -6,7 +6,7 @@ class PositionWiseFeedForward(nn.Module):
         self.fc1 = nn.Linear(d_model, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, d_model)
         self.dropout = nn.Dropout(dropout)
-        self.acti = nn.ReLU()
+        self.acti = nn.GELU()
 
     def forward(self, x):
         x = self.fc1(x)

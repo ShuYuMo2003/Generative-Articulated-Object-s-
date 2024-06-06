@@ -10,9 +10,7 @@ from onet.decoder import Decoder
 class LatentCodeParser():
     def __init__(self, config):
         self.device = config['device']
-
         self.generator = Generator3D(device=self.device)
-
         self.decoder = Decoder(**config['latent_decoder']['args'])
         checkpoint_state = torch.load(config['latent_decoder']['ckpt_path'])
         self.decoder.load_state_dict(checkpoint_state['decoder'])
