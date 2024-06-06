@@ -1,20 +1,19 @@
-import argparse
-import trimesh
-import numpy as np
-import os
-import glob
-import sys
-from multiprocessing import Pool
-from rich.progress import track
-from functools import partial
-import binvox_rw
-import voxels
 import sys
 sys.path.append('..')
-from libmesh import check_mesh_contains
 
-from rich.progress import Progress
+import os
+import sys
+import glob
 import time
+import trimesh
+import argparse
+import numpy as np
+from multiprocessing import Pool
+from rich.progress import Progress
+
+import binvox_rw
+import voxels
+from libmesh import check_mesh_contains
 
 
 parser = argparse.ArgumentParser('Sample a watertight mesh.')

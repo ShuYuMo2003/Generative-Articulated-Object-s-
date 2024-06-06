@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from rich import print
+
 from transformer.utils import parse_args
 from transformer.layers.decoder_layers import NativeDecoderLayer
 from transformer.embedding import (get_tokenizer,   get_positionembedding,
@@ -86,6 +87,7 @@ class ParallelDecoder(nn.Module):
 
         attn_mask = self.generate_mask(n_part)
 
+        # TODO: Add long connection
         for layer in self.layers:
             tokens = layer(tokens, key_padding_mask, attn_mask)
 

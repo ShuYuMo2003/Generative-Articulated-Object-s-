@@ -10,12 +10,12 @@ action:
     per_epoch_save: 1000
     betas: [0.9, 0.98]
     eps: 1e-9
-    scheduler_factor: 1
+    scheduler_factor: 0.01
     scheduler_warmup: 100
     evaluetaion: true
     n_validation_sample: 10
     main_loss_ratio: 1
-    train_with_decoder: true
+    train_with_decoder: false
 
 ######### For evaluation ONLY, the paramerters for latentcode decoder.
 n_latent_code_validation_samples: 10000
@@ -49,8 +49,8 @@ part_structure:
   latent_info:
     latent: 128
   other_info:
-    dec_samplepoint: [100000, 3]
-    dec_occ: 100000
+    dec_samplepoint: [50000, 3]
+    dec_occ: 50000
   vocab_size: 16384 # >>> 2048 * 8
 
 # Global Model Parameters
@@ -59,7 +59,7 @@ model_parameter:
   tokenizer_leaky_relu: 0.1
 
   n_head: 16
-  n_layer: 24
+  n_layer: 12
   d_model: 512
   max_part_len_embedding: 128
   decoder_dropout: 0.1

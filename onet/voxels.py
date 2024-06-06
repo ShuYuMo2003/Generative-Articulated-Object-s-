@@ -1,11 +1,14 @@
 
-import numpy as np
-import trimesh
-from scipy import ndimage
-from skimage.measure import block_reduce
 import sys
 sys.path.append('..')
+
+import trimesh
 import pyximport
+import numpy as np
+
+from scipy import ndimage
+from skimage.measure import block_reduce
+
 pyximport.install()
 from libmesh import check_mesh_contains
 from libvoxelize.voxelize import voxelize_mesh_

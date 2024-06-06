@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 from transformer.model import get_decoder
 from transformer.loaddataset import get_dataset
 
+torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch,
@@ -58,13 +59,18 @@ class Trainer():
         self.run_latent_eval = evaluetaion
         if evaluetaion:
             self.latent_decoder = torch.load(self.train_dataset.onet_decoder_path).to(self.device)
-            # freeze latent decoder, we don't want to train it in this stage.
-            for param in self.latent_decoder.parameters():
-                param.requires_grad = False
+
+            # freeze latent decoder, we don't want to train it in this stage, just for clear gradient.
+            # self.decoder_optimizer = torch.optim.Adam(self.latent_decoder.parameters(), lr=1, betas=betas, eps=float(eps))
             self.n_latent_code_validation_samples = config['n_latent_code_validation_samples']
             self.n_validation_sample = n_validation_sample
 
         self.generator       = Generator3D(device=self.device)
+
+    def zero_gred(self):
+        self.optimizer.zero_grad()
+        # if self.run_latent_eval:
+        #     self.decoder_optimizer.zero_grad()
 
     def gen_image_from_latent(self, decoder, mean_z):
         with torch.no_grad():
@@ -122,16 +128,17 @@ class Trainer():
     def run_valiate_shape_acc(self):
         validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1, shuffle=False)
         acc = []
-        for idx, (d_idx, input, output) in tqdm(enumerate(validate_dataloader),
+        for idx, (d_idx, input, output, key_pad_mask) in tqdm(enumerate(validate_dataloader),
                                                 desc='validate shape quality.',
                                                 total=self.n_validation_sample):
             if idx >= self.n_validation_sample:
                 break
 
             if self.device == 'cuda':
-                (d_idx, input, output) = to_cuda((d_idx, input, output))
+                (d_idx, input, output, key_pad_mask) = to_cuda((d_idx, input, output, key_pad_mask))
 
-            predicted_shape, _ = self.model(d_idx, input)
+            predicted_shape, _ = self.model(d_idx, input, key_pad_mask)
+
             # attribute_name * n_batch * (part_idx==fix_length) * attribute_dim
             shape_acc = self.validate_shape_acc(predicted_shape['latent'], output['latent'])
             actually_shape =  output
@@ -143,6 +150,7 @@ class Trainer():
         latent = actually_shape['latent'][[0], 0, :]
         img1 = self.gen_image_from_latent(self.latent_decoder, latent)
         img = np.concatenate([img0, img1], axis=1)
+
         return torch.tensor(acc).mean(), img
 
     def compute_loss_g_token(self, index, input, output, key_padding_mask):
@@ -197,7 +205,7 @@ class Trainer():
 
             loss_latent += loss_latent_from_dec
 
-        return loss_latent + loss_pred
+        return loss_latent + loss_pred, loss_latent, loss_pred
 
     def save_checkpoint(self, epoch):
         print('save checkpoint at epoch', epoch, '...', end='')
@@ -219,7 +227,11 @@ class Trainer():
         for epoch_idx in range(self.n_epoch):
             self.model.train()
 
-            train_losses = []
+            train_losses = {
+                'loss': [],
+                'loss_latent': [],
+                'loss_pred': [],
+            }
             for idx, (d_idx, input, output, key_padding_mask) in tqdm(enumerate(self.train_dataloader),
                                                     desc=f'epoch = {epoch_idx}',
                                                     total=len(self.train_dataloader)):
@@ -230,13 +242,14 @@ class Trainer():
                     (d_idx, input, output, key_padding_mask) =  \
                         to_cuda((d_idx, input, output, key_padding_mask))
 
-                loss = self.compute_loss(d_idx, input, output, key_padding_mask)
+                loss, loss_latent, loss_pred= self.compute_loss(d_idx, input, output, key_padding_mask)
 
-                self.optimizer.zero_grad()
+                self.zero_gred()
                 loss.backward()
-
                 self.optimizer.step()
-                train_losses.append(loss.item())
+                train_losses['loss'].append(loss.item())
+                train_losses['loss_latent'].append(loss_latent.item())
+                train_losses['loss_pred'].append(loss_pred.item())
 
             shape_acc, img = self.run_valiate_shape_acc()
 
@@ -246,7 +259,10 @@ class Trainer():
             self.lr_scheduler.step()
 
             self.feed_to_wandb({
-                'train_loss': torch.tensor(train_losses).mean(),
+                'train_loss': torch.tensor(train_losses['loss']).mean(),
+                'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
+                'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
+
                 'lr': self.optimizer.param_groups[0]['lr'],
                 'shape_acc': shape_acc,
                 'img': wandb.Image(img, caption='validation image: val[0]'),
