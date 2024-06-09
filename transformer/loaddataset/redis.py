@@ -6,6 +6,7 @@ import torch
 from rich import print
 from tqdm import tqdm
 import copy
+from transformer.utils import str2hash
 
 def identity_or_create_tensor(x):
     if torch.is_tensor(x):
@@ -16,7 +17,7 @@ def identity_or_create_tensor(x):
 
 class FromRedisNativeDataset(Dataset):
     def __init__(self, host, port, db, fix_length,
-                    seed=(hash('love ytq.') & ((1 << 25) - 1))):
+                    seed=(str2hash('love ytq.') & ((1 << 25) - 1))):
         super().__init__()
         self.fix_length = fix_length
         self._r = redis.Redis(host=host, port=port, db=db)

@@ -28,4 +28,8 @@ def to_cuda(obj):
     else:
         return obj
 
+def str2hash(ss):
+    import hashlib
+    return int(hashlib.md5(ss.encode()).hexdigest(), 16)
+
 __all__ = ['parse_args', 'to_cuda']

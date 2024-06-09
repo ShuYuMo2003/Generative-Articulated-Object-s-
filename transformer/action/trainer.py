@@ -125,7 +125,7 @@ class Trainer():
 
         return acc
 
-    def run_valiate_shape_acc(self):
+    def run_valiate_shape_acc(self, with_image=False):
         validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1, shuffle=False)
         acc = []
         for idx, (d_idx, input, output, key_pad_mask) in tqdm(enumerate(validate_dataloader),
@@ -141,17 +141,25 @@ class Trainer():
 
             # attribute_name * n_batch * (part_idx==fix_length) * attribute_dim
             shape_acc = self.validate_shape_acc(predicted_shape['latent'], output['latent'])
-            actually_shape =  output
+            actually_shape = output
             acc.append(shape_acc)
 
         # batch_size, n_part, latent_dim
-        latent = predicted_shape['latent'][[0], 0, :]
-        img0 = self.gen_image_from_latent(self.latent_decoder, latent)
-        latent = actually_shape['latent'][[0], 0, :]
-        img1 = self.gen_image_from_latent(self.latent_decoder, latent)
-        img = np.concatenate([img0, img1], axis=1)
+        images = None
+        if with_image:
+            images = []
+            for idx in range(3):
+                latent = predicted_shape['latent'][[0], idx, :]
+                img0 = self.gen_image_from_latent(self.latent_decoder, latent)
+                latent = actually_shape['latent'][[0], idx, :]
+                img1 = self.gen_image_from_latent(self.latent_decoder, latent)
+                img = np.concatenate([img0, img1], axis=1)
+                images.append(img)
 
-        return torch.tensor(acc).mean(), img
+            images = np.concatenate(images, axis=0)
+
+
+        return torch.tensor(acc).mean(), images
 
     def compute_loss_g_token(self, index, input, output, key_padding_mask):
         predicted_shape, g_token_dist = self.model(index, input)
@@ -251,19 +259,20 @@ class Trainer():
                 train_losses['loss_latent'].append(loss_latent.item())
                 train_losses['loss_pred'].append(loss_pred.item())
 
-            shape_acc, img = self.run_valiate_shape_acc()
+            shape_acc, img = self.run_valiate_shape_acc(epoch_idx % 50 == 0)
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
 
             self.lr_scheduler.step()
 
-            self.feed_to_wandb({
+            log_data = {
                 'train_loss': torch.tensor(train_losses['loss']).mean(),
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
-
                 'lr': self.optimizer.param_groups[0]['lr'],
                 'shape_acc': shape_acc,
-                'img': wandb.Image(img, caption='validation image: val[0]'),
-            })
+            }
+            if img is not None:
+                log_data['img'] = wandb.Image(img, caption='validation image: val[0]')
+            self.feed_to_wandb(log_data)

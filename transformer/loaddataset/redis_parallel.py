@@ -9,6 +9,8 @@ from tqdm import tqdm
 
 from torch.utils.data import Dataset
 
+from transformer.utils import str2hash
+
 def identity_or_create_tensor(x):
     if torch.is_tensor(x):
         return x
@@ -17,7 +19,7 @@ def identity_or_create_tensor(x):
 
 
 class FromRedisParallelDataset(Dataset):
-    def __init__(self, part_structure, host, port, db, fix_length, seed=hash('ytq') & ((1 << 20) - 1)):
+    def __init__(self, part_structure, host, port, db, fix_length, seed=str2hash('ytq') & ((1 << 20) - 1)):
         super().__init__()
         self.fix_length = fix_length
         self._r = redis.Redis(host=host, port=port, db=db)

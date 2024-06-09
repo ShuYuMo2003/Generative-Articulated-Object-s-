@@ -3,14 +3,15 @@ import numpy as np
 import torch
 from glob import glob
 from pathlib import Path
+from transformer.utils import str2hash
 
 class PartnetMobilityDataset(Dataset):
     def __init__(self, path:list[tuple[str, str]], train_ratio:float,
                  train:bool, unpackbits=True, return_path_name=False):
         super().__init__()
         assert 0 <= train_ratio <= 1
-        selector = ( lambda x : hash(x[0]) % 100 <  train_ratio * 100 if train
-                else lambda x : hash(x[0]) % 100 >= train_ratio * 100)
+        selector = ( lambda x : str2hash(x[0]) % 100 <  train_ratio * 100 if train
+                else lambda x : str2hash(x[0]) % 100 >= train_ratio * 100)
         enc_data = sorted(list(glob(str(Path(path) / f'point-0' / '*'))))
         dec_data = sorted(list(glob(str(Path(path) / f'point-1' / '*'))))
         assert len(dec_data) == len(enc_data)

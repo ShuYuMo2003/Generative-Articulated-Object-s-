@@ -20,6 +20,8 @@ from onet.encoder_latent import Encoder
 from onet.dataset import PartnetMobilityDataset
 from onet.generate_3d import Generator3D
 
+from transformer.utils import str2hash
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', '-c', dest='config',
                     help=('config file.'), required=True)
@@ -103,7 +105,7 @@ _ = run.config
 
 Path(_.checkpoint_output).mkdir(exist_ok=True)
 
-setup_seed(hash(_.seed) & ((1 << 20) - 1))
+setup_seed(str2hash(_.seed) & ((1 << 20) - 1))
 
 train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio, train=True)
 train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True)

@@ -5,6 +5,8 @@ import random
 import argparse
 from rich import print
 
+from transformer.utils import str2hash
+
 from onet import a_extract_from_raw_dataset as process_raw_dataset
 from onet import b_convert_to_onet_dataset as generate_onet_dataset
 from onet import d_evaluate_latent_code as gen_latent_code
@@ -23,7 +25,7 @@ parser.add_argument('--config', '-c', dest='config',
                     type=argparse.FileType('r'), required=True)
 args = parser.parse_args()
 config = yaml.safe_load(args.config.read())
-setup_seed(hash(config['random_seed']) & ((1 << 20) - 1))
+setup_seed(str2hash(config['random_seed']) & ((1 << 20) - 1))
 config.update({
     'device': 'cuda' if torch.cuda.is_available() else 'cpu'
 })
