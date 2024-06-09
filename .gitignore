@@ -8,3 +8,4 @@ ckpt/
 ckpt.bak/
 eval_output/
 checkpoints/
+sensitive_info.py

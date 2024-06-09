@@ -1,0 +1,5 @@
+build/
+dist/
+playground/
+*.egg-info/
+poe_api_wrapper/__pycache__/

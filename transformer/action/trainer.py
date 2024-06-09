@@ -20,7 +20,7 @@ from transformer.loaddataset import get_dataset
 torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
-    def __init__(self, wandb_instance, config, n_epoch,
+    def __init__(self, wandb_instance, config, n_epoch, gen_visualization_per_epoch,
                  ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save, train_with_decoder,
                  scheduler_warmup, evaluetaion, n_validation_sample, main_loss_ratio):
 
@@ -31,6 +31,7 @@ class Trainer():
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
         self.train_with_decoder = train_with_decoder
+        self.gen_visualization_per_epoch = gen_visualization_per_epoch
 
         self.model_type = config['decoder']['type']
         if self.model_type == 'NativeDecoder':
@@ -259,7 +260,7 @@ class Trainer():
                 train_losses['loss_latent'].append(loss_latent.item())
                 train_losses['loss_pred'].append(loss_pred.item())
 
-            shape_acc, img = self.run_valiate_shape_acc(epoch_idx % 50 == 0)
+            shape_acc, img = self.run_valiate_shape_acc(epoch_idx % self.gen_visualization_per_epoch == 0)
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
