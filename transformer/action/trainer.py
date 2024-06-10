@@ -59,7 +59,7 @@ class Trainer():
                                                                       scheduler_factor, scheduler_warmup))
         self.run_latent_eval = evaluetaion
         if evaluetaion:
-            self.latent_decoder = torch.load(self.train_dataset.onet_decoder_path).to(self.device)
+            self.latent_decoder = torch.load(self.train_dataset.onet_decoder_path, map_location=torch.device(self.device)).to(self.device)
 
             # freeze latent decoder, we don't want to train it in this stage, just for clear gradient.
             # self.decoder_optimizer = torch.optim.Adam(self.latent_decoder.parameters(), lr=1, betas=betas, eps=float(eps))
@@ -129,40 +129,54 @@ class Trainer():
     def run_valiate_shape_acc(self, with_image=False):
         validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1, shuffle=False)
         acc = []
-        for idx, (d_idx, input, output, key_pad_mask) in tqdm(enumerate(validate_dataloader),
+        actually_shape_list = []
+        predicted_shape_list = []
+        text_list = []
+        for idx, batched_data in tqdm(enumerate(validate_dataloader),
                                                 desc='validate shape quality.',
                                                 total=self.n_validation_sample):
             if idx >= self.n_validation_sample:
                 break
 
             if self.device == 'cuda':
-                (d_idx, input, output, key_pad_mask) = to_cuda((d_idx, input, output, key_pad_mask))
+                batched_data = to_cuda(batched_data)
 
-            predicted_shape, _ = self.model(d_idx, input, key_pad_mask)
+            predicted_shape, _ = self.model(index           = batched_data['index'],
+                                            raw_parts       = batched_data['input'],
+                                            key_padding_mask= batched_data['key_padding_mask'],
+                                            enc_data        = batched_data['enc_data'])
 
             # attribute_name * n_batch * (part_idx==fix_length) * attribute_dim
-            shape_acc = self.validate_shape_acc(predicted_shape['latent'], output['latent'])
-            actually_shape = output
+            shape_acc = self.validate_shape_acc(predicted_shape['latent'], batched_data['output']['latent'])
+            actually_shape = batched_data['output']
             acc.append(shape_acc)
+            actually_shape_list.append(actually_shape)
+            predicted_shape_list.append(predicted_shape)
+            text_list.append(batched_data['enc_text'])
 
         # batch_size, n_part, latent_dim
         images = None
         if with_image:
             images = []
-            for idx in range(3):
-                latent = predicted_shape['latent'][[0], idx, :]
-                img0 = self.gen_image_from_latent(self.latent_decoder, latent)
-                latent = actually_shape['latent'][[0], idx, :]
-                img1 = self.gen_image_from_latent(self.latent_decoder, latent)
-                img = np.concatenate([img0, img1], axis=1)
-                images.append(img)
-
-            images = np.concatenate(images, axis=0)
+            for actually_shape, predicted_shape in tqdm(zip(actually_shape_list, predicted_shape_list), desc='generate image'):
+                single_obj_images = []
+                for idx in range(3):
+                    latent = predicted_shape['latent'][[0], idx, :]
+                    img0 = self.gen_image_from_latent(self.latent_decoder, latent)
+                    latent = actually_shape['latent'][[0], idx, :]
+                    img1 = self.gen_image_from_latent(self.latent_decoder, latent)
+                    img = np.concatenate([img0, img1], axis=1)
+                    single_obj_images.append(img)
+                single_obj_image = np.concatenate(single_obj_images, axis=0)
+                images.append(single_obj_image)
+            images = np.concatenate(images, axis=1)
+            print('texts: ', text_list)
 
 
         return torch.tensor(acc).mean(), images
 
     def compute_loss_g_token(self, index, input, output, key_padding_mask):
+        raise NotImplementedError('compute_loss_g_token is deprecated.')
         predicted_shape, g_token_dist = self.model(index, input)
 
         loss_kl = distributions.kl_divergence(g_token_dist, self.g_token0_z).sum(dim=-1).mean()
@@ -176,8 +190,8 @@ class Trainer():
         loss = loss_pred + loss_kl
         return loss, loss_pred, loss_kl
 
-    def compute_loss_parallel(self, index, input, output, key_padding_mask):
-        predicted_shape, _ = self.model(index, input, key_padding_mask)
+    def compute_loss_parallel(self, index, input, output, key_padding_mask, enc_data, enc_text):
+        predicted_shape, _ = self.model(index, input, key_padding_mask, enc_data)
 
         keys = list(self.input_structure['non_latent_info'].keys()) + list(self.input_structure['latent_info'].keys())
 
@@ -241,17 +255,16 @@ class Trainer():
                 'loss_latent': [],
                 'loss_pred': [],
             }
-            for idx, (d_idx, input, output, key_padding_mask) in tqdm(enumerate(self.train_dataloader),
+            for idx, batched_data in tqdm(enumerate(self.train_dataloader),
                                                     desc=f'epoch = {epoch_idx}',
                                                     total=len(self.train_dataloader)):
 
                 # print(f'idx = {idx}')
 
                 if self.device == 'cuda':
-                    (d_idx, input, output, key_padding_mask) =  \
-                        to_cuda((d_idx, input, output, key_padding_mask))
+                    batched_data = to_cuda(batched_data)
 
-                loss, loss_latent, loss_pred= self.compute_loss(d_idx, input, output, key_padding_mask)
+                loss, loss_latent, loss_pred= self.compute_loss(**batched_data)
 
                 self.zero_gred()
                 loss.backward()

@@ -27,7 +27,7 @@ def main(config):
 
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-    encoder = torch.load(check_point_path).to(device)
+    encoder = torch.load(check_point_path, map_location=torch.device(device) ).to(device)
 
     with torch.no_grad():
         for idx, (enc_sp, enc_occ, dec_sp, dec_occ, path) in enumerate(dataloader):

@@ -4,6 +4,10 @@ checkpoint_output: checkpoints/onet
 check_point_path: checkpoints/onet
 check_point_filename: null
 random_seed: love ytq.
+shape_description_path: dataset/4_screenshot_description
+transformers_name: google-t5/t5-base
+pretrained_model_cache_dir: cache
+
 
 host: localhost
 port: 6379

@@ -68,6 +68,8 @@ model_parameter:
   ffd_hidden_dim: 4096
   ffd_dropout: 0.1
 
+  encoder_kv_dim: 768 # decided by pretrained model.
+
 ## Module Parameter Config.
 ## It will read from above parameter.
 ## No need to change here.
@@ -113,6 +115,7 @@ decoder:
     n_head: model_parameter.n_head
     d_model: model_parameter.d_model
     dropout: model_parameter.decoder_dropout
+    encoder_kv_dim: model_parameter.encoder_kv_dim
 
 feedforward: # TODO: try KAN.
   args:

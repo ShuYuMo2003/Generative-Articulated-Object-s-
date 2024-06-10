@@ -6,10 +6,7 @@ import argparse
 
 import numpy as np
 from rich import print
-from torch.utils.data import DataLoader
 
-from transformer.loaddataset import get_dataset
-from transformer.model import get_decoder
 from transformer.utils import str2hash
 
 def setup_seed(seed):

@@ -86,7 +86,19 @@ class FromRedisParallelDataset(Dataset):
 
         # print('oup shape:', output)
 
-        return index, input, output, key_padding_mask
+        enc_data = shape_data['enc_data']
+        enc_text = shape_data['enc_text']
+
+        enc_data.requires_grad = False
+
+        return {
+            'index': index,
+            'input': input,
+            'output': output,
+            'key_padding_mask': key_padding_mask,
+            'enc_data': enc_data,
+            'enc_text': enc_text
+        }
 
 
 

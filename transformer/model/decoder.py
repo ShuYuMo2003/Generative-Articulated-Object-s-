@@ -75,7 +75,7 @@ class ParallelDecoder(nn.Module):
         mask = torch.tril(mask)
         return mask
 
-    def forward(self, index, raw_parts, key_padding_mask):
+    def forward(self, index, raw_parts, key_padding_mask, enc_data):
         dfn, dfn_fa, tokens = self.tokenizer(raw_parts)
 
         # print(dfn.shape, dfn_fa.shape, tokens.shape)
@@ -89,7 +89,7 @@ class ParallelDecoder(nn.Module):
 
         # TODO: Add long connection
         for layer in self.layers:
-            tokens = layer(tokens, key_padding_mask, attn_mask)
+            tokens = layer(tokens, key_padding_mask, attn_mask, enc_data)
 
         part_info = self.untokenizer(tokens)
 
