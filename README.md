@@ -5,30 +5,34 @@ https://stackoverflow.com/questions/72110384/libgl-error-mesa-loader-failed-to-o
 sudo apt-get install libgl1-mesa-dri
 ```
 
-## 准备数据集
 ```
-1_extract_from_raw_dataset.py
-2_convert_to_onet_dataset.py
-3_evaluate_latent_code.py
-4_push_to_redis.py
+conda env create -f env.yaml
 ```
 
-## 准备数据
-```
-python main-onet.py -c configs/onet/generate_onet_dataset.yaml
-```
+transformer 的数据集存储在 redis 中，所以需要安装 redis @see https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/
 
-## 训练
-```
-python main.py -c configs/default.yaml
-```
+# commands
+ - 准备数据集
+    ```
+    python main-onet.py -c configs/onet/prepare_transformer_dataset.yaml
+    ```
 
-## 看点好的
-./logs/interp_test/interp.gif
-![./logs/interp_test/interp.gif](./logs/interp_test/interp.gif)
+ - 训练 ONet
+    ```
+    python train-onet.py -c configs/onet/train-onet.yaml
+    ```
 
-./logs/interp_test/usb-body-noise-higher.gif
-![./logs/interp_test/usb-body-noise-higher.gif](./logs/interp_test/usb-body-noise-higher.gif)
+ - 利用训练好的 ONet 生成 transformer 数据集
+    ```
+    python main-onet.py -c configs/onet/prepare_transformer_dataset.yaml
+    ```
 
-./logs/interp_test/usb-cap-noise-higher.gif
-![./logs/interp_test/usb-cap-noise-higher.gif](./logs/interp_test/usb-cap-noise-higher.gif)
+ - 训练 transformer
+    ```
+    python main-transformer.py -c configs/transformer/train-default-v2.yaml
+    ```
+
+ - 推理 transformer
+    ```
+    python main-transformer.py -c configs/transformer/eval-default.yaml
+    ```
