@@ -46,6 +46,8 @@ class Trainer():
         self.d_model = config['model_parameter']['d_model']
         self.wandb_instance = wandb_instance
         self.called = False
+
+        # g token is deprecated
         self.g_token0_z = distributions.Normal(torch.zeros(self.d_model, device=self.device),
                                                torch.ones(self.d_model, device=self.device))
         self.main_loss_ratio = main_loss_ratio

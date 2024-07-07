@@ -4,10 +4,13 @@ device: null
 action:
   type: eval
   args:
-    ckpt_filepath: checkpoints/transformer/native-00900.ckpt
+    ckpt_filepath: checkpoints/transformer/native-02100.ckpt
     eval_output_path: logs/eval_output
     equal_part_threshold: 0.5
 
+# pretained text encoder config
+transformers_name: google-t5/t5-base
+pretrained_model_cache_dir: cache
 
 ######### For evaluation ONLY, the paramerters for latentcode decoder.
 n_latent_code_validation_samples: 10000

@@ -17,14 +17,18 @@ from transformer.utils import to_cuda
 from onet.generate_3d import Generator3D
 from onet.decoder import Decoder
 
+from transformers import AutoTokenizer, T5EncoderModel
+
+import pyrender
+
 
 class Evaluater():
     def __init__(self, config, ckpt_filepath, eval_output_path, equal_part_threshold):
-        self.model = torch.load(ckpt_filepath)
+        self.model = torch.load(ckpt_filepath, map_location=config['device'])
 
         self.dataset = get_dataset(config)
 
-        self.latent_decoder = torch.load(self.dataset.onet_decoder_path)
+        self.latent_decoder = torch.load(self.dataset.onet_decoder_path, map_location=config['device'])
 
         self.config = config
         self.device = config['device']
@@ -34,6 +38,13 @@ class Evaluater():
 
         self.s_part = copy.deepcopy(self.dataset.s_part)
         self.e_part = copy.deepcopy(self.dataset.e_part)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(config['transformers_name'],
+                                                       cache_dir=config['pretrained_model_cache_dir'])
+        print('load tokenizer')
+        self.text_encoder = T5EncoderModel.from_pretrained(config['transformers_name'],
+                                                           cache_dir=config['pretrained_model_cache_dir'])
+        print('load text encoder')
 
         if self.device == 'cuda':
             self.s_part = to_cuda(self.s_part)
@@ -51,7 +62,7 @@ class Evaluater():
         result = 0
         for key in self.basic_shape_structure.keys():
             result += nn.functional.mse_loss(total_part[key][0, -1, :], self.e_part[key])
-        print('mse loss', result)
+        # print('mse loss', result)
         return result
 
     def add_s_part_n_add_pos(self, part_list):
@@ -97,33 +108,59 @@ class Evaluater():
 
         return screenshot
 
-    def visualize(self, total_part):
+    def generate_box_bound(self, parts, meshs):
+        pyrender_mesh = pyrender.Mesh.from_trimesh(meshs[0])
+        scene = pyrender.Scene()
+        scene.add(pyrender_mesh)
+        pyrender.Viewer(scene, use_raymond_lighting=True)
+
+    def genreate_each_mesh(self, total_part):
         latent = total_part['latent']
         meshs = []
-        for i in range(latent.size(1)):
+        for i in range(latent.size(1) - 1): # do not genreate e_part
             mesh = self.generate_mesh_from_latent(latent[:, i, :])
 
             screenshot = self.generate_screenshoot_from_mesh(mesh)
             plt.imshow(screenshot)
             plt.savefig(os.path.join(self.eval_output_path, f"{i}.png"))
+            print(os.path.join(self.eval_output_path, f"{i}.png"), 'generated')
 
             meshs.append(mesh)
+        return meshs
 
-    def inference(self):
+    def inference(self, idx=None):
         self.model.eval()
         count = 0
         key_padding_mask = torch.ones((1, self.dataset.fix_length), device=self.device, dtype=torch.int16)
         total_part = self.add_s_part_n_add_pos({})
+        if idx is not None:
+            test_data_sample = self.dataset[idx]
+            enc_data = identity_or_create_tensor(test_data_sample['enc_data']).to(self.device).unsqueeze(0)
+            enc_text = test_data_sample['enc_text']
+        else:
+            enc_text = input("Input prompt for generation: ").strip()
+            input_ids = self.tokenizer([enc_text], return_tensors="pt", padding=True).input_ids
+            outputs = self.text_encoder(input_ids=input_ids)
+            enc_data = outputs.last_hidden_state.to(self.device)
+
+        print('runing with prompt:', enc_text)
+
         with torch.no_grad():
             while True:
                 # print(total_part)
-                total_part, _ = self.model(None, total_part, key_padding_mask[:, :total_part['dfn'].size(1)])
+                total_part, _ = self.model(None, total_part, key_padding_mask[:, :total_part['dfn'].size(1)], enc_data)
                 count += 1
                 total_part = self.add_s_part_n_add_pos(total_part)
-                if self.compare_last_part_with_e(total_part) < self.equal_part_threshold or count >= 3: break
+                mse_loss_with_e_part = self.compare_last_part_with_e(total_part)
+                print('MSE Loss with E-part = ', mse_loss_with_e_part)
+                if mse_loss_with_e_part < self.equal_part_threshold:
+                    print('Same token with E-part, end inference.')
+                    break
 
-        self.visualize(total_part)
-        print(total_part)
+        meshs = self.genreate_each_mesh(total_part)
+
+        self.generate_box_bound(total_part, meshs)
+        # print(total_part)
 
 
 

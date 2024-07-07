@@ -40,7 +40,7 @@ def eval(config):
     print('start to eval with config: ', config)
     eval_args = config['action']['args']
     evaler = Evaluater(config=config, **eval_args)
-    evaler.inference()
+    while True: evaler.inference(0)
 
 
 if __name__ == '__main__':
