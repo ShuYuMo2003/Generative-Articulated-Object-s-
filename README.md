@@ -11,6 +11,16 @@ conda env create -f env.yaml
 
 transformer 的数据集存储在 redis 中，所以需要安装 redis @see https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/
 
+# 下载数据集
+   https://sapien.ucsd.edu/downloads
+   解压进 `dataset/raw`
+   ```
+   (gao) (base) shuyumo@SYM:~/research/GAO/dataset/raw$ pwd
+   /home/shuyumo/research/GAO/dataset/raw
+   (gao) (base) shuyumo@SYM:~/research/GAO/dataset/raw$ ls
+   100013  100340  100712  100905  101114  101450  101842  102202  102567 ..............
+   ```
+
 # commands
  - 准备数据集
     ```
