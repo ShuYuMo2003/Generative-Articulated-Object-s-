@@ -24,7 +24,7 @@ transformer 的数据集存储在 redis 中，所以需要安装 redis @see http
 # commands
  - 准备数据集
     ```
-    python main-onet.py -c configs/onet/prepare_transformer_dataset.yaml
+    python main-onet.py -c configs/onet/generate_onet_dataset.yaml
     ```
 
  - 训练 ONet
