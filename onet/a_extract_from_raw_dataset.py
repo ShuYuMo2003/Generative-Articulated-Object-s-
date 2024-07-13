@@ -78,7 +78,10 @@ def convert_meshs(shape_path, output_path, mesh_output_path):
         for mesh_name in mobility_id_2_objs[idx]:
             try: meshs.append(pv.read(shape_path / 'textured_objs' / (mesh_name + '.obj')))
             except FileNotFoundError: print(f"File not found: {mesh_name}")
-        combined_mesh[idx] = reduce(lambda x, y: x + y, meshs)
+        try: combined_mesh[idx] = reduce(lambda x, y: x + y, meshs)
+        except ValueError:
+            print(f"Error: {meshs}")
+            return "Error on combine meshs."
         combined_mesh[idx].points += translation[idx]
         combined_mesh[idx].save(str(mesh_output_path / f'{model_cat}-{shape_original_id}-{idx}.ply'))
 
@@ -253,12 +256,12 @@ def main(args):
     from multiprocessing import Pool
     failed = []
     with Pool(args['n_precessor']) as _:
-        results = [_.apply_async(convert_meshs, (path, output_info_path, output_mesh_path))
+        results = [(path, _.apply_async(convert_meshs, (path, output_info_path, output_mesh_path)))
                     for path in map(Path, filtered_paths)]
 
         bar = tqdm(total=len(results), desc='-- Processing')
         while bar.n < bar.total:
-            for res in results:
+            for path, res in results:
                 if res.ready():
                     bar.update()
                     return_value = res.get()

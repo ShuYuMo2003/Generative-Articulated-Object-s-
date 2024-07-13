@@ -56,10 +56,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu
+CMAKE_SOURCE_DIR = /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build
+CMAKE_BINARY_DIR = /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/fusion_gpu.dir/depend.make
@@ -75,24 +75,24 @@ include CMakeFiles/fusion_gpu.dir/flags.make
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o.depend
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o.Release.cmake
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o: ../fusion.cu
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building NVCC (Device) object CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o"
-	cd /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -E make_directory /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.
-	cd /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -D verbose:BOOL=$(VERBOSE) -D build_configuration:STRING=Release -D generated_file:STRING=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion.cu.o -D generated_cubin_file:STRING=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion.cu.o.cubin.txt -P /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion.cu.o.Release.cmake
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building NVCC (Device) object CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o"
+	cd /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -E make_directory /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.
+	cd /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -D verbose:BOOL=$(VERBOSE) -D build_configuration:STRING=Release -D generated_file:STRING=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion.cu.o -D generated_cubin_file:STRING=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion.cu.o.cubin.txt -P /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion.cu.o.Release.cmake
 
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o.depend
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o.Release.cmake
 CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o: ../fusion_zach_tvl1.cu
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building NVCC (Device) object CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o"
-	cd /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -E make_directory /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.
-	cd /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -D verbose:BOOL=$(VERBOSE) -D build_configuration:STRING=Release -D generated_file:STRING=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o -D generated_cubin_file:STRING=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o.cubin.txt -P /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.Release.cmake
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building NVCC (Device) object CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o"
+	cd /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -E make_directory /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.
+	cd /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir && /usr/bin/cmake -D verbose:BOOL=$(VERBOSE) -D build_configuration:STRING=Release -D generated_file:STRING=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o -D generated_cubin_file:STRING=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o.cubin.txt -P /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.Release.cmake
 
 # Object files for target fusion_gpu
 fusion_gpu_OBJECTS =
 
 # External object files for target fusion_gpu
 fusion_gpu_EXTERNAL_OBJECTS = \
-"/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o" \
-"/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o"
+"/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o" \
+"/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o"
 
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o
@@ -102,7 +102,7 @@ libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/librt.a
 libfusion_gpu.so: /usr/local/cuda-12.4/lib64/libcudart_static.a
 libfusion_gpu.so: /usr/lib/x86_64-linux-gnu/librt.a
 libfusion_gpu.so: CMakeFiles/fusion_gpu.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libfusion_gpu.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libfusion_gpu.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/fusion_gpu.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -115,6 +115,6 @@ CMakeFiles/fusion_gpu.dir/clean:
 
 CMakeFiles/fusion_gpu.dir/depend: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion.cu.o
 CMakeFiles/fusion_gpu.dir/depend: CMakeFiles/fusion_gpu.dir/fusion_gpu_generated_fusion_zach_tvl1.cu.o
-	cd /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/fusion_gpu.dir/depend
 
