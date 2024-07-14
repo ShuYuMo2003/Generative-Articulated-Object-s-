@@ -9,7 +9,7 @@ import trimesh
 from tqdm import tqdm
 import mesh_to_sdf
 import numpy as np
-import open3d as o3d
+# import open3d as o3d
 
 manifold_path = Path('../third_party/ManifoldPlus/build/manifold')
 
@@ -75,12 +75,12 @@ def convert_mesh(ply_file, clear_temp=True):
     stem = ply_file.stem
     temp_dir = Path(f'../dataset/2_onet_dataset/temp/{stem}')
     result_dir = Path(f'../dataset/2_onet_dataset/result')
-    sdf_target_file = result_dir / f'{stem}.sdf'
+
     create_folder(temp_dir, result_dir)
 
     obj_file = temp_dir / (stem + ".obj")
     wt_obj_file = temp_dir / (stem + ".wt.obj")
-    sdf_file = temp_dir / (stem + ".sdf")
+    sdf_target_file = result_dir / f'{stem}.sdf'
 
     print('Converting to (obj)', ply_file)
     ply_to_obj(ply_file, obj_file)
@@ -97,9 +97,9 @@ if __name__ == '__main__':
                             Path('../dataset/1_preprecessed_mesh').iterdir()))
 
 
-    with Pool(cpu_count() - 2) as p:
+    with Pool(cpu_count() - 1) as p:
         result = [
-            p.apply_async(convert_mesh, (ply_file, True))
+            p.apply_async(convert_mesh, (ply_file, False))
             for ply_file in all_ply_files
         ]
         bar = tqdm(total=len(result), desc='Converting meshes')

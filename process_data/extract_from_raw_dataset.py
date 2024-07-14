@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import torch
 import shutil
 import numpy as np
 import pyvista as pv
@@ -232,9 +231,9 @@ def toy(shape_path, output_path, mesh_output_path):
         plotter.close()
 
 if __name__ == '__main__':
-    raw_dataset_paths   = '../dataset/raw/*'
-    output_info_path    = '../dataset/1_preprocessed_info'
-    output_mesh_path    = '../dataset/1_preprecessed_mesh'
+    raw_dataset_paths   = glob('../dataset/raw/*')
+    output_info_path    = Path('../dataset/1_preprocessed_info')
+    output_mesh_path    = Path('../dataset/1_preprecessed_mesh')
 
     shutil.rmtree(output_info_path, ignore_errors=True)
     shutil.rmtree(output_mesh_path, ignore_errors=True)
@@ -244,7 +243,7 @@ if __name__ == '__main__':
 
     filtered_paths = []
 
-    category = ['Bottle']
+    category = ['*']
 
     for path in tqdm(raw_dataset_paths, desc='-- filtering'):
         with open(os.path.join(path, 'meta.json')) as f:
