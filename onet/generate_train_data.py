@@ -7,7 +7,7 @@ import os
 import glob
 
 MESH_FUSION_PATH = None
-USE_GPU = True
+USE_GPU = False
 PROCESS_COUNT = cpu_count() - 1
 
 SCALE_STEP = 1
