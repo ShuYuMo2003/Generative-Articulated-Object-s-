@@ -267,7 +267,7 @@ def main(args):
                     return_value = res.get()
                     if isinstance(return_value, str):
                         failed.append(return_value)
-                    results.remove(res)
+                    results.remove((path, res))
                     break
             time.sleep(0.05)
         bar.close()

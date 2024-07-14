@@ -1,4 +1,4 @@
-# Install script for directory: /home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu
+# Install script for directory: /home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

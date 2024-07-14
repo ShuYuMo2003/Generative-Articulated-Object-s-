@@ -6,9 +6,8 @@ output_mesh_path: dataset/1_preprecessed_mesh
 mesh_fusion_path: onet/mesh-fusion
 output_dataset_path: dataset/2_onet_dataset
 selected_category_name:
- - '*'
-
+  - "*"
 
 action:
- - process_raw_dataset # 临时处理原始数据集
- - generate_onet_dataset # 生成onet数据集
+  - process_raw_dataset # 临时处理原始数据集
+  - generate_onet_dataset # 生成onet数据集

@@ -1,0 +1,551 @@
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_4edf2/fast && /usr/bin/make -f CMakeFiles/cmTC_4edf2.dir/build.make CMakeFiles/cmTC_4edf2.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_4edf2.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_4edf2.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_4edf2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4edf2.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_4edf2.dir/testCXXCompiler.cxx.o  -o cmTC_4edf2 
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_4edf2.dir/build.make:87: cmTC_4edf2] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_4edf2/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e28fc/fast && /usr/bin/make -f CMakeFiles/cmTC_e28fc.dir/build.make CMakeFiles/cmTC_e28fc.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e28fc.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_e28fc.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_e28fc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e28fc.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_e28fc.dir/testCXXCompiler.cxx.o  -o cmTC_e28fc 
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_e28fc.dir/build.make:87: cmTC_e28fc] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_e28fc/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b1700/fast && /usr/bin/make -f CMakeFiles/cmTC_b1700.dir/build.make CMakeFiles/cmTC_b1700.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b1700.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_b1700.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_b1700
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b1700.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_b1700.dir/testCXXCompiler.cxx.o  -o cmTC_b1700 
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_b1700.dir/build.make:87: cmTC_b1700] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_b1700/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3c2e9/fast && /usr/bin/make -f CMakeFiles/cmTC_3c2e9.dir/build.make CMakeFiles/cmTC_3c2e9.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_3c2e9.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_3c2e9.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_3c2e9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3c2e9.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_3c2e9.dir/testCXXCompiler.cxx.o  -o cmTC_3c2e9 
+/usr/bin/ld: cannot find -lstdc++
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_3c2e9.dir/build.make:87: cmTC_3c2e9] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_3c2e9/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_da63b/fast && /usr/bin/make -f CMakeFiles/cmTC_da63b.dir/build.make CMakeFiles/cmTC_da63b.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_da63b.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_da63b.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_da63b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_da63b.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_da63b.dir/testCXXCompiler.cxx.o  -o cmTC_da63b 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_da63b.dir/build.make:87: cmTC_da63b] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_da63b/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3a299/fast && /usr/bin/make -f CMakeFiles/cmTC_3a299.dir/build.make CMakeFiles/cmTC_3a299.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_3a299.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_3a299.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_3a299
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3a299.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_3a299.dir/testCXXCompiler.cxx.o  -o cmTC_3a299 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_3a299.dir/build.make:87: cmTC_3a299] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_3a299/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3a6df/fast && /usr/bin/make -f CMakeFiles/cmTC_3a6df.dir/build.make CMakeFiles/cmTC_3a6df.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_3a6df.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_3a6df.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_3a6df
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3a6df.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_3a6df.dir/testCXXCompiler.cxx.o  -o cmTC_3a6df 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_3a6df.dir/build.make:87: cmTC_3a6df] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_3a6df/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_54de5/fast && /usr/bin/make -f CMakeFiles/cmTC_54de5.dir/build.make CMakeFiles/cmTC_54de5.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_54de5.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_54de5.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_54de5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_54de5.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_54de5.dir/testCXXCompiler.cxx.o  -o cmTC_54de5 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_54de5.dir/build.make:87: cmTC_54de5] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_54de5/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_8ce19/fast && /usr/bin/make -f CMakeFiles/cmTC_8ce19.dir/build.make CMakeFiles/cmTC_8ce19.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8ce19.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_8ce19.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_8ce19
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8ce19.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_8ce19.dir/testCXXCompiler.cxx.o  -o cmTC_8ce19 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_8ce19.dir/build.make:87: cmTC_8ce19] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_8ce19/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f0fda/fast && /usr/bin/make -f CMakeFiles/cmTC_f0fda.dir/build.make CMakeFiles/cmTC_f0fda.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f0fda.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_f0fda.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_f0fda
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f0fda.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_f0fda.dir/testCXXCompiler.cxx.o  -o cmTC_f0fda 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_f0fda.dir/build.make:87: cmTC_f0fda] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_f0fda/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_bdb38/fast && /usr/bin/make -f CMakeFiles/cmTC_bdb38.dir/build.make CMakeFiles/cmTC_bdb38.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_bdb38.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_bdb38.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_bdb38
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bdb38.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_bdb38.dir/testCXXCompiler.cxx.o  -o cmTC_bdb38 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_bdb38.dir/build.make:87: cmTC_bdb38] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_bdb38/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7f8c8/fast && /usr/bin/make -f CMakeFiles/cmTC_7f8c8.dir/build.make CMakeFiles/cmTC_7f8c8.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7f8c8.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_7f8c8.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_7f8c8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7f8c8.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_7f8c8.dir/testCXXCompiler.cxx.o  -o cmTC_7f8c8 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_7f8c8.dir/build.make:87: cmTC_7f8c8] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_7f8c8/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f7d7b/fast && /usr/bin/make -f CMakeFiles/cmTC_f7d7b.dir/build.make CMakeFiles/cmTC_f7d7b.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f7d7b.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_f7d7b.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_f7d7b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f7d7b.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_f7d7b.dir/testCXXCompiler.cxx.o  -o cmTC_f7d7b 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_f7d7b.dir/build.make:87: cmTC_f7d7b] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_f7d7b/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d18d4/fast && /usr/bin/make -f CMakeFiles/cmTC_d18d4.dir/build.make CMakeFiles/cmTC_d18d4.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d18d4.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_d18d4.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_d18d4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d18d4.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_d18d4.dir/testCXXCompiler.cxx.o  -o cmTC_d18d4 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_d18d4.dir/build.make:87: cmTC_d18d4] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_d18d4/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_cf3dd/fast && /usr/bin/make -f CMakeFiles/cmTC_cf3dd.dir/build.make CMakeFiles/cmTC_cf3dd.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cf3dd.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_cf3dd.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_cf3dd
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cf3dd.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_cf3dd.dir/testCXXCompiler.cxx.o  -o cmTC_cf3dd 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_cf3dd.dir/build.make:87: cmTC_cf3dd] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_cf3dd/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f0a5b/fast && /usr/bin/make -f CMakeFiles/cmTC_f0a5b.dir/build.make CMakeFiles/cmTC_f0a5b.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f0a5b.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_f0a5b.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_f0a5b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f0a5b.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_f0a5b.dir/testCXXCompiler.cxx.o  -o cmTC_f0a5b 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_f0a5b.dir/build.make:87: cmTC_f0a5b] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_f0a5b/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_968a9/fast && /usr/bin/make -f CMakeFiles/cmTC_968a9.dir/build.make CMakeFiles/cmTC_968a9.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_968a9.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_968a9.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_968a9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_968a9.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_968a9.dir/testCXXCompiler.cxx.o  -o cmTC_968a9 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_968a9.dir/build.make:87: cmTC_968a9] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_968a9/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c6849/fast && /usr/bin/make -f CMakeFiles/cmTC_c6849.dir/build.make CMakeFiles/cmTC_c6849.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c6849.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_c6849.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_c6849
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c6849.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_c6849.dir/testCXXCompiler.cxx.o  -o cmTC_c6849 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_c6849.dir/build.make:87: cmTC_c6849] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_c6849/fast] Error 2
+
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: /usr/bin/clang++ 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d81cc/fast && /usr/bin/make -f CMakeFiles/cmTC_d81cc.dir/build.make CMakeFiles/cmTC_d81cc.dir/build
+make[1]: Entering directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d81cc.dir/testCXXCompiler.cxx.o
+/usr/bin/clang++     -o CMakeFiles/cmTC_d81cc.dir/testCXXCompiler.cxx.o -c /home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_d81cc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d81cc.dir/link.txt --verbose=1
+/usr/bin/clang++       -rdynamic CMakeFiles/cmTC_d81cc.dir/testCXXCompiler.cxx.o  -o cmTC_d81cc 
+/usr/bin/ld: cannot find -lstdc++: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [CMakeFiles/cmTC_d81cc.dir/build.make:87: cmTC_d81cc] Error 1
+make[1]: Leaving directory '/home/ce-amtic/CODE/PROJ/Generative-Articulated-Object-s-/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_d81cc/fast] Error 2
+
+
+

@@ -1,0 +1,6 @@
+setup.py
+triangle_hash.cpp
+triangle_hash.egg-info/PKG-INFO
+triangle_hash.egg-info/SOURCES.txt
+triangle_hash.egg-info/dependency_links.txt
+triangle_hash.egg-info/top_level.txt

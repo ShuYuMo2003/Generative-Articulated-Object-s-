@@ -58,18 +58,18 @@ endif()
 
 # Set these up as variables to make reading the generated file easier
 set(CMAKE_COMMAND "/usr/bin/cmake") # path
-set(source_file "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/fusion_zach_tvl1.cu") # path
-set(NVCC_generated_dependency_file "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.NVCC-depend") # path
-set(cmake_dependency_file "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.depend") # path
+set(source_file "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/fusion_zach_tvl1.cu") # path
+set(NVCC_generated_dependency_file "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.NVCC-depend") # path
+set(cmake_dependency_file "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//fusion_gpu_generated_fusion_zach_tvl1.cu.o.depend") # path
 set(CUDA_make2cmake "/usr/share/cmake-3.22/Modules/FindCUDA/make2cmake.cmake") # path
 set(CUDA_parse_cubin "/usr/share/cmake-3.22/Modules/FindCUDA/parse_cubin.cmake") # path
 set(build_cubin OFF) # bool
 set(CUDA_HOST_COMPILER "/usr/bin/cc") # path
 # We won't actually use these variables for now, but we need to set this, in
 # order to force this file to be run again if it changes.
-set(generated_file_path "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.") # path
-set(generated_file_internal "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o") # path
-set(generated_cubin_file_internal "/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o.cubin.txt") # path
+set(generated_file_path "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//.") # path
+set(generated_file_internal "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o") # path
+set(generated_cubin_file_internal "/home/shuyumo/research/GAO/external/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir//./fusion_gpu_generated_fusion_zach_tvl1.cu.o.cubin.txt") # path
 
 set(CUDA_NVCC_EXECUTABLE "/usr/local/cuda-12.4/bin/nvcc") # path
 set(CUDA_NVCC_FLAGS ;-std=c++11; -gencode=arch=compute_50,code=sm_50; -gencode=arch=compute_50,code=compute_50 ;; ) # list
