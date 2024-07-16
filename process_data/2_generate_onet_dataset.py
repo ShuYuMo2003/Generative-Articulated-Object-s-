@@ -125,8 +125,8 @@ if __name__ == '__main__':
                             Path('../dataset/1_preprocessed_mesh/').iterdir()))
     # all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB_1948_1.ply')]
 
-    convert_mesh(all_ply_files[0], False)
-    exit(0)
+    # convert_mesh(all_ply_files[0], False)
+    # exit(0)
 
     with Pool(cpu_count() // 2) as p:
         result = [
