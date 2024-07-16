@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     filtered_paths = []
 
-    category = ['*']
+    category = ['Door']
 
     for path in tqdm(raw_dataset_paths, desc='-- filtering'):
         with open(os.path.join(path, 'meta.json')) as f:

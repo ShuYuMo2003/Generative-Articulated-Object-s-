@@ -174,7 +174,8 @@ def convert_meshs(shape_path, output_path, mesh_output_path):
     for idx in range(len(overall_result)):
         info = overall_result[idx]
         # 0 不存在于 dfs 序列中。
-        slice = {'dfn': dfn[idx], 'dfn_fa' : dfn[mobility_dict[idx]['parent']] if mobility_dict[idx]['parent'] != -1 else 0}
+        slice = {'dfn': dfn[idx], 'dfn_fa' : dfn[mobility_dict[idx]['parent']]
+                    if mobility_dict[idx]['parent'] != -1 else 0}
         slice.update(info)
         new_parts.append(slice)
 

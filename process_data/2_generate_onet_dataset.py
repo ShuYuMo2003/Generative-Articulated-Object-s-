@@ -47,15 +47,18 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
         'surface_point_method' : 'sample',
         'sign_method': 'normal',
     }
-    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=50000, **common_args)
+    # print('sampling sdf 1 1 1')
+    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=20000, **common_args)
 
     boxsize = 2.1
-    uni_point = boxsize * np.random.rand(10000, 3) - (boxsize / 2)
+    uni_point = boxsize * np.random.rand(5000, 3) - (boxsize / 2)
+    # print('sampling sdf 2 2 2')
     uni_sdf = mesh_to_sdf.mesh_to_sdf(wt_obj, uni_point, **common_args)
-
+    # print('done done')
     point = np.concatenate([point, uni_point], axis=0)
     sdf = np.concatenate([sdf, uni_sdf], axis=0)
 
+    # print('saved', sdf_file)
     np.savez(sdf_file.as_posix(), point=point, sdf=sdf)
 
     # selected_point = point[sdf < 0, ...]
@@ -82,7 +85,7 @@ def convert_mesh(ply_file, clear_temp=True):
     wt_obj_file = temp_dir / (stem + ".wt.obj")
     sdf_target_file = result_dir / f'{stem}.sdf'
 
-    print('Converting to (obj)', ply_file)
+    print('Converting to (obj)', obj_file)
     ply_to_obj(ply_file, obj_file)
     print('Converting to (wt)', wt_obj_file)
     obj_to_wtobj(obj_file, wt_obj_file)
@@ -97,7 +100,7 @@ if __name__ == '__main__':
                             Path('../dataset/1_preprecessed_mesh').iterdir()))
 
 
-    with Pool(cpu_count() - 1) as p:
+    with Pool(cpu_count() // 2) as p:
         result = [
             p.apply_async(convert_mesh, (ply_file, False))
             for ply_file in all_ply_files

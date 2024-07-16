@@ -1,12 +1,17 @@
 seed: love ytq.
-batch_size: 8
+batch_size: 30
 lr_rate: 1.5e-3
 total_epoch: 1000
-train_ratio: 0.9
+train_ratio: 0.95
 emb_sigma: 0.2
 dataset_root_path: dataset/2_onet_dataset
 checkpoint_output: checkpoints/onet
 z_dim: 128
 leaky: 0.05
-ffe_sigma: 0.2
 optimizer: adam
+selected_categories:
+ - USB
+ - Chair
+ - Door
+ - StorageFurniture
+ - Toilet

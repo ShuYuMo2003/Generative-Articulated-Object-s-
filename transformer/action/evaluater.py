@@ -14,8 +14,8 @@ from transformer.loaddataset.redis_parallel import identity_or_create_tensor
 
 from transformer.loaddataset import get_dataset
 from transformer.utils import to_cuda
-from onet.generate_3d import Generator3D
-from onet.decoder import Decoder
+from onet_v2.utils.generate_3d import Generator3D
+from onet_v2.decoder import Decoder
 
 from transformers import AutoTokenizer, T5EncoderModel
 
