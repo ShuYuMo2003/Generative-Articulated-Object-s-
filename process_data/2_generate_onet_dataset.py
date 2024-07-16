@@ -48,10 +48,10 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
         'sign_method': 'normal',
     }
     # print('sampling sdf 1 1 1')
-    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=20000, **common_args)
+    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=1000, **common_args)
 
-    boxsize = 2.1
-    uni_point = boxsize * np.random.rand(5000, 3) - (boxsize / 2)
+    boxsize = 2.05
+    uni_point = boxsize * np.random.rand(20000, 3) - (boxsize / 2)
     # print('sampling sdf 2 2 2')
     uni_sdf = mesh_to_sdf.mesh_to_sdf(wt_obj, uni_point, **common_args)
     # print('done done')
@@ -97,7 +97,7 @@ def convert_mesh(ply_file, clear_temp=True):
 if __name__ == '__main__':
     shutil.rmtree('../dataset/2_onet_dataset', ignore_errors=True)
     all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',
-                            Path('../dataset/1_preprecessed_mesh').iterdir()))
+                            Path('../dataset/1_preprocessed_mesh').iterdir()))
 
 
     with Pool(cpu_count() // 2) as p:

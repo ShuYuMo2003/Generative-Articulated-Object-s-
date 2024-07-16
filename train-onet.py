@@ -133,6 +133,10 @@ for epoch in tqdm(range(_.total_epoch), desc="Training"):
         enc_occ = enc_occ.to(device)
         dec_sp = dec_sp.to(device)
         dec_occ = dec_occ.to(device)
+        torch.save(enc_sp, 'logs/enc_sp.pt')
+        torch.save(enc_occ, 'logs/enc_occ.pt')
+        torch.save(dec_sp, 'logs/dec_sp.pt')
+        torch.save(dec_occ, 'logs/dec_occ.pt')
         # print(enc_sp.shape, enc_occ.shape, dec_sp.shape, dec_occ.shape)
 
         # print('moved to gpu')

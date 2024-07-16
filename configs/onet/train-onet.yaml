@@ -1,6 +1,6 @@
 seed: love ytq.
-batch_size: 48
-lr_rate: 1.5e-3
+batch_size: 8
+lr_rate: 2.5e-3
 total_epoch: 1000
 train_ratio: 0.95
 emb_sigma: 0.2
@@ -11,7 +11,7 @@ leaky: 0.05
 optimizer: adam
 selected_categories:
  - USB
- - Chair
- - Door
- - StorageFurniture
- - Toilet
+#  - Chair
+#  - Door
+#  - StorageFurniture
+#  - Toilet
