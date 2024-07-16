@@ -27,7 +27,7 @@ def ply_to_obj(ply_file, obj_file):
     center = (max_bound + min_bound) / 2
     mesh.vertices -= center
 
-    scale = (max_bound - min_bound).max() / (1 - 0.01)
+    scale = (max_bound - min_bound).max() / (1 - 0.001)
     mesh.vertices /= scale
     mesh.export(obj_file.as_posix(), file_type='obj')
 
@@ -48,10 +48,10 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
         'sign_method': 'normal',
     }
     # print('sampling sdf 1 1 1')
-    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=1000, **common_args)
+    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=10000, **common_args)
 
-    boxsize = 2.05
-    uni_point = boxsize * np.random.rand(20000, 3) - (boxsize / 2)
+    boxsize = 1
+    uni_point = boxsize * np.random.rand(100000, 3) - (boxsize / 2)
     # print('sampling sdf 2 2 2')
     uni_sdf = mesh_to_sdf.mesh_to_sdf(wt_obj, uni_point, **common_args)
     # print('done done')

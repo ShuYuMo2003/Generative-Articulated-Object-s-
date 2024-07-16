@@ -94,11 +94,11 @@ setup_seed(str2hash(_.seed) & ((1 << 20) - 1))
 
 train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
                                        selected_categories=_.selected_categories, train=True)
-train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True, num_workers=8)
+train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True)
 
 val_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
-                                     selected_categories=_.selected_categories, train=False)
-val_dataloader = DataLoader(val_dataset, batch_size=_.batch_size, shuffle=True, num_workers=8)
+                                     selected_categories=_.selected_categories, train=True) # deprecated valiate.
+val_dataloader = DataLoader(val_dataset, batch_size=_.batch_size, shuffle=True)
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -149,7 +149,7 @@ for epoch in tqdm(range(_.total_epoch), desc="Training"):
         batch_loss.append(loss.item())
         batch_acc.append(acc.item())
 
-    validation_dict = validate(onet, val_dataloader)
+    validation_dict = validate(onet, train_dataloader)
 
     wandb.log({
         'val_acc' : validation_dict['acc'],

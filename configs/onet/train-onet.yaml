@@ -1,9 +1,9 @@
 seed: love ytq.
 batch_size: 8
-lr_rate: 2.5e-3
-total_epoch: 1000
-train_ratio: 0.95
-emb_sigma: 0.2
+lr_rate: 1.8e-3
+total_epoch: 4000
+train_ratio: 1
+emb_sigma: 0.14
 dataset_root_path: dataset/2_onet_dataset
 checkpoint_output: checkpoints/onet
 z_dim: 128

@@ -7,7 +7,7 @@ mesh_fusion_path: onet/mesh-fusion
 output_dataset_path: dataset/2_onet_dataset
 selected_category_name:
 #  - '*'
- - Bottle
+ - USB
 
 action:
  - process_raw_dataset # 临时处理原始数据集

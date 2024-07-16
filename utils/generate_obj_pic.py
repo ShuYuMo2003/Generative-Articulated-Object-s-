@@ -145,6 +145,10 @@ def generate_obj_pics(_parts_data, percentage):
     buffer = plotter.screenshot()
     plotter.close()
 
+    for idx, mesh in enumerate(meshs):
+        # save mesh to file
+        mesh.export(f'mesh{idx}.obj', file_type='obj')
+
     return buffer
 
 '''

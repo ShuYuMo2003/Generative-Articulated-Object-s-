@@ -251,7 +251,7 @@ def main(args):
     for path in tqdm(raw_dataset_paths, desc='-- filtering'):
         with open(os.path.join(path, 'meta.json')) as f:
             meta = json.loads(f.read())
-            if (meta['model_cat'] in category or '*' in category) and '4204' in path:
+            if (meta['model_cat'] in category or '*' in category):
                 filtered_paths.append(path)
 
     from multiprocessing import Pool
