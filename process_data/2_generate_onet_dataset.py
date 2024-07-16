@@ -121,9 +121,9 @@ def convert_mesh(ply_file, clear_temp=True):
 
 if __name__ == '__main__':
     shutil.rmtree('../dataset/2_onet_dataset', ignore_errors=True)
-    # all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',
-                            # Path('../dataset/1_preprocessed_mesh/').iterdir()))
-    all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB_1948_1.ply')]
+    all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',
+                            Path('../dataset/1_preprocessed_mesh/').iterdir()))
+    # all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB_1948_1.ply')]
 
     convert_mesh(all_ply_files[0], False)
     exit(0)
