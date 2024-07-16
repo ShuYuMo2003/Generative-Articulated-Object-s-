@@ -173,13 +173,11 @@ if __name__ == '__main__':
     output_info_path    = Path('../dataset/1_preprocessed_info')
     output_mesh_path    = Path('../dataset/1_preprocessed_mesh')
     needed_categories   = [
-            'Bottle',
             'USB',
             'Chair',
             'Door',
             'StorageFurniture',
             'Toilet',
-            'TrashCan'
         ]
 
     shutil.rmtree(output_info_path, ignore_errors=True)

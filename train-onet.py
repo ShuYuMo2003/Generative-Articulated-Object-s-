@@ -94,11 +94,11 @@ setup_seed(str2hash(_.seed) & ((1 << 20) - 1))
 
 train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
                                        selected_categories=_.selected_categories, train=True)
-train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True)
+train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True, num_workers=8)
 
 val_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
                                      selected_categories=_.selected_categories, train=False)
-val_dataloader = DataLoader(val_dataset, batch_size=_.batch_size, shuffle=True)
+val_dataloader = DataLoader(val_dataset, batch_size=_.batch_size, shuffle=True, num_workers=8)
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -127,10 +127,15 @@ for epoch in tqdm(range(_.total_epoch), desc="Training"):
     batch_acc = []
 
     for batch, (enc_sp, enc_occ, dec_sp, dec_occ) in tqdm(enumerate(train_dataloader), desc="Batch", total=len(train_dataloader)):
+        # print('batch = ', batch)
+
         enc_sp = enc_sp.to(device)
         enc_occ = enc_occ.to(device)
         dec_sp = dec_sp.to(device)
         dec_occ = dec_occ.to(device)
+        # print(enc_sp.shape, enc_occ.shape, dec_sp.shape, dec_occ.shape)
+
+        # print('moved to gpu')
 
         loss, acc, mean_z = compute_loss_n_acc(onet, enc_sp, enc_occ, dec_sp, dec_occ)
 

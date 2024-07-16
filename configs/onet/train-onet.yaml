@@ -1,5 +1,5 @@
 seed: love ytq.
-batch_size: 30
+batch_size: 48
 lr_rate: 1.5e-3
 total_epoch: 1000
 train_ratio: 0.95
