@@ -55,27 +55,28 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
     }
     # print('sampling sdf 1 1 1')
     # print('3#', wt_obj.bounds)
-    point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=1000, **common_args)
 
-    in_range_indices = np.all((point >= -0.5) & (point <= 0.5), axis=1)
-    point = point[in_range_indices]
-    sdf = sdf[in_range_indices]
+    # point, sdf = mesh_to_sdf.sample_sdf_near_surface(wt_obj, number_of_points=1000, **common_args)
 
-    print("1 max = ", point.max(axis=0))
-    print("1 min = ", point.min(axis=0))
+    # in_range_indices = np.all((point >= -0.5) & (point <= 0.5), axis=1)
+    # point = point[in_range_indices]
+    # sdf = sdf[in_range_indices]
+
+    # print("1 max = ", point.max(axis=0))
+    # print("1 min = ", point.min(axis=0))
 
     box_size = 1.05
-    uni_point = box_size * np.random.rand(100000, 3) - (box_size / 2)
+    uni_point = box_size * np.random.rand(110000, 3) - (box_size / 2)
 
-    print("2 max = ", uni_point.max(axis=0))
-    print("2 min = ", uni_point.min(axis=0))
+    # print("2 max = ", uni_point.max(axis=0))
+    # print("2 min = ", uni_point.min(axis=0))
     # print('sampling sdf 2 2 2')
 
     uni_sdf = mesh_to_sdf.mesh_to_sdf(wt_obj, uni_point, **common_args)
     # print('done done')
 
-    point = np.concatenate([point, uni_point], axis=0)
-    sdf = np.concatenate([sdf, uni_sdf], axis=0)
+    point = uni_point # np.concatenate([point, uni_point], axis=0)
+    sdf = uni_sdf # np.concatenate([sdf, uni_sdf], axis=0)
 
     min_bounds, max_bounds = wt_obj.bounds[0], wt_obj.bounds[1]
     outside_bounds = np.logical_or(np.any(point < min_bounds, axis=1), np.any(point > max_bounds, axis=1))
@@ -118,6 +119,8 @@ def convert_mesh(ply_file, clear_temp=True):
     print('finished')
 
     if clear_temp: shutil.rmtree(temp_dir, ignore_errors=True)
+
+    return "Done"
 
 if __name__ == '__main__':
     shutil.rmtree('../dataset/2_onet_dataset', ignore_errors=True)

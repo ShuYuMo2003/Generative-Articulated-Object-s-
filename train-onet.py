@@ -94,6 +94,11 @@ setup_seed(str2hash(_.seed) & ((1 << 20) - 1))
 
 train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
                                        selected_categories=_.selected_categories, train=True)
+for dd in train_dataset:
+    (enc_sp, enc_occ, dec_sp, dec_occ) = dd
+    print(enc_sp.shape, enc_occ.shape, dec_sp.shape, dec_occ.shape)
+    break
+exit(0)
 train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True)
 
 val_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
