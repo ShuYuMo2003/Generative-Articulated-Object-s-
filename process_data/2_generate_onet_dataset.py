@@ -50,8 +50,8 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
         file_type='obj'
     )
     common_args = {
-        'surface_point_method' : 'scan',
-        'sign_method': 'depth',
+        'surface_point_method' : 'sample',
+        'sign_method': 'normal',
     }
     # print('sampling sdf 1 1 1')
     # print('3#', wt_obj.bounds)
