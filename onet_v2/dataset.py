@@ -36,8 +36,8 @@ class PartnetMobilityDataset(Dataset):
         point = file['point']
         sdf = file['sdf']
 
-        enc_samplepoints, dec_samplepoints = point[0::2, ...], point[1::2, ...]
-        enc_occ, dec_occ = (sdf[0::2, ...] < 0), (sdf[1::2, ...] < 0)
+        enc_samplepoints, dec_samplepoints = point[0::4, ...], point[1::4, ...]
+        enc_occ, dec_occ = (sdf[0::4, ...] < 0), (sdf[1::4, ...] < 0)
 
         enc_occ = enc_occ.astype(np.float32)
         dec_occ = dec_occ.astype(np.float32)

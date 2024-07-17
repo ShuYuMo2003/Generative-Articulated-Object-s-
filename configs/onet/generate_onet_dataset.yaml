@@ -2,7 +2,7 @@ random_seed: love ytq forever.
 n_precessor: 10
 raw_dataset_path: dataset/raw
 output_info_path: dataset/1_preprocessed_info
-output_mesh_path: dataset/1_preprecessed_mesh
+output_mesh_path: dataset/1_preprocessed_mesh
 mesh_fusion_path: onet/mesh-fusion
 output_dataset_path: dataset/2_onet_dataset
 selected_category_name:

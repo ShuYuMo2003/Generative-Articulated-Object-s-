@@ -1,3 +1,5 @@
+use_v1_dataset: true
+
 seed: love ytq.
 batch_size: 8
 lr_rate: 1.5e-3
@@ -10,3 +12,9 @@ z_dim: 128
 leaky: 0.05
 ffe_sigma: 0.2
 optimizer: adam
+selected_categories:
+ - USB
+#  - Chair
+#  - Door
+#  - StorageFurniture
+#  - Toilet

@@ -11,7 +11,7 @@ class ONet(nn.Module):
         super().__init__()
 
         self.encoder = Encoder(z_dim=dim_z, c_dim=0, emb_sigma=emb_sigma)
-        self.decoder = Decoder(z_dim=dim_z, c_dim=0, emb_sigma=emb_sigma)
+        self.decoder = Decoder(z_dim=dim_z, c_dim=0, emb_sigma=emb_sigma, hidden_size=dim_z)
         self.dim_z = dim_z
 
     def get_decoder(self):
@@ -31,10 +31,3 @@ class ONet(nn.Module):
         logits = self.decoder(dec_sp, z)
 
         return logits, kl_loss, mean_z
-        # loss_i = F.binary_cross_entropy_with_logits(
-        #         logits, dec_occ, reduction='none')
-        # loss = loss + loss_i.sum(-1).mean()
-
-        # acc = ((logits > 0) == dec_occ).float().mean()
-
-        # return loss, acc, mean_z

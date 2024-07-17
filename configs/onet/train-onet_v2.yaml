@@ -1,0 +1,18 @@
+seed: love ytq.
+batch_size: 4
+lr_rate: 5.0e-4
+total_epoch: 10000
+train_ratio: 1
+emb_sigma: 0.33
+dataset_root_path: dataset/2_onet_v2_dataset
+checkpoint_output: checkpoints/onet_v2
+z_dim: 256
+leaky: 0.05
+optimizer: adam
+use_v1: true
+selected_categories:
+ - USB
+#  - Chair
+#  - Door
+#  - StorageFurniture
+#  - Toilet

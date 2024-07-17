@@ -28,20 +28,18 @@ class Encoder(nn.Module):
         self.c_dim = c_dim
 
         # Submodules
-        self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=256, d_in=dim, emb_sigma=emb_sigma)
-        self.fc_pos_0 = nn.Linear(256, 256)
-        self.pos_acti = nn.ReLU()
-        self.fc_pos_1 = nn.Linear(256, 128)
+        self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=z_dim * 2, d_in=dim, emb_sigma=emb_sigma)
+        self.fc_pos_1 = nn.Linear(z_dim * 2, z_dim)
 
         if c_dim != 0:
             self.fc_c = nn.Linear(c_dim, 128)
 
-        self.fc_0 = nn.Linear(1, 128)
-        self.fc_1 = nn.Linear(128, 128)
-        self.fc_2 = nn.Linear(256, 128)
-        self.fc_3 = nn.Linear(256, 128)
-        self.fc_mean = nn.Linear(128, z_dim)
-        self.fc_logstd = nn.Linear(128, z_dim)
+        self.fc_0 = nn.Linear(1, z_dim)
+        self.fc_1 = nn.Linear(z_dim, z_dim)
+        self.fc_2 = nn.Linear(z_dim * 2, z_dim)
+        self.fc_3 = nn.Linear(z_dim * 2, z_dim)
+        self.fc_mean = nn.Linear(z_dim, z_dim)
+        self.fc_logstd = nn.Linear(z_dim, z_dim)
 
         self.actvn = nn.ReLU()
         self.pool = maxpool
