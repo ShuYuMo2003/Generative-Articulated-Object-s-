@@ -6,7 +6,7 @@ from pathlib import Path
 from transformer.utils import str2hash
 
 class PartnetMobilityDataset(Dataset):
-    def __init__(self, path:list[tuple[str, str]], train_ratio:float,
+    def __init__(self, path:str, train_ratio:float,
                  train:bool, selected_categories:list[str], return_path_name=False):
         super().__init__()
         assert 0 <= train_ratio <= 1
@@ -16,7 +16,8 @@ class PartnetMobilityDataset(Dataset):
         self.files = list(glob(str(Path(path) / f'result' / '*.npz')))
         # print(str(Path(path) / f'result' / '*.npz'))
         # print('all files:', list(map(lambda x : x.split('/')[-1].split('-')[0], self.files[:10])))
-        self.files = list(filter(lambda x : x.split('/')[-1].split('-')[0] in selected_categories, self.files))
+        if selected_categories != '*':
+            self.files = list(filter(lambda x : x.split('/')[-1].split('-')[0] in selected_categories, self.files))
         # print('selected categories:', selected_categories)
         # print('selected files:', len(self.files))
         self.files.sort()

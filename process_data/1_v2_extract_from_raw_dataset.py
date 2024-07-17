@@ -8,11 +8,11 @@ from rich import print
 from glob import glob
 from pathlib import Path
 
-class HighPrecisionEncoder(json.JSONEncoder):
-    def encode(self, obj):
-        if isinstance(obj, float):
-            return format(obj, '.20f')
-        return json.JSONEncoder.encode(self, obj)
+
+import sys
+sys.path.append('..')
+from utils.utils import HighPrecisionJsonEncoder
+
 
 def degree2rad(degree):
     # assert -180 <= degree <= 180
@@ -162,7 +162,7 @@ def process(shape_path:Path, output_info_path:Path, output_mesh_path:Path, neede
     output_info_path.write_text(json.dumps({
             'meta': meta,
             'part': processed_part
-        } , cls=HighPrecisionEncoder, indent=2))
+        } , cls=HighPrecisionJsonEncoder, indent=2))
 
     end_time = time.time()
     return f'[Done] {shape_path.as_posix()} time: {end_time - start_time:.2f}s'

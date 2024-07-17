@@ -121,5 +121,6 @@ for epoch in tqdm(range(_.total_epoch), desc="Training"):
     wandb.log(info)
     print(f'epoch {epoch} ', info)
     if epoch % 50 == 0:
-        savepath = str(Path(_.checkpoint_output) / f'{epoch}-{best_val_acc}.ptn')
+        acc = torch.tensor(batch_acc).mean().item()
+        savepath = str(Path(_.checkpoint_output) / f'{acc}-{epoch}.ptn')
         torch.save(onet, savepath)

@@ -38,6 +38,8 @@ print('=================', 'run action:', str(actions))
 for (step_idx, action) in enumerate(actions):
     print('START ======================== step = ', step_idx, '  running: ', action, '========================')
     if action == 'process_raw_dataset':
+        raise RuntimeError('Deprecated. Use process_dataset 1.py instead.')
+        exit(-1)
         process_raw_dataset.main(config)
     elif action == 'generate_onet_dataset':
         generate_onet_dataset.main(config)
