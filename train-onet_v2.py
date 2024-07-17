@@ -13,7 +13,6 @@ from rich import print
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from onet_v2.utils.generate_3d import Generator3D
-from onet_v2.dataset import PartnetMobilityDataset
 from onet_v2.onet import ONet
 
 from transformer.utils import str2hash
@@ -66,6 +65,7 @@ if _.use_v1_dataset:
     train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio, train=True)
     print('load v1 dataset')
 else:
+    from onet_v2.dataset import PartnetMobilityDataset
     train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
                                         selected_categories=_.selected_categories, train=True)
 

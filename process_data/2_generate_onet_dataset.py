@@ -5,15 +5,17 @@ from pathlib import Path
 from time import sleep
 from multiprocessing import Pool, cpu_count
 
+
 import trimesh
 from tqdm import tqdm
 import mesh_to_sdf
+import point_cloud_utils as pcu
 import numpy as np
 # import open3d as o3d
 
 manifold_path = Path('../third_party/ManifoldPlus/build/manifold')
 
-total_number_of_sample_point = 100000
+total_number_of_sample_point = 50000
 uniform_sample_ratio = 0.9
 surface_point_sigma = 0.03
 points_padding = 0.05
@@ -48,7 +50,42 @@ def obj_to_wtobj(obj_file, wt_obj_file):
                     > {wt_obj_file.as_posix()}.log ''')
     if ok != 0: raise RuntimeError(f'Error in watertight obj conversion: {obj_file}')
 
-def wtobj_to_sdf(wt_obj_file, sdf_file):
+# @see: https://www.fwilliams.info/point-cloud-utils/sections/mesh_sdf/
+def wtobj_to_sdf_by_pcu(wt_obj_file, sdf_file):
+    _v, _f = pcu.load_mesh_vf(wt_obj_file)
+
+    n_point_total = total_number_of_sample_point * 2 # for encoder and decoder.
+    n_point_near_surface = int(n_point_total * (1 - uniform_sample_ratio))
+
+    # Generate point on the surface
+    print('sampling point on mesh')
+    fid, bc = pcu.sample_mesh_poisson_disk(_v, _f, num_samples=n_point_near_surface)
+    point_near_surface = pcu.interpolate_barycentric_coords(_f, fid, bc, _v)
+    n_point_near_surface = point_near_surface.shape[0]
+    point_near_surface += surface_point_sigma * np.random.randn(n_point_near_surface, 3)
+    print('point_near_surface : ', point_near_surface.shape)
+
+    # Generate uniform point
+    print('sampling point in box')
+    n_point_uniform = n_point_total - n_point_near_surface
+    box_size = 1 + points_padding
+    uniform_point = box_size * np.random.rand(n_point_uniform, 3) - (box_size / 2)
+
+    # Combine surface and uniform point
+    query_pts = np.concatenate([point_near_surface, uniform_point], axis=0)
+    print('query_pts: ', query_pts.shape)
+    print('calculating sdf')
+    sdf, fid, bc = pcu.signed_distance_to_mesh(query_pts, _v, _f)
+
+    print('sdf: ', sdf)
+    print('occ: ', np.sum(sdf < 0))
+
+    print('saved', sdf_file)
+    np.savez(sdf_file.as_posix(), point=query_pts, sdf=sdf)
+    return "Done"
+
+# @see: https://github.com/marian42/mesh_to_sdf   mei sha pi yong
+def wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_file):
     wt_obj = trimesh.load_mesh(
         open(wt_obj_file.as_posix(), 'r'),
         file_type='obj'
@@ -116,7 +153,7 @@ def wtobj_to_sdf(wt_obj_file, sdf_file):
     # point = np.concatenate([point, uni_point], axis=0)
     # sdf = np.concatenate([sdf, uni_sdf], axis=0)
 
-def convert_mesh(ply_file, clear_temp=True):
+def convert_mesh(ply_file, clear_temp=True, method='pcu'):
     stem = ply_file.stem
     temp_dir = Path(f'../dataset/2_onet_v2_dataset/temp/{stem}')
     result_dir = Path(f'../dataset/2_onet_v2_dataset/result')
@@ -132,7 +169,12 @@ def convert_mesh(ply_file, clear_temp=True):
     print('Converting to (wt)', wt_obj_file)
     obj_to_wtobj(obj_file, wt_obj_file)
     print('Converting to (sdf)', sdf_target_file)
-    wtobj_to_sdf(wt_obj_file, sdf_target_file)
+    if method == 'pcu':
+        print('Using pcu method')
+        wtobj_to_sdf_by_pcu(wt_obj_file, sdf_target_file)
+    else:
+        print('Using mesh_to_sdf method')
+        wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_target_file)
     print('finished')
 
     if clear_temp: shutil.rmtree(temp_dir, ignore_errors=True)
@@ -146,10 +188,10 @@ if __name__ == '__main__':
 
     # all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB-100061-0.ply')]
 
-    # convert_mesh(all_ply_files[0], False)
+    # convert_mesh(all_ply_files[0], False, 'pcu')
     # exit(0)
 
-    with Pool(cpu_count() // 2) as p:
+    with Pool(cpu_count() - 2) as p:
         result = [
             p.apply_async(convert_mesh, (ply_file, False))
             for ply_file in all_ply_files
