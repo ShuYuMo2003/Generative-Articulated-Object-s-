@@ -93,7 +93,7 @@ def process(shape_path:Path, output_info_path:Path, output_mesh_path:Path, neede
     mobility_file   = json.loads(mobility_file_path.read_text())
 
     catecory_name   = raw_meta['model_cat']
-    meta            = {'catecory': raw_meta['model_cat'], 'shape_id': raw_meta['anno_id'], shape_path: shape_path.as_posix()}
+    meta            = {'catecory': raw_meta['model_cat'], 'shape_id': raw_meta['anno_id'], 'shape_path': shape_path.as_posix()}
     processed_part  = []
 
     if catecory_name not in needed_categories and '*' not in needed_categories:
