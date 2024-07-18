@@ -3,6 +3,8 @@ import numpy as np
 import pyvista as pv
 from rich import print
 
+from .utils import bright_colors
+
 def calc_linear_value(L, R, ratio):
     return 1.0 * L + (R - L) * 1.0 * ratio
 
@@ -37,7 +39,7 @@ def produce_rotate_around_line_matrix(start, direction, angle):
     T_inv = produce_translate_matrix(start, 1)
     return T_inv @ R @ T
 
-def generate_obj_pics(_parts_data, percentage):
+def generate_obj_pics(_parts_data, percentage, cinema_position):
     print('generate_obj_pics called with percentage = ', percentage)
     parts_data = copy.deepcopy(_parts_data)
     # Sort by dfn
@@ -132,22 +134,21 @@ def generate_obj_pics(_parts_data, percentage):
 
     # print(dfn_to_part)
     plotter = pv.Plotter(off_screen=True)
+    # plotter = pv.Plotter()
     for (idx, mesh) in enumerate(meshs):
-        plotter.add_mesh(mesh, color=['white', 'red', 'green', 'blue'][idx % 4])
+        plotter.add_mesh(mesh, color=bright_colors[idx % len(bright_colors)])
 
     plotter.add_axes()
-    plotter.camera_position = [
-            (-3.8362383391098698, 0.32839933941769145, 2.3169300384519738),
-            (-0.04570716149497277, -0.06563260832821388, -0.06195879116203942),
-            (0.06658921116808907, 0.9960418054055029, -0.05887782978811195)
-        ]
+    plotter.camera_position = cinema_position
     plotter.show()
+    # print(plotter.camera_position)
     buffer = plotter.screenshot()
     plotter.close()
 
-    for idx, mesh in enumerate(meshs):
-        # save mesh to file
-        mesh.export(f'mesh{idx}.obj', file_type='obj')
+    # for idx, mesh in enumerate(meshs):
+    #     # save mesh to file
+    #     mesh.export(f'mesh{idx}.obj', file_type='obj')
+
 
     return buffer
 

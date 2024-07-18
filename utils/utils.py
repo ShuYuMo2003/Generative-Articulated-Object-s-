@@ -1,6 +1,8 @@
 import json
 import numpy as np
 
+bright_colors = ['#E9A7AB', '#F5D76C', '#EB950C', '#DB481F', '#08998A', '#FF2D2B']
+
 class HighPrecisionJsonEncoder(json.JSONEncoder):
     def encode(self, obj):
         if isinstance(obj, float):
