@@ -10,3 +10,5 @@ eval_output/
 checkpoints/
 sensitive_info.py
 cache/
+build/
+.vscode/
