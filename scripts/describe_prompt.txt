@@ -1,0 +1,10 @@
+This is a type of CATE. 
+Please focus on its movable parts and articulation characteristics, and describe the possible motion characteristics of each part. 
+Provide a brief one-sentence description. Here are some examples:
+---
+input: <image of a USB>
+description: A USB device features a rectangular shape with a swivel mechanism that allows a cover to rotate and reveal or protect the USB connector.
+--
+input: <image of a USB>
+description: A USB device features a rectangular shape with a removable cap that detaches to expose the USB connector.
+---
