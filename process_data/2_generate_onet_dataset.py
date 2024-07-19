@@ -1,17 +1,17 @@
 
 import os
 import shutil
+import time
 from pathlib import Path
 from time import sleep
+from rich import print
 from multiprocessing import Pool, cpu_count
-
 
 import trimesh
 from tqdm import tqdm
-import mesh_to_sdf
-import point_cloud_utils as pcu
 import numpy as np
 # import open3d as o3d
+
 
 manifold_path = Path('../third_party/ManifoldPlus/build/manifold')
 
@@ -43,15 +43,32 @@ def ply_to_obj(ply_file, obj_file):
     mesh.export(obj_file.as_posix(), file_type='obj')
 
 
-def obj_to_wtobj(obj_file, wt_obj_file):
+def obj_to_wtobj_by_manifold(obj_file, wt_obj_file):
     ok = os.system(f'''{manifold_path.as_posix()}     \\
                     --input {obj_file.as_posix()}     \\
                     --output {wt_obj_file.as_posix()} \\
                     > {wt_obj_file.as_posix()}.log ''')
     if ok != 0: raise RuntimeError(f'Error in watertight obj conversion: {obj_file}')
+    return "Done"
+
+def obj_to_wtobj_by_pcu(obj_file, wt_obj_file):
+    import point_cloud_utils as pcu
+
+    v, f = pcu.load_mesh_vf(obj_file)
+
+
+    # The resolution parameter controls the density of the output mesh
+    # It is linearly proportional to the number of faces in the output
+    # mesh. A higher value corresponds to a denser mesh.
+    resolution = 19_000
+    vw, fw = pcu.make_mesh_watertight(v, f, resolution)
+
+    pcu.save_mesh_vf(wt_obj_file.as_posix(), vw, fw)
+    return "Done"
 
 # @see: https://www.fwilliams.info/point-cloud-utils/sections/mesh_sdf/
 def wtobj_to_sdf_by_pcu(wt_obj_file, sdf_file):
+    import point_cloud_utils as pcu
     _v, _f = pcu.load_mesh_vf(wt_obj_file)
 
     n_point_total = total_number_of_sample_point * 2 # for encoder and decoder.
@@ -84,8 +101,49 @@ def wtobj_to_sdf_by_pcu(wt_obj_file, sdf_file):
     np.savez(sdf_file.as_posix(), point=query_pts, sdf=sdf)
     return "Done"
 
+def wtobj_to_sdf_by_libmesh(wt_obj_file, sdf_file):
+    import sys
+    sys.path.append('..')
+    from utils.libmesh import check_mesh_contains
+
+    wt_obj = trimesh.load_mesh(
+        open(wt_obj_file.as_posix(), 'r'),
+        file_type='obj'
+    )
+
+    if not wt_obj.is_watertight:
+        print('Warning: mesh %s is not watertight!'
+              'Cannot sample points.' % wt_obj_file)
+        return
+
+    n_point_total = total_number_of_sample_point * 2 # for encoder and decoder.
+    n_point_near_surface = int(n_point_total * (1 - uniform_sample_ratio))
+
+    point_near_surface = wt_obj.sample(n_point_near_surface)
+    point_near_surface += surface_point_sigma * np.random.randn(n_point_near_surface, 3)
+
+    n_point_uniform = n_point_total - n_point_near_surface
+    box_size = 1 + points_padding
+    uniform_point = box_size * np.random.rand(n_point_uniform, 3) - (box_size / 2)
+
+    points = np.concatenate([point_near_surface, uniform_point], axis=0)
+
+    print('points shape: ', points.shape)
+    occupancies = check_mesh_contains(wt_obj, points)
+
+    points = points.astype(np.float32)
+
+    sdf = np.zeros_like(occupancies, dtype=np.float32)
+    sdf[occupancies == True] = -1
+    sdf[occupancies == False] = 1
+
+    print('saved', sdf_file)
+    np.savez(sdf_file.as_posix(), point=points, sdf=sdf)
+    return "Done"
+
 # @see: https://github.com/marian42/mesh_to_sdf   mei sha pi yong
 def wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_file):
+    import mesh_to_sdf
     wt_obj = trimesh.load_mesh(
         open(wt_obj_file.as_posix(), 'r'),
         file_type='obj'
@@ -153,7 +211,8 @@ def wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_file):
     # point = np.concatenate([point, uni_point], axis=0)
     # sdf = np.concatenate([sdf, uni_sdf], axis=0)
 
-def convert_mesh(ply_file, clear_temp=True, method='pcu'):
+def convert_mesh(ply_file, clear_temp=True, wt_method='pcu', sdf_method='libmesh'):
+    start_time = time.time()
     stem = ply_file.stem
     temp_dir = Path(f'../dataset/2_onet_v2_dataset/temp/{stem}')
     result_dir = Path(f'../dataset/2_onet_v2_dataset/result')
@@ -164,18 +223,35 @@ def convert_mesh(ply_file, clear_temp=True, method='pcu'):
     wt_obj_file = temp_dir / (stem + ".wt.obj")
     sdf_target_file = result_dir / f'{stem}.sdf'
 
-    print('Converting to (obj)', obj_file)
+    print('(1) Converting to (obj)', obj_file)
     ply_to_obj(ply_file, obj_file)
-    print('Converting to (wt)', wt_obj_file)
-    obj_to_wtobj(obj_file, wt_obj_file)
-    print('Converting to (sdf)', sdf_target_file)
-    if method == 'pcu':
-        print('Using pcu method')
-        wtobj_to_sdf_by_pcu(wt_obj_file, sdf_target_file)
+
+    print('(2) Converting to (wt)', wt_obj_file)
+    if wt_method == 'pcu':
+        print('(2) Using pcu to watertight obj')
+        assert obj_to_wtobj_by_pcu(obj_file, wt_obj_file) == 'Done'
+    elif wt_method == 'manifold':
+        print('(2) Using manifold to watertight obj')
+        assert obj_to_wtobj_by_manifold(obj_file, wt_obj_file) == 'Done'
     else:
-        print('Using mesh_to_sdf method')
-        wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_target_file)
-    print('finished')
+        raise ValueError(f'Invalid method wt_method {wt_method}')
+
+    print('(3) Converting to (sdf)', sdf_target_file)
+    if sdf_method == 'pcu':
+        print('(3) Using pcu to generate sdf')
+        assert wtobj_to_sdf_by_pcu(wt_obj_file, sdf_target_file) == 'Done'
+    elif sdf_method == 'mesh_to_sdf':
+        print('(3) Using mesh_to_sdf to generate sdf')
+        assert wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_target_file) == 'Done'
+    elif sdf_method == 'libmesh':
+        print('(3) Using libmesh to generate sdf')
+        if wtobj_to_sdf_by_libmesh(wt_obj_file, sdf_target_file) != 'Done':
+            print('Error in sdf generation')
+            return 'Error'
+    else:
+        raise ValueError(f'Invalid method sdf_method {sdf_method}')
+
+    print('finished in ', time.time() - start_time, 's')
 
     if clear_temp: shutil.rmtree(temp_dir, ignore_errors=True)
 
@@ -186,22 +262,27 @@ if __name__ == '__main__':
     all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',
                             Path('../dataset/1_preprocessed_mesh/').iterdir()))
 
-    # all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB-100061-0.ply')]
+    # all_ply_files = [Path('../dataset/1_preprocessed_mesh/USB_64_0.ply')]
 
-    # convert_mesh(all_ply_files[0], False, 'pcu')
+    # convert_mesh(all_ply_files[0], False)
     # exit(0)
-
+    failed = []
     with Pool(cpu_count() - 2) as p:
         result = [
-            p.apply_async(convert_mesh, (ply_file, False))
+            (p.apply_async(convert_mesh, (ply_file, False)), ply_file)
             for ply_file in all_ply_files
         ]
         bar = tqdm(total=len(result), desc='Converting meshes')
         while result:
-            for r in result:
+            for r, ply_file in result:
                 if r.ready():
                     bar.update(1)
-                    assert r.get() == 'Done'
-                    result.remove(r)
+                    if r.get() != 'Done':
+                        print('Error in converting mesh')
+                        failed.append(ply_file)
+                    result.remove((r, ply_file))
             sleep(0.1)
+
+
+    print('Failed: ', failed)
 

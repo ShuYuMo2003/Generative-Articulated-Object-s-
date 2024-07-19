@@ -17,7 +17,7 @@ class PartnetMobilityDataset(Dataset):
         # print(str(Path(path) / f'result' / '*.npz'))
         # print('all files:', list(map(lambda x : x.split('/')[-1].split('-')[0], self.files[:10])))
         if selected_categories != '*':
-            self.files = list(filter(lambda x : x.split('/')[-1].split('-')[0] in selected_categories, self.files))
+            self.files = list(filter(lambda x : x.split('/')[-1].split('_')[0] in selected_categories, self.files))
         # print('selected categories:', selected_categories)
         # print('selected files:', len(self.files))
         self.files.sort()
