@@ -130,6 +130,8 @@ def process(shape_path:Path, output_info_path:Path, output_mesh_path:Path, neede
         if part['parent'] != -1:
             new_part['joint_data_origin'] = part['jointData']['axis']['origin']
             new_part['joint_data_direction'] = part['jointData']['axis']['direction']
+            if None in new_part['joint_data_direction']:
+                return f"[Error]: Bad data in {shape_path.as_posix()}"
         else:
             new_part['joint_data_origin'] = [0, 0, 0]
             new_part['joint_data_direction'] = [0, 0, 0]

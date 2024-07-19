@@ -12,8 +12,8 @@ z_dim: 128
 leaky: 0.05
 optimizer: adam
 selected_categories:
- - USB
-#  - Chair
-#  - Door
-#  - StorageFurniture
-#  - Toilet
+  - USB
+  # - Chair
+  # - Door
+  # - StorageFurniture
+  # - Toilet
