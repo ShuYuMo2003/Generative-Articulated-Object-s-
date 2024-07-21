@@ -176,10 +176,10 @@ if __name__ == '__main__':
     output_mesh_path    = Path('../dataset/1_preprocessed_mesh')
     needed_categories   = [
             'USB',
-            # 'Chair',
-            # 'Door',
-            # 'StorageFurniture',
-            # 'Toilet',
+            'Chair',
+            'Door',
+            'StorageFurniture',
+            'Toilet',
         ]
 
     shutil.rmtree(output_info_path, ignore_errors=True)

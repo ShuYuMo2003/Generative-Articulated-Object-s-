@@ -52,7 +52,8 @@ def gen_image_from_latent(decoder, mean_z):
 
 run = wandb.init(
     project="Pointnet encoder N ONet decoder",
-    config=config
+    config=config,
+    entity="shuyumo1"
 )
 _ = run.config
 
