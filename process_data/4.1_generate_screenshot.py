@@ -3,6 +3,7 @@
 import sys
 import os
 import json
+import time
 import shutil
 import trimesh
 
@@ -11,6 +12,7 @@ import imageio
 import numpy as np
 from glob import glob
 from pathlib import Path
+from multiprocessing import Pool, cpu_count
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -62,7 +64,7 @@ def generate_gif_toy():
         n_frame = 100
         n_timepoint = 50
         buffers = []
-        for ratio in tqdm(np.linspace(0, 1, n_frame)):
+        for ratio in np.linspace(0, 1, n_frame):
             buffer = generate_obj_pics(obj_info['part'], ratio, camera_positions[0])
             buffers.append(buffer)
 
@@ -83,11 +85,32 @@ def generate_gif_toy():
 
 def generate_screenshot_for_description(obj_info, camera_positions, n_pose):
     buffers = []
-    for camera_positon in tqdm(camera_positions, desc='camera_positions'):
+    for camera_positon in camera_positions:
         for ratio in np.random.rand(n_pose):
             buffer = generate_obj_pics(obj_info['part'], ratio, camera_positon)
             buffers.append(buffer)
     return buffers
+
+def generate_screenshot_wapper(obj_info):
+    # print("process meta = ", obj_info['meta'])
+    for part in obj_info['part']:
+        part['mesh'] = trimesh.load_mesh(
+            open(mesh_factory_path + '/' + part["mesh"], 'rb'),
+            file_type='ply'
+        )
+
+    buffers = generate_screenshot_for_description(obj_info, camera_positions, 3)
+
+    shape_id = obj_info['meta']['shape_id']
+    category = obj_info['meta']['catecory']
+
+    shape_output_path = output_path / f"{category}_{shape_id}"
+    shape_output_path.mkdir(exist_ok=True)
+
+    for idx, buffer in enumerate(buffers):
+        opath = shape_output_path / f"{idx}.png"
+        print('[Write] : ', opath)
+        imageio.imwrite(opath, buffer)
 
 if __name__ == '__main__':
     # generate_gif_toy()
@@ -103,25 +126,24 @@ if __name__ == '__main__':
         json.load(open(path, 'r'))
         for path in obj_info_paths
     ]
-    for obj_info in obj_infos:
-        print("process meta = ", obj_info['meta'])
-        for part in obj_info['part']:
-            part['mesh'] = trimesh.load_mesh(
-                open(mesh_factory_path + '/' + part["mesh"], 'rb'),
-                file_type='ply'
-            )
 
-        buffers = generate_screenshot_for_description(obj_info, camera_positions, 3)
+    with Pool(cpu_count() - 1) as pool:
+        result = [pool.apply_async(generate_screenshot_wapper, (obj_info,))
+                    for obj_info in obj_infos]
 
-        shape_id = obj_info['meta']['shape_id']
-        path_id = obj_info['meta']['shape_path'].split('/')[-1]
-        category = obj_info['meta']['catecory']
+        bar = tqdm(total=len(result), desc='generate_screenshot_wapper')
 
-        shape_output_path = output_path / f"{category}_{shape_id}_{path_id}"
-        shape_output_path.mkdir(exist_ok=True)
+        while len(result) > 0:
+            for res in result:
+                if res.ready():
+                    bar.update(1)
+                    res.get()
+                    result.remove(res)
+            time.sleep(0.3)
 
-        for idx, buffer in enumerate(buffers):
-            imageio.imwrite(shape_output_path / f"{category}_{shape_id}_{path_id}_{idx}.png", buffer)
+
+
+
 
 
 

@@ -40,7 +40,7 @@ def produce_rotate_around_line_matrix(start, direction, angle):
     return T_inv @ R @ T
 
 def generate_obj_pics(_parts_data, percentage, cinema_position):
-    print('generate_obj_pics called with percentage = ', percentage)
+    # print('generate_obj_pics called with percentage = ', percentage)
     parts_data = copy.deepcopy(_parts_data)
     # Sort by dfn
     parts_data.sort(key=lambda x: x['dfn'])

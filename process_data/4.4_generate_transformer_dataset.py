@@ -9,7 +9,6 @@ from glob import glob
 from pathlib import Path
 from tqdm import tqdm
 
-
 sys.path.append('..')
 from onet_v2.dataset import PartnetMobilityDataset
 from utils.utils import (tokenize_part_info, generate_special_tokens,
@@ -23,7 +22,7 @@ def determine_latentcode_encoder():
     onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
 
     best_ckpt_path = onets_ckpt_paths[0]
-    print('Use best ckpt:', best_ckpt_path)
+    print('Using best ckpt:', best_ckpt_path)
 
     onet = torch.load(best_ckpt_path)
     return onet
@@ -80,7 +79,9 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, path_to_latent:
     for part_info in shape_info['part']:
         # Add the latent code
         mesh_file_name = part_info['mesh']
-        latent = path_to_latent[mesh_file_name]
+        latent = path_to_latent.get(mesh_file_name)
+        if latent is None:
+            return f"[Error] Latent code not found for {mesh_file_name}"
         part_info['latent_code'] = latent.tolist()
 
         token = tokenize_part_info(part_info)
@@ -107,8 +108,6 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, path_to_latent:
         part_info['child'].sort(key=lambda x: x['dfn'])
 
     assert root is not None
-
-    # print(new_parts_info)
 
     exist_node = [{'token': start_token, 'dfn': 0, 'dfn_fa' : 0, 'child': [root]}]
 
@@ -140,9 +139,9 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, path_to_latent:
         dataset_name = prefix_name + '_' + str(idx) + '.json'
 
         for node in dataset[0]:
-            if node.get('child'): del node['child']
+            if node.get('child') is not None: del node['child']
         for node in dataset[1]:
-            if node.get('child'): del node['child']
+            if node.get('child') is not None: del node['child']
 
         with open(transformer_dataset_path / dataset_name, 'w') as f:
             text = json.dumps({
@@ -153,12 +152,11 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, path_to_latent:
                 }, cls=HighPrecisionJsonEncoder, indent=2)
             f.write(text)
 
-
-
 if __name__ == '__main__':
     transformer_dataset_path = Path('../dataset/3_transformer_dataset')
     shutil.rmtree(transformer_dataset_path, ignore_errors=True)
     transformer_dataset_path.mkdir(exist_ok=True)
+
     shape_info_paths = list(map(Path, glob('../dataset/1_preprocessed_info/*')))
     onet = determine_latentcode_encoder()
     path_to_latent = evaluate_latent_codes(onet)

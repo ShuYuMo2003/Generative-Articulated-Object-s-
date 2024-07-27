@@ -131,7 +131,7 @@ def process(shape_path:Path, output_info_path:Path, output_mesh_path:Path, neede
             new_part['joint_data_origin'] = part['jointData']['axis']['origin']
             new_part['joint_data_direction'] = part['jointData']['axis']['direction']
             if None in new_part['joint_data_direction']:
-                return f"[Error]: Bad data in {shape_path.as_posix()}"
+                return f"[Error]: Bad data in {shape_path.as_posix()}: {new_part['joint_data_direction']}"
         else:
             new_part['joint_data_origin'] = [0, 0, 0]
             new_part['joint_data_direction'] = [0, 0, 0]
@@ -176,10 +176,10 @@ if __name__ == '__main__':
     output_mesh_path    = Path('../dataset/1_preprocessed_mesh')
     needed_categories   = [
             'USB',
-            # 'Chair',
-            # 'Door',
-            # 'StorageFurniture',
-            # 'Toilet',
+            'Chair',
+            'Door',
+            'StorageFurniture',
+            'Toilet',
         ]
 
     shutil.rmtree(output_info_path, ignore_errors=True)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
         status = process(Path(shape_path), output_info_path, output_mesh_path, needed_categories)
         if 'Error' in status:
-            failed_shape_path.append(shape_path)
+            failed_shape_path.append((shape_path, status))
         elif 'Done' in status:
             success_shape_path.append(shape_path)
 

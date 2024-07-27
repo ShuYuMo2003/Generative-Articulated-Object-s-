@@ -267,7 +267,7 @@ if __name__ == '__main__':
     # convert_mesh(all_ply_files[0], False)
     # exit(0)
     failed = []
-    with Pool(cpu_count() - 2) as p:
+    with Pool(cpu_count() - 1) as p:
         result = [
             (p.apply_async(convert_mesh, (ply_file, False)), ply_file)
             for ply_file in all_ply_files

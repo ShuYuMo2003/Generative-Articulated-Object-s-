@@ -1,97 +1,39 @@
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "9dc8a64b4d9f35503bf8540d2bdbdaf9", "version": "1", "anno_id": "3075", "time_in_sec": "25"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "e9d3e491-f9a5-474b-8baf-2effbede788f", "version": "4", "anno_id": "3339", "time_in_sec": "1252"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "ua36ffd66-736a-47f0-be77-1aa8b6639b6b-0", "version": "1", "anno_id": "3126", "time_in_sec": "311"}
-{"model_id": "b61e3ab43da0faf0a0eb5a85db887292", "anno_id": "13027", "user_id": "yz-majinghua", "time_in_sec": "1707", "version": "4", "model_cat": "Keyboard"}
-{"user_id": "haozhu", "model_cat": "Eyeglasses", "model_id": "a03a3a49f906e1f080317dd831b4efd1-1", "version": "1", "anno_id": "3184", "time_in_sec": "75"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "ub630f30d-bc91-4666-bca8-7cff40a9acf5", "version": "1", "anno_id": "3423", "time_in_sec": "181"}
-{"user_id": "ericyi", "model_cat": "TrashCan", "model_id": "7b287f39-89b2-4145-8a8e-0369b078b858-1", "version": "1", "anno_id": "2173", "time_in_sec": "93"}
-{"model_id": "f3d2391b5d4a42102d147aaf14d33e8b", "anno_id": "13154", "user_id": "zhangyu", "time_in_sec": "1198", "version": "3", "model_cat": "Keyboard"}
-{"user_id": "haozhu", "model_cat": "Cart", "model_id": "62b0b158d42d244a20014e7ab3c6d48-0", "version": "1", "anno_id": "2548", "time_in_sec": "83"}
-{"user_id": "ericyi", "model_cat": "TrashCan", "model_id": "uee557be2-dc90-4f09-97bd-9a772b25316c", "version": "2", "anno_id": "3012", "time_in_sec": "259"}
-{"user_id": "shawn", "model_cat": "Fan", "model_id": "9c9d2736ab34dcaa4efc7e7114f1b9c5", "version": "2", "anno_id": "1474", "time_in_sec": "211"}
-{"model_id": "80f23c80d8d050db169ad157eae2079f", "anno_id": "11030", "user_id": "chuangda014", "time_in_sec": "912", "version": "3", "model_cat": "Laptop"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "b7bed3ec-0d63-4c17-a780-e0b99271d35b", "version": "1", "anno_id": "3087", "time_in_sec": "386"}
-{"user_id": "shawn", "model_cat": "TrashCan", "model_id": "287458eb8a296bd8587571917ed1aa02", "version": "3", "anno_id": "3634", "time_in_sec": "466"}
-{"user_id": "yuzhe", "model_cat": "Box", "model_id": "15b5c54a8ddc84353a5acb1c5cbd19ff", "version": "3", "anno_id": "129", "time_in_sec": "73"}
-{"user_id": "yuzhe", "model_cat": "Bucket", "model_id": "uce940367-b7b4-43b9-af12-eae51692f2f7", "version": "2", "anno_id": "486", "time_in_sec": "35"}
-{"model_id": "90f66de8ce581ee39aa778fe3a2080af", "anno_id": "47443", "user_id": "face++luoxianfu", "time_in_sec": "754", "version": "2", "model_cat": "StorageFurniture"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "64bc6e2a-63d2-44a3-a3ca-907796900279", "version": "1", "anno_id": "3046", "time_in_sec": "65"}
-{"model_id": "a86e4fb88103550d4dc96c27c8aa82ed", "anno_id": "13004", "user_id": "zhangyu", "time_in_sec": "58", "version": "2", "model_cat": "Keyboard"}
-{"model_id": "102273fdf8d1b90041fbc1e2da054acb", "anno_id": "13928", "user_id": "yz-majinghua", "time_in_sec": "526", "version": "3", "model_cat": "Lamp"}
-{"model_id": "2d38fa685e71721986a7e0484f5238e4", "anno_id": "10125", "user_id": "chuangda014", "time_in_sec": "634", "version": "4", "model_cat": "Laptop"}
-{"model_id": "4c7814676c42d67b902e12fe4da5924d", "anno_id": "10239", "user_id": "chuangda013", "time_in_sec": "409", "version": "2", "model_cat": "Laptop"}
-{"model_id": "2fc19897a2f384ebc77d45d65dc3714", "anno_id": "14703", "user_id": "shape11", "time_in_sec": "318", "version": "3", "model_cat": "Lamp"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "313e624b6dd69c8fdc82124a3619b076", "version": "1", "anno_id": "2994", "time_in_sec": "84"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "34791388-d94e-4d75-b51c-6d0f3212152e-2", "version": "2", "anno_id": "2985", "time_in_sec": "2164"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "34791388-d94e-4d75-b51c-6d0f3212152e-0", "version": "3", "anno_id": "2981", "time_in_sec": "1116"}
-{"model_id": "9728d5d4ba7fc664aa4473b82fdc5099", "anno_id": "11141", "user_id": "chuangda014", "time_in_sec": "292", "version": "3", "model_cat": "Laptop"}
-{"user_id": "fxiang", "model_cat": "Pliers", "model_id": "b74051f4-61c9-423f-9607-b44486b3fa28-1", "version": "2", "anno_id": "2243", "time_in_sec": "275"}
-{"model_id": "d22bad5e72b815c41aea59cd55c902b0", "anno_id": "13082", "user_id": "zhangyu", "time_in_sec": "91", "version": "2", "model_cat": "Keyboard"}
-{"model_id": "1579c3aae8e26472db1afe6c464e7652", "anno_id": "14314", "user_id": "shape03", "time_in_sec": "107", "version": "3", "model_cat": "Lamp"}
-{"model_id": "6445c051acf63ce01aea59cd55c902b0", "anno_id": "12923", "user_id": "yz-majinghua", "time_in_sec": "121", "version": "3", "model_cat": "Keyboard"}
-{"model_id": "ef6d92c90aeabf5becae27d182a3e41c", "anno_id": "11854", "user_id": "chuangda003", "time_in_sec": "260", "version": "2", "model_cat": "Laptop"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "50e0970b-a234-4c61-b3ff-b60265059b89-0", "version": "1", "anno_id": "3371", "time_in_sec": "62"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "bf189fc7-ff9e-48d4-bbd7-723b203eeb69", "version": "5", "anno_id": "3319", "time_in_sec": "2629"}
-{"model_id": "f9f1193588137b64768adf30680eefb", "anno_id": "13136", "user_id": "yz-majinghua", "time_in_sec": "940", "version": "4", "model_cat": "Keyboard"}
-{"model_id": "3781aa0aaed95b8049244b68aadec703", "anno_id": "13525", "user_id": "yz_hujincheng", "time_in_sec": "753", "version": "4", "model_cat": "Lamp"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "2bbbe0e4-7f35-43a1-927c-d4c84e1af737", "version": "2", "anno_id": "1442", "time_in_sec": "234"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "8cd07794-5a60-405b-bd40-f1c577f65f36", "version": "1", "anno_id": "1531", "time_in_sec": "34"}
-{"model_id": "1497a7a1871af20162360e5e854659a", "anno_id": "9912", "user_id": "chuangda013", "time_in_sec": "1187", "version": "3", "model_cat": "Laptop"}
-{"user_id": "kent0318", "model_cat": "WashingMachine", "model_id": "0f820012-c96c-4086-b005-b8e3f65984bf-0", "version": "3", "anno_id": "3351", "time_in_sec": "1661"}
-{"model_id": "8e4d5fa2a1c91f036a9633583f89b17f", "anno_id": "16032", "user_id": "yzwangshuo", "time_in_sec": "483", "version": "6", "model_cat": "Lamp"}
-{"user_id": "kent0318", "model_cat": "Printer", "model_id": "1ac77274-c9b8-455e-b6d0-f50add3fff45", "version": "3", "anno_id": "3811", "time_in_sec": "2988"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "7d808a72d38c7fd450da8b99982a3057", "version": "2", "anno_id": "1520", "time_in_sec": "236"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "2cb950b9-43d6-4d7d-8352-2f70c936dd6a", "version": "2", "anno_id": "1458", "time_in_sec": "98"}
-{"model_id": "85e029acb2edbd3a86a7e0484f5238e4", "anno_id": "10707", "user_id": "chuangda003", "time_in_sec": "305", "version": "2", "model_cat": "Laptop"}
-{"user_id": "hewang", "model_cat": "Toaster", "model_id": "24a8244a62435a6f96b84415a3f1393b", "version": "2", "anno_id": "3466", "time_in_sec": "793"}
-{"user_id": "ericyi", "model_cat": "TrashCan", "model_id": "dd5c2fb4-0cc0-4e9d-9ede-6ac6d88d780d", "version": "1", "anno_id": "2210", "time_in_sec": "212"}
-{"user_id": "hewang", "model_cat": "Toaster", "model_id": "15fe4715-1841-4cd8-9893-9d066631c98f", "version": "1", "anno_id": "3465", "time_in_sec": "102"}
-{"model_id": "c2378f62797cbcb26a5e440d54e375dc", "anno_id": "16675", "user_id": "shape22", "time_in_sec": "614", "version": "3", "model_cat": "Lamp"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "985a2239-7ac5-4cf1-aebd-ebf842184df9-0", "version": "1", "anno_id": "3074", "time_in_sec": "86"}
-{"user_id": "hewang", "model_cat": "Toaster", "model_id": "42b880cd6684c59cba5342d638d0c267", "version": "1", "anno_id": "3475", "time_in_sec": "142"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "6ff509da-bd03-4a9c-b719-4fca6a0ae4ae-0", "version": "1", "anno_id": "3378", "time_in_sec": "130"}
-{"user_id": "kaichun", "model_cat": "Camera", "model_id": "ff035f53-0332-4440-8941-cdf770b0239b", "version": "1", "anno_id": "2890", "time_in_sec": "157"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "u94db8749-22a2-427f-a865-89e8709f15ca", "version": "1", "anno_id": "3125", "time_in_sec": "45"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "16b3b695-346c-4040-a23e-bdd409a7fccb", "version": "2", "anno_id": "2149", "time_in_sec": "829"}
-{"user_id": "kaichun", "model_cat": "Camera", "model_id": "db663e3f7ee9869f5c351e299b24e355", "version": "1", "anno_id": "2870", "time_in_sec": "231"}
-{"model_id": "891f65c773939191c834958aed613724", "anno_id": "7265", "user_id": "huangfuchong", "time_in_sec": "372", "version": "3", "model_cat": "Microwave"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "15479c9e-650a-4b4d-8c6a-c3173d020304", "version": "2", "anno_id": "2805", "time_in_sec": "997"}
-{"user_id": "shawn", "model_cat": "TrashCan", "model_id": "1498f9ee-0846-4e45-922a-f550123c145c", "version": "2", "anno_id": "3633", "time_in_sec": "325"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "57e870a0-5f54-4292-918a-ae6d913ea0cd", "version": "2", "anno_id": "3077", "time_in_sec": "1169"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "dd79686f-7fe7-4b1b-b219-148b4f4a463e", "version": "1", "anno_id": "3402", "time_in_sec": "40"}
-{"model_id": "2bbf7f77d43b74338a331b18e58c6914", "anno_id": "10108", "user_id": "chuangda003", "time_in_sec": "1210", "version": "5", "model_cat": "Laptop"}
-{"model_id": "1e9a36b3360f23388962005ce0e986db", "anno_id": "15030", "user_id": "shape17", "time_in_sec": "202", "version": "2", "model_cat": "Lamp"}
-{"user_id": "kent0318", "model_cat": "Printer", "model_id": "2e42dc81abb41b06d483b3bba3d3c62", "version": "1", "anno_id": "4013", "time_in_sec": "291"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "4e085d9579f12f87b822d48a43773c62-0", "version": "1", "anno_id": "3016", "time_in_sec": "406"}
-{"model_id": "9e7dd4dbf22ec237fb7161b6d96fd118", "anno_id": "12999", "user_id": "zhangyu", "time_in_sec": "126", "version": "2", "model_cat": "Keyboard"}
-{"user_id": "hewang", "model_cat": "Toaster", "model_id": "b417d108-7aee-428d-871f-bbd4b9eb380b", "version": "3", "anno_id": "3524", "time_in_sec": "725"}
-{"user_id": "kent0318", "model_cat": "Printer", "model_id": "u3cef8765-8e95-4efe-9fdf-037e949f480d", "version": "1", "anno_id": "4006", "time_in_sec": "592"}
-{"model_id": "3a5a0f4c78e17b284f0c4075db76b7c", "anno_id": "15084", "user_id": "yzwangshuo", "time_in_sec": "308", "version": "2", "model_cat": "Lamp"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "ab805048-df62-4839-a8ec-b738524c9d4e", "version": "1", "anno_id": "3082", "time_in_sec": "119"}
-{"model_id": "702a7226baa1ec0a2d147aaf14d33e8b", "anno_id": "12947", "user_id": "yz-majinghua", "time_in_sec": "1748", "version": "4", "model_cat": "Keyboard"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "8f538396-ff7e-4d7d-a522-9ac5e40ce65a", "version": "1", "anno_id": "3071", "time_in_sec": "89"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "c4e4333a-706a-472a-81ac-ab2eac2c9470", "version": "1", "anno_id": "3088", "time_in_sec": "185"}
-{"user_id": "shawn", "model_cat": "Fan", "model_id": "419327cc99fdf6c43ab9904eea287f61", "version": "2", "anno_id": "1413", "time_in_sec": "717"}
-{"model_id": "375c6cce56f3967ed323d15bd4f8b2d", "anno_id": "15082", "user_id": "yzwangshuo", "time_in_sec": "163", "version": "3", "model_cat": "Lamp"}
-{"user_id": "haozhu", "model_cat": "Cart", "model_id": "42e8d73c5fb6c29a543bdc3ac15dcc41-0", "version": "1", "anno_id": "2989", "time_in_sec": "327"}
-{"user_id": "fxiang", "model_cat": "KitchenPot", "model_id": "e1c1bdde-8ce8-46ee-b9fc-f7227282f0c9-1", "version": "1", "anno_id": "2085", "time_in_sec": "27"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "34791388-d94e-4d75-b51c-6d0f3212152e-1", "version": "2", "anno_id": "2984", "time_in_sec": "800"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "d0718456507d8b0050da8b99982a3057", "version": "1", "anno_id": "1558", "time_in_sec": "151"}
-{"user_id": "ericyi", "model_cat": "Dispenser", "model_id": "e4855c2e-b91c-4372-81fc-cedf42a99185-0", "version": "1", "anno_id": "3406", "time_in_sec": "35"}
-{"model_id": "a801be11157a7f243d39d8012919dd25", "anno_id": "16378", "user_id": "shape25", "time_in_sec": "1252", "version": "2", "model_cat": "Lamp"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "8729b3d5-5d1d-4479-afff-851ffdd7742f", "version": "1", "anno_id": "3067", "time_in_sec": "112"}
-{"model_id": "3b2db36aaa2546b99c7c402f274622c", "anno_id": "10211", "user_id": "chuangda013", "time_in_sec": "465", "version": "2", "model_cat": "Laptop"}
-{"user_id": "KeplerSN", "model_cat": "Safe", "model_id": "3c5b48d9-a733-4f95-a88b-b615cadfe3f4-0", "version": "5", "anno_id": "2278", "time_in_sec": "813"}
-{"user_id": "fxiang", "model_cat": "Pliers", "model_id": "da0c70926b8ca70226816b1f4a348020-0", "version": "2", "anno_id": "2266", "time_in_sec": "407"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "ec3e19da-3506-45d3-9568-af8f5d36a6c9-0", "version": "2", "anno_id": "3098", "time_in_sec": "190"}
-{"user_id": "shawn", "model_cat": "Fan", "model_id": "d8aafb24ec3ef92abb5cc581616a0f9", "version": "2", "anno_id": "1499", "time_in_sec": "77"}
-{"model_id": "3d839aa532198b3923c841f9d5051936", "anno_id": "12851", "user_id": "yz-zhangl", "time_in_sec": "309", "version": "2", "model_cat": "Keyboard"}
-{"model_id": "8c5f6d5f0ad51f1a45c8b1285cb15c2c", "anno_id": "16016", "user_id": "shape18", "time_in_sec": "192", "version": "2", "model_cat": "Lamp"}
-{"model_id": "21f6bbe54dab206a571ee28145703271", "anno_id": "12834", "user_id": "yz-zhangl", "time_in_sec": "184", "version": "2", "model_cat": "Keyboard"}
-{"user_id": "haozhu", "model_cat": "Phone", "model_id": "6ddbc6cdb21a0a4d40c6ab3fd3186c2c-1", "version": "1", "anno_id": "3593", "time_in_sec": "83"}
-{"user_id": "fxiang", "model_cat": "Pliers", "model_id": "b74051f4-61c9-423f-9607-b44486b3fa28-4", "version": "2", "anno_id": "2253", "time_in_sec": "141"}
-{"user_id": "hewang", "model_cat": "Toaster", "model_id": "ud0e969dd-6a53-40ff-9d4b-527052c0f913", "version": "1", "anno_id": "3561", "time_in_sec": "126"}
-{"user_id": "KeplerSN", "model_cat": "Window", "model_id": "43eb8d9a-b117-4566-a17d-65d47bc64807", "version": "3", "anno_id": "3050", "time_in_sec": "720"}
-{"user_id": "kaichun", "model_cat": "CoffeeMachine", "model_id": "f3395b96-eefd-4bf7-bf01-414116a01c2a", "version": "1", "anno_id": "3105", "time_in_sec": "64"}
-{"user_id": "fxiang", "model_cat": "Pliers", "model_id": "b74051f4-61c9-423f-9607-b44486b3fa28-3", "version": "1", "anno_id": "2251", "time_in_sec": "122"}
-{"user_id": "Shawn", "model_cat": "Remote", "model_id": "2e6c006620cb33babf939c87604069b", "version": "3", "anno_id": "395", "time_in_sec": "153"}
+gen onet dataset:
+[
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_46456_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45573_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/USB_513_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45444_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_41510_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/Door_8897_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_49062_4.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45696_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_49062_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45573_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47577_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/USB_116_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/Door_8893_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_48356_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45594_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_48797_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47853_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47686_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47747_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_41003_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_46236_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/Door_9263_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_49062_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45444_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_46490_1.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47595_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47808_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45415_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47669_4.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/Door_9386_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47853_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_46490_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_47853_2.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45623_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/StorageFurniture_45423_0.ply'),
+    PosixPath('../dataset/1_preprocessed_mesh/Door_9263_0.ply')
+]
