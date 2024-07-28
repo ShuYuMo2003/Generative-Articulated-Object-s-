@@ -275,13 +275,14 @@ class Trainer():
                         'loss_latent': loss_latent.item(),
                         'loss_pred': loss_pred.item(),
                     })
+                self.lr_scheduler.step()
 
             # shape_acc, img = self.run_valiate_shape_acc(epoch_idx % self.gen_visualization_per_epoch == 0)
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
 
-            self.lr_scheduler.step()
+
 
             log_data = {
                 'train_loss': torch.tensor(train_losses['loss']).mean(),

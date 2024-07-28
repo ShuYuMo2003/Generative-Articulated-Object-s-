@@ -1,4 +1,4 @@
-usewandb: false
+usewandb: true
 random_seed: love ytq forever.
 device: null
 
@@ -11,7 +11,7 @@ action:
     betas: [0.9, 0.98]
     eps: 1e-9
     scheduler_factor: 0.01
-    scheduler_warmup: 100
+    scheduler_warmup: 10000
     evaluetaion: false # TODO: set to true after implement the evaluation.
     n_validation_sample: 12
     gen_visualization_per_epoch: 30
@@ -34,8 +34,8 @@ dataset:
 
 dataloader:
   args:
-    batch_size: 256
-    num_workers: 2
+    batch_size: 64
+    num_workers: 4
     shuffle: true
 
 part_structure:
@@ -47,18 +47,18 @@ part_structure:
 
 # Global Model Parameters
 model_parameter:
-  tokenizer_hidden_dim: 1024
+  tokenizer_hidden_dim: 2048
 
   d_token: 144 # 6 + 3 + 3 + 4 + 128
   n_head: 8
   n_layer: 8
-  d_model: 256
+  d_model: 512
   decoder_dropout: 0.1
   dim_gru_single_emb: 64
 
   position_embedding_dropout: 0.1
 
-  ffd_hidden_dim: 1024
+  ffd_hidden_dim: 4096
   ffd_dropout: 0.2
 
   encoder_kv_dim: 1024 # decided by pretrained model.

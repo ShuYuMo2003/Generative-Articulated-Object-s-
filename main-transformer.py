@@ -50,10 +50,3 @@ if __name__ == '__main__':
         eval(config)
     else:
         raise NotImplementedError("?? QAQ ?? T_T ??")
-
-
-
-
-
-
-
