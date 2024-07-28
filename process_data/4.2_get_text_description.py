@@ -42,25 +42,40 @@ def camel_to_snake(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1 \2', s1).lower()
 
+def compress_figure(figure_path: str):
+    return figure_path
+    pass
+
+
 def generate_description(figure_path, output_txt_path, category):
     print('describing fig:', figure_path, 'with', category, 'writing to', output_txt_path)
+
+    if os.path.exists(output_txt_path) and "Message too long" in Path(output_txt_path).read_text():
+        os.remove(output_txt_path)
+        print('[Delete]: ', output_txt_path)
+
     if os.path.exists(output_txt_path):
         print('description for', figure_path, 'already exists.')
         return
+
     print('describing fig:', figure_path, 'with', category)
-    description = ''
     while True:
         try:
+            description = ''
             for chunk in client.send_message(
                                 bot_type,
                                 prompt.replace('CATE', category),
                                 file_path=[figure_path]):
                 print(chunk["response"], end="", flush=True)
                 description += chunk["response"]
+            # print(description)
+            if "Message too long" in description:
+                print('[Error] Message too long')
+                figure_path = compress_figure(figure_path)
+                raise Exception('Message too long')
             break
         except Exception as e:
-            if 'You have sent messages too fast' in str(e):
-                print('You have sent messages too fast, please wait for a while.')
+            print(e)
             time.sleep(2)
 
     print('[Write] ', output_txt_path, ": ", description)

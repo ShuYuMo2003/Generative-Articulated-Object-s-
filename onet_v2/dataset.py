@@ -14,12 +14,14 @@ class PartnetMobilityDataset(Dataset):
               else (lambda x : str2hash(x) % 100 >= train_ratio * 100))
 
         self.files = list(glob(str(Path(path) / f'result' / '*.npz')))
+        # print('1 files selected: ', len(self.files))
         # print('selected files:', len(self.files))
         # print(str(Path(path) / f'result' / '*.npz'))
         # print('all files:', list(map(lambda x : x.split('/')[-1].split('-')[0], self.files[:10])))
         # self.files = list(filter(lambda x : x.split('/')[-1].split('_')[0] in selected_categories, self.files))
         if '*' not in selected_categories:
             self.files = list(filter(lambda x : x.split('/')[-1].split('_')[0] in selected_categories, self.files))
+        # print('2 files selected: ', len(self.files))
         # print('selected categories:', selected_categories)
         # print('selected files:', len(self.files))
         self.files.sort()
@@ -27,6 +29,8 @@ class PartnetMobilityDataset(Dataset):
         # print('files: ', self.files[:20])
         # print('files selected: ', list(map(selector, self.files[:20])))
         self.files = list(filter(selector, self.files))
+        # print('files selected: ', len(self.files))
+        # exit(0)
         self.return_path_name = return_path_name
 
     def __len__(self):

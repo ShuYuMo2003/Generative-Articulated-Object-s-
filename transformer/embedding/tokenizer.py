@@ -14,6 +14,21 @@ example:
 'latent': array([-1.21896137e-02,  2.56319121e-02, -5.50454366e-04, -3.20652053e-02,
 '''
 
+class MLPTokenizerV2(nn.Module):
+    def __init__(self, d_token, d_hidden, d_model, drop_out):
+        super().__init__()
+        self.fc_0 = nn.Linear(d_token, d_hidden)
+        self.acti = nn.GELU()
+        self.drop = nn.Dropout(drop_out)
+        self.fc_1 = nn.Linear(d_hidden, d_model)
+
+    def forward(self, x):
+        x = self.fc_0(x)
+        x = self.acti(x)
+        x = self.drop(x)
+        x = self.fc_1(x)
+        return x
+
 
 class NativeMLPTokenizer(nn.Module):
     def __init__(self, input_structure, d_model, hidden_dim, latent_code_dim, leaky_relu, drop_out):

@@ -57,7 +57,6 @@ class NativeDecoder(nn.Module):
 
         return part_info, g_token_dist
 
-
 class ParallelDecoder(nn.Module):
     def __init__(self, config, n_layer, device):
         super().__init__()
@@ -94,3 +93,42 @@ class ParallelDecoder(nn.Module):
         part_info = self.untokenizer(tokens)
 
         return part_info, None
+
+class DecoderV2(nn.Module):
+    def __init__(self, config, n_layer, device):
+        super().__init__()
+        self.device         = device
+        self.tokenizer      = get_tokenizer(config)
+        self.position_emb   = get_positionembedding(config)
+        self.untokenizer    = get_untokenizer(config)
+
+        self.layers         = nn.ModuleList([
+            NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
+                for _ in range(n_layer)
+        ])
+
+    def generate_mask(self, n_part):
+        mask = torch.ones(n_part, n_part, device=self.device, dtype=torch.int16)
+        # mask = torch.tril(mask) # no need mask
+        return mask
+
+    def forward(self, input, padding_mask, enc_data):
+        # ('token'/'dfn'/'dfn_fa') * batch * part_idx * attribute_dim
+        batch, n_part, d_model = input['token'].size()
+
+        # print('1 input[token]', input['token'].shape, 'input[fa]', input['fa'].shape)
+
+        input['token'] = self.tokenizer(input['token'])
+        tokens = self.position_emb(input)
+
+        # print('2 tokens', tokens.shape)
+
+        attn_mask = self.generate_mask(n_part)
+
+        # TODO: Add long connection
+        for layer in self.layers:
+            tokens = layer(tokens, padding_mask, attn_mask, enc_data)
+
+        tokens = self.untokenizer(tokens)
+
+        return tokens

@@ -8,5 +8,8 @@ def get_dataset(config, **args):
     elif dataset == 'redis_parallel':
         from .redis_parallel import FromRedisParallelDataset
         return FromRedisParallelDataset(part_structure=config['part_structure'], **config['dataset']['args'])
+    elif dataset == 'file':
+        from .filesdataset import FileSysDataset
+        return FileSysDataset(**config['dataset']['args'])
     else:
         raise NotImplementedError(f"{dataset}: dataset is not implemented")

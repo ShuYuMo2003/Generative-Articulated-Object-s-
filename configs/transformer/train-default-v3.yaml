@@ -1,0 +1,110 @@
+usewandb: false
+random_seed: love ytq forever.
+device: null
+
+action:
+  type: train
+  args:
+    n_epoch: 1000000
+    ckpt_save_name: checkpoints/transformer/v2-{epoch:05d}.ckpt
+    per_epoch_save: 300
+    betas: [0.9, 0.98]
+    eps: 1e-9
+    scheduler_factor: 0.01
+    scheduler_warmup: 100
+    evaluetaion: false # TODO: set to true after implement the evaluation.
+    n_validation_sample: 12
+    gen_visualization_per_epoch: 30
+
+    latent_code_loss_ratio: 0.9
+
+######### For evaluation ONLY, the paramerters for latentcode decoder.
+n_latent_code_validation_samples: 10000
+latent_decoder:
+  type: null
+  ckpt_path:
+######### END
+
+# Dataset & Dataloader config
+dataset:
+  type: file
+  args:
+    dataset_path: dataset/4_transformer_dataset
+    description_for_each_file: 6
+
+dataloader:
+  args:
+    batch_size: 256
+    num_workers: 2
+    shuffle: true
+
+part_structure:
+  bounding_box: 6
+  joint_data_origin: 3
+  joint_data_direction: 3
+  limit: 4
+  latent_code: 128
+
+# Global Model Parameters
+model_parameter:
+  tokenizer_hidden_dim: 1024
+
+  d_token: 144 # 6 + 3 + 3 + 4 + 128
+  n_head: 8
+  n_layer: 8
+  d_model: 256
+  decoder_dropout: 0.1
+  dim_gru_single_emb: 64
+
+  position_embedding_dropout: 0.1
+
+  ffd_hidden_dim: 1024
+  ffd_dropout: 0.2
+
+  encoder_kv_dim: 1024 # decided by pretrained model.
+
+## Module Parameter Config.
+## It will read from above parameter.
+## No need to change here.
+tokenizer:
+  type: MLPTokenizerV2
+  args:
+    d_token: model_parameter.d_token
+    d_hidden: model_parameter.tokenizer_hidden_dim
+    d_model: model_parameter.d_model
+    drop_out: model_parameter.decoder_dropout
+
+untokenizer:
+  type: MLPUnTokenizerV2
+  args:
+    d_token: model_parameter.d_token
+    d_hidden: model_parameter.tokenizer_hidden_dim
+    d_model: model_parameter.d_model
+    drop_out: model_parameter.decoder_dropout
+
+position_embedding:
+  type: PositionGRUEmbedding
+  args:
+    d_model: model_parameter.d_model
+    dim_single_emb: model_parameter.dim_gru_single_emb
+    dropout: model_parameter.position_embedding_dropout
+
+decoder:
+  type: DecoderV2
+  args:
+    config: '.'
+    n_layer: model_parameter.n_layer
+    device: device
+  layer_arges:
+    n_head: model_parameter.n_head
+    d_model: model_parameter.d_model
+    dropout: model_parameter.decoder_dropout
+    encoder_kv_dim: model_parameter.encoder_kv_dim
+
+feedforward: # TODO: try KAN.
+  args:
+    d_model: model_parameter.d_model
+    hidden_dim: model_parameter.ffd_hidden_dim
+    dropout: model_parameter.ffd_dropout
+
+

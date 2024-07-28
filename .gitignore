@@ -12,3 +12,4 @@ sensitive_info.py
 cache/
 build/
 .vscode/
+logs/

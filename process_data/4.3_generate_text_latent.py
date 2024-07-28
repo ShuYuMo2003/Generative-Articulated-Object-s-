@@ -9,6 +9,7 @@ from transformers import AutoTokenizer, T5EncoderModel
 def process_description(t5_cache_path:Path, t5_model_name:str,
                         batch_size:int, device:str, max_sentence_length:int,
                         description_path:Path, encoded_text_path:Path):
+
     print('Processing description: ', '\n','description_path: ', description_path, '\n',
           'Using model: ', t5_model_name, '\n', 'Batch size: ', batch_size, '\n', 'Device: ', device)
     tokenizer = AutoTokenizer.from_pretrained(t5_model_name, cache_dir=t5_cache_path.as_posix())
@@ -21,7 +22,9 @@ def process_description(t5_cache_path:Path, t5_model_name:str,
         all_descriptions_path = glob((Path(shape_desc_path) / "*.txt").as_posix())
         descriptions = []
         for desc_path in all_descriptions_path:
-            descriptions.append(Path(desc_path).read_text())
+            text = Path(desc_path).read_text()
+            assert "try again" not in text
+            descriptions.append(text)
 
         shape_name = shape_desc_path.split('/')[-1]
         shape_to_description[shape_name] = descriptions
@@ -29,7 +32,7 @@ def process_description(t5_cache_path:Path, t5_model_name:str,
     pure_sentences = []
     for shape_name, descriptions in shape_to_description.items():
         for idx, desc in enumerate(descriptions):
-            pure_sentences.append((encoded_text_path / (shape_name + '_' + str(idx)), desc))
+            pure_sentences.append((encoded_text_path / (shape_name + '_' + str(idx) + '.npy'), desc))
 
     for s in tqdm(range(0, len(pure_sentences), batch_size), desc="Encoding sentences"):
         slice = pure_sentences[s:min(s+batch_size, len(pure_sentences))]
@@ -43,14 +46,14 @@ def process_description(t5_cache_path:Path, t5_model_name:str,
 
         for idx, path in enumerate(save_path):
             print('[Write]', path)
-            np.save(path, encoded_text[idx, ...])
+            np.save(path, dict(encoded_text=encoded_text[idx, ...], text=input[idx]))
 
 if __name__ == '__main__':
     t5_cache_path = Path('../cache/t5_cache')
     t5_cache_path.mkdir(exist_ok=True)
     t5_model_name = 'google-t5/t5-large'
     t5_device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    t5_batch_size = 8
+    t5_batch_size = 10
     t5_max_sentence_length = 128
 
     description_path = Path('../dataset/4_screenshot_description')

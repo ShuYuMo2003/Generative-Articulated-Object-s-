@@ -21,8 +21,8 @@ torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch, gen_visualization_per_epoch,
-                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save, train_with_decoder,
-                 scheduler_warmup, evaluetaion, n_validation_sample, main_loss_ratio):
+                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
+                 scheduler_warmup, evaluetaion, n_validation_sample, latent_code_loss_ratio):
 
         self.n_epoch = n_epoch
         self.per_epoch_save = per_epoch_save
@@ -30,7 +30,6 @@ class Trainer():
         self.device = config['device']
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
-        self.train_with_decoder = train_with_decoder
         self.gen_visualization_per_epoch = gen_visualization_per_epoch
 
         self.model_type = config['decoder']['type']
@@ -38,9 +37,11 @@ class Trainer():
             self.compute_loss = self.compute_loss_g_token
         elif self.model_type == 'ParallelDecoder':
             self.compute_loss = self.compute_loss_parallel
+        elif self.model_type == 'DecoderV2':
+            self.compute_loss = self.compute_loss_v2
 
         self.train_dataset = get_dataset(config)
-        self.validate_dataset = get_dataset(config, train=False)
+        # self.validate_dataset = get_dataset(config, train=False)
         self.train_dataloader = DataLoader(self.train_dataset, **config['dataloader']['args'])
 
         self.d_model = config['model_parameter']['d_model']
@@ -50,8 +51,10 @@ class Trainer():
         # g token is deprecated
         self.g_token0_z = distributions.Normal(torch.zeros(self.d_model, device=self.device),
                                                torch.ones(self.d_model, device=self.device))
-        self.main_loss_ratio = main_loss_ratio
-        assert 0 <= self.main_loss_ratio <= 1, 'main_loss_ratio should be in [0, 1]'
+
+
+        self.latent_code_loss_ratio = latent_code_loss_ratio
+        assert 0 <= self.latent_code_loss_ratio <= 1, 'latent_code_loss_ratio should be in [0, 1]'
 
         # lr: not important, will be overriden by the scheduler
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1, betas=betas, eps=float(eps))
@@ -206,31 +209,26 @@ class Trainer():
             else:
                 loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
 
-        if self.train_with_decoder:
-            n_batch, n_part, n_latent_dim = predicted_shape['latent'].shape
-            pred_latents = predicted_shape['latent'].view(-1, n_latent_dim)
-
-            n_batch, n_part, n_sample_point, dim_point = output['dec_samplepoint'].shape
-
-            dec_samplepoint = output['dec_samplepoint'].view(-1, n_sample_point, dim_point)
-            dec_occ = output['dec_occ'].view(n_batch * n_part, n_sample_point)
-
-            dfn = output['dfn'].view(n_batch * n_part, 1)
-            mask = ((dfn == 0) | (dfn == self.validate_dataset.fix_length)).repeat(1, n_latent_dim)
-
-            # 对特殊 token 截断 decoder 梯度
-            pred_latents[mask] = 0
-
-            self.latent_decoder.train()
-            occ_logits = self.latent_decoder(dec_samplepoint, pred_latents)
-            #TODO: Check how to freeze the latent decoder
-
-            loss_latent_from_dec = F.binary_cross_entropy_with_logits(
-                occ_logits, dec_occ, reduction='none').sum(-1).mean()
-
-            loss_latent += loss_latent_from_dec
-
         return loss_latent + loss_pred, loss_latent, loss_pred
+
+    def compute_loss_v2(self, batched_data):
+        input, output, padding_mask, encoded_text, text = batched_data
+        predicted_output = self.model(input, padding_mask, encoded_text)
+
+        dim_latent_code = self.input_structure['latent_code']
+        # batch * part_idx * d_model
+        predicted_latent_code = predicted_output[:, :, -dim_latent_code:] * padding_mask.unsqueeze(-1)
+        predicted_other_info  = predicted_output[:, :, :-dim_latent_code] * padding_mask.unsqueeze(-1)
+
+        latent_code = output[:, :, -dim_latent_code:] * padding_mask.unsqueeze(-1)
+        other_info  = output[:, :, :-dim_latent_code] * padding_mask.unsqueeze(-1)
+
+        loss_latent = torch.nn.functional.mse_loss(predicted_latent_code, latent_code)
+        loss_other  = torch.nn.functional.mse_loss(predicted_other_info, other_info)
+
+        loss = self.latent_code_loss_ratio * loss_latent + (1 - self.latent_code_loss_ratio) * loss_other
+
+        return loss, loss_latent, loss_other
 
     def save_checkpoint(self, epoch):
         print('save checkpoint at epoch', epoch, '...', end='')
@@ -261,12 +259,10 @@ class Trainer():
                                                     desc=f'epoch = {epoch_idx}',
                                                     total=len(self.train_dataloader)):
 
-                # print(f'idx = {idx}')
-
                 if self.device == 'cuda':
                     batched_data = to_cuda(batched_data)
 
-                loss, loss_latent, loss_pred= self.compute_loss(**batched_data)
+                loss, loss_latent, loss_pred = self.compute_loss(batched_data)
 
                 self.zero_gred()
                 loss.backward()
@@ -274,8 +270,13 @@ class Trainer():
                 train_losses['loss'].append(loss.item())
                 train_losses['loss_latent'].append(loss_latent.item())
                 train_losses['loss_pred'].append(loss_pred.item())
+                print({
+                        'loss': loss.item(),
+                        'loss_latent': loss_latent.item(),
+                        'loss_pred': loss_pred.item(),
+                    })
 
-            shape_acc, img = self.run_valiate_shape_acc(epoch_idx % self.gen_visualization_per_epoch == 0)
+            # shape_acc, img = self.run_valiate_shape_acc(epoch_idx % self.gen_visualization_per_epoch == 0)
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
@@ -287,8 +288,8 @@ class Trainer():
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
-                'shape_acc': shape_acc,
+                # 'shape_acc': shape_acc,
             }
-            if img is not None:
-                log_data['img'] = wandb.Image(img, caption='validation image: val[0]')
+            # if img is not None:
+                # log_data['img'] = wandb.Image(img, caption='validation image: val[0]')
             self.feed_to_wandb(log_data)

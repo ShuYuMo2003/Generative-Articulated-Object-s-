@@ -29,7 +29,9 @@ https://sapien.ucsd.edu/downloads
 - 准备数据集
 
   ```
-  python main-onet.py -c configs/onet/generate_onet_dataset.yaml
+  cd process_data/
+  python 1_v2_extract_from_raw_dataset.py
+  python 2_generate_onet_dataset.py
   ```
 
 - 训练 ONet
@@ -42,16 +44,15 @@ https://sapien.ucsd.edu/downloads
 - 利用训练好的 ONet 生成 transformer 数据集
 
   ```
-  python main-onet.py -c configs/onet/prepare_transformer_dataset.yaml
+  python 4.1_generate_screenshot.py
+  python 4.2_get_text_description.py
+  python 4.3_generate_text_latent.py
+  python 4.4_generate_transformer_dataset.py
   ```
 
 - 训练 transformer
 
   ```
-  python main-transformer.py -c configs/transformer/train-default-v2.yaml
+  python main-transformer.py -c configs/transformer/train-default-v3.yaml
   ```
 
-- 推理 transformer
-  ```
-  python main-transformer.py -c configs/transformer/eval-default.yaml
-  ```
