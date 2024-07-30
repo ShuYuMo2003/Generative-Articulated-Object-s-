@@ -1,0 +1,31 @@
+random_seed: love ytq forever
+device: null
+
+action:
+  type: eval
+  args:
+    ckpt_filepath: checkpoints/transformer/v2-00630.ckpt
+    eval_output_path: logs/eval_output
+    equal_part_threshold: 0.005
+    t5_max_sentence_length: 128
+
+# Dataset & Dataloader config
+dataset:
+  type: file
+  args:
+    dataset_path: dataset/4_transformer_dataset
+    description_for_each_file: 6
+    cut_off: -1
+
+dataloader:
+  args:
+    batch_size: 1
+    num_workers: 1
+    shuffle: False
+
+part_structure:
+  bounding_box: 6
+  joint_data_origin: 3
+  joint_data_direction: 3
+  limit: 4
+  latent_code: 128

@@ -21,8 +21,11 @@ start_token = None
 end_token = None
 pad_token = None
 max_count_token = 0
+best_ckpt_path = None
 
 def determine_latentcode_encoder():
+    global best_ckpt_path
+
     onets_ckpt_paths = glob('../checkpoints/onet/*.ptn')
     onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
 
@@ -203,6 +206,7 @@ if __name__ == '__main__':
             'end_token': end_token,
             'pad_token': pad_token,
             'max_count_token': max_count_token,
+            'best_ckpt_path': best_ckpt_path.replace('../', ''),
         }, f, cls=HighPrecisionJsonEncoder, indent=2)
 
     print('Failed:', failed)

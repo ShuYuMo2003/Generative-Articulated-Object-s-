@@ -3,7 +3,8 @@ import numpy as np
 import pyvista as pv
 from rich import print
 
-from .utils import bright_colors
+
+bright_colors = ['#E9A7AB', '#F5D76C', '#EB950C', '#DB481F', '#08998A', '#FF2D2B']
 
 def calc_linear_value(L, R, ratio):
     return 1.0 * L + (R - L) * 1.0 * ratio

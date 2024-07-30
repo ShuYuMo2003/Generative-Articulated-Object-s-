@@ -1,28 +1,27 @@
 import os
 import torch
 import wandb
-import pyvista as pv
-import numpy   as np
 
+import numpy as np
 from rich import print
 from tqdm import tqdm
-from torch import distributions
+from pathlib import Path
 from torch.nn import functional as F
-
-from onet.decoder import Decoder as LatentDecoder
-from onet.generate_3d import Generator3D
 
 from transformer.utils import to_cuda
 from torch.utils.data import DataLoader
 from transformer.model import get_decoder
 from transformer.loaddataset import get_dataset
 
+from utils.evaluators import LatentCodeEvaluator
+
 torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
-    def __init__(self, wandb_instance, config, n_epoch, gen_visualization_per_epoch,
+    def __init__(self, wandb_instance, config, n_epoch,
                  ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
-                 scheduler_warmup, evaluetaion, n_validation_sample, latent_code_loss_ratio):
+                 scheduler_warmup, latent_code_loss_ratio, n_pointsample_for_evaluate,
+                 onet_batch_size):
 
         self.n_epoch = n_epoch
         self.per_epoch_save = per_epoch_save
@@ -30,27 +29,24 @@ class Trainer():
         self.device = config['device']
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
-        self.gen_visualization_per_epoch = gen_visualization_per_epoch
 
-        self.model_type = config['decoder']['type']
-        if self.model_type == 'NativeDecoder':
-            self.compute_loss = self.compute_loss_g_token
-        elif self.model_type == 'ParallelDecoder':
-            self.compute_loss = self.compute_loss_parallel
-        elif self.model_type == 'DecoderV2':
-            self.compute_loss = self.compute_loss_v2
+        assert config['decoder']['type'] == 'DecoderV2'
 
-        self.train_dataset = get_dataset(config)
-        # self.validate_dataset = get_dataset(config, train=False)
+        self.train_dataset = get_dataset(config, train=True)
         self.train_dataloader = DataLoader(self.train_dataset, **config['dataloader']['args'])
+
+        self.evaluate_dataset = get_dataset(config, train=False)
+        print('evaluate_dataset = ', len(self.evaluate_dataset))
+        self.evaluate_dataloader = DataLoader(self.evaluate_dataset, **config['evaluate_dataloader']['args'])
+
+        self.latentcode_evaluator = LatentCodeEvaluator(Path(self.train_dataset.get_onet_ckpt_path()),
+                                                        n_pointsample_for_evaluate,
+                                                        onet_batch_size,
+                                                        self.device)
 
         self.d_model = config['model_parameter']['d_model']
         self.wandb_instance = wandb_instance
         self.called = False
-
-        # g token is deprecated
-        self.g_token0_z = distributions.Normal(torch.zeros(self.d_model, device=self.device),
-                                               torch.ones(self.d_model, device=self.device))
 
 
         self.latent_code_loss_ratio = latent_code_loss_ratio
@@ -62,38 +58,9 @@ class Trainer():
                                                             lr_lambda=lambda step:
                                                             self.rate(step, self.d_model,
                                                                       scheduler_factor, scheduler_warmup))
-        self.run_latent_eval = evaluetaion
-        if evaluetaion:
-            self.latent_decoder = torch.load(self.train_dataset.onet_decoder_path, map_location=torch.device(self.device)).to(self.device)
-
-            # freeze latent decoder, we don't want to train it in this stage, just for clear gradient.
-            # self.decoder_optimizer = torch.optim.Adam(self.latent_decoder.parameters(), lr=1, betas=betas, eps=float(eps))
-            self.n_latent_code_validation_samples = config['n_latent_code_validation_samples']
-            self.n_validation_sample = n_validation_sample
-
-        self.generator       = Generator3D(device=self.device)
 
     def zero_gred(self):
         self.optimizer.zero_grad()
-        # if self.run_latent_eval:
-        #     self.decoder_optimizer.zero_grad()
-
-    def gen_image_from_latent(self, decoder, mean_z):
-        with torch.no_grad():
-            # print('gen latent mesh')
-            mesh = self.generator.generate_from_latent(decoder, mean_z)
-            # print('gened')
-            mesh.export('logs/temp-validate.obj')
-            plotter = pv.Plotter()
-            try:
-                pv_mesh = pv.read('logs/temp-validate.obj')
-                plotter.add_mesh(pv_mesh)
-            except ValueError:
-                print('error')
-                pass
-            plotter.show()
-            screenshot = plotter.screenshot()
-            return screenshot
 
     # @from: https://nlp.seas.harvard.edu/annotated-transformer/#batches-and-masking
     @classmethod
@@ -108,111 +75,8 @@ class Trainer():
             model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5))
         )
 
-    def validate_shape_acc(self, pred_latent, actu_latent):
-        self.latent_decoder.eval()
-
-        batch_size, n_part, latent_dim = pred_latent.shape
-        assert pred_latent.shape == actu_latent.shape,        \
-            'pred_latent and actu_latent should have the same shape'
-        sampled_point = torch.rand((self.n_latent_code_validation_samples, 3),
-                                   device=self.device) - 0.5
-
-        sampled_point = sampled_point.unsqueeze(0).repeat(batch_size, 1, 1)
-
-        # only take the first part for validation.
-        pred_latent = pred_latent[:, 0, :]
-        actu_latent = actu_latent[:, 0, :]
-
-        with torch.no_grad():
-            pred_occ_logits = self.latent_decoder(sampled_point, pred_latent)
-            actu_occ_logits = self.latent_decoder(sampled_point, actu_latent)
-
-        acc = ((pred_occ_logits > 0) == (actu_occ_logits > 0)).float().mean()
-
-        return acc
-
-    def run_valiate_shape_acc(self, with_image=False):
-        validate_dataloader = DataLoader(self.validate_dataset, batch_size=1, num_workers=1, shuffle=False)
-        acc = []
-        actually_shape_list = []
-        predicted_shape_list = []
-        text_list = []
-        for idx, batched_data in tqdm(enumerate(validate_dataloader),
-                                                desc='validate shape quality.',
-                                                total=self.n_validation_sample):
-            if idx >= self.n_validation_sample:
-                break
-
-            if self.device == 'cuda':
-                batched_data = to_cuda(batched_data)
-
-            predicted_shape, _ = self.model(index           = batched_data['index'],
-                                            raw_parts       = batched_data['input'],
-                                            key_padding_mask= batched_data['key_padding_mask'],
-                                            enc_data        = batched_data['enc_data'])
-
-            # attribute_name * n_batch * (part_idx==fix_length) * attribute_dim
-            shape_acc = self.validate_shape_acc(predicted_shape['latent'], batched_data['output']['latent'])
-            actually_shape = batched_data['output']
-            acc.append(shape_acc)
-            actually_shape_list.append(actually_shape)
-            predicted_shape_list.append(predicted_shape)
-            text_list.append(batched_data['enc_text'])
-
-        # batch_size, n_part, latent_dim
-        images = None
-        if with_image:
-            images = []
-            for actually_shape, predicted_shape in tqdm(zip(actually_shape_list, predicted_shape_list), desc='generate image'):
-                single_obj_images = []
-                for idx in range(3):
-                    latent = predicted_shape['latent'][[0], idx, :]
-                    img0 = self.gen_image_from_latent(self.latent_decoder, latent)
-                    latent = actually_shape['latent'][[0], idx, :]
-                    img1 = self.gen_image_from_latent(self.latent_decoder, latent)
-                    img = np.concatenate([img0, img1], axis=1)
-                    single_obj_images.append(img)
-                single_obj_image = np.concatenate(single_obj_images, axis=0)
-                images.append(single_obj_image)
-            images = np.concatenate(images, axis=1)
-            print('texts: ', text_list)
-
-
-        return torch.tensor(acc).mean(), images
-
-    def compute_loss_g_token(self, index, input, output, key_padding_mask):
-        raise NotImplementedError('compute_loss_g_token is deprecated.')
-        predicted_shape, g_token_dist = self.model(index, input)
-
-        loss_kl = distributions.kl_divergence(g_token_dist, self.g_token0_z).sum(dim=-1).mean()
-
-        keys = list(self.input_structure['non_latent_info'].keys()) + list(self.input_structure['latent_info'].keys())
-
-        loss_pred = torch.zeros(1, device=self.device)
-        for key in keys:
-            loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
-
-        loss = loss_pred + loss_kl
-        return loss, loss_pred, loss_kl
-
-    def compute_loss_parallel(self, index, input, output, key_padding_mask, enc_data, enc_text):
-        predicted_shape, _ = self.model(index, input, key_padding_mask, enc_data)
-
-        keys = list(self.input_structure['non_latent_info'].keys()) + list(self.input_structure['latent_info'].keys())
-
-        loss_pred = torch.zeros(1, device=self.device)
-        loss_latent = torch.zeros(1, device=self.device)
-
-        for key in keys:
-            if key == 'latent':
-                loss_latent += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
-            else:
-                loss_pred += torch.nn.functional.mse_loss(predicted_shape[key], output[key])
-
-        return loss_latent + loss_pred, loss_latent, loss_pred
-
-    def compute_loss_v2(self, batched_data):
-        input, output, padding_mask, encoded_text, text = batched_data
+    def compute_loss(self, batched_data):
+        input, output, padding_mask, output_skip_end_token_mask, encoded_text, text = batched_data
         predicted_output = self.model(input, padding_mask, encoded_text)
 
         dim_latent_code = self.input_structure['latent_code']
@@ -242,55 +106,109 @@ class Trainer():
         if self.wandb_instance:
             self.wandb_instance.log(args)
 
-    def __call__(self):
+    def run_epoch(self, epoch_idx):
+        self.model.train()
+        train_losses = {
+            'loss': [],
+            'loss_latent': [],
+            'loss_pred': [],
+        }
+        for idx, batched_data in tqdm(enumerate(self.train_dataloader),
+                                                desc=f'epoch = {epoch_idx}',
+                                                total=len(self.train_dataloader)):
 
-        assert not self.called, 'Trainer can only be called once'
-        self.called = True
+            if self.device == 'cuda':
+                batched_data = to_cuda(batched_data)
 
-        for epoch_idx in range(self.n_epoch):
-            self.model.train()
+            loss, loss_latent, loss_pred = self.compute_loss(batched_data)
 
-            train_losses = {
-                'loss': [],
-                'loss_latent': [],
-                'loss_pred': [],
-            }
-            for idx, batched_data in tqdm(enumerate(self.train_dataloader),
-                                                    desc=f'epoch = {epoch_idx}',
-                                                    total=len(self.train_dataloader)):
+            self.zero_gred()
+            loss.backward()
+            self.optimizer.step()
+            train_losses['loss'].append(loss.item())
+            train_losses['loss_latent'].append(loss_latent.item())
+            train_losses['loss_pred'].append(loss_pred.item())
+            print({
+                    'loss': loss.item(),
+                    'loss_latent': loss_latent.item(),
+                    'loss_pred': loss_pred.item(),
+                })
+        return train_losses
+
+    def evaluate_shape_acc(self):
+        self.model.eval()
+
+        expected_output = []
+        predicted_output = []
+        valid_output_mask = []
+
+        # print('evaluate_dataset = ', len(self.evaluate_dataset))
+
+        with torch.no_grad():
+            for idx, batched_data in tqdm(enumerate(self.evaluate_dataloader),
+                                                    desc='evaluating',
+                                                    total=len(self.evaluate_dataloader)):
 
                 if self.device == 'cuda':
                     batched_data = to_cuda(batched_data)
 
-                loss, loss_latent, loss_pred = self.compute_loss(batched_data)
+                input, output, padding_mask, output_skip_end_token_mask,  \
+                            encoded_text, text = batched_data
 
-                self.zero_gred()
-                loss.backward()
-                self.optimizer.step()
-                train_losses['loss'].append(loss.item())
-                train_losses['loss_latent'].append(loss_latent.item())
-                train_losses['loss_pred'].append(loss_pred.item())
-                print({
-                        'loss': loss.item(),
-                        'loss_latent': loss_latent.item(),
-                        'loss_pred': loss_pred.item(),
-                    })
-                self.lr_scheduler.step()
+                p_output = self.model(input, padding_mask, encoded_text)
 
-            # shape_acc, img = self.run_valiate_shape_acc(epoch_idx % self.gen_visualization_per_epoch == 0)
+                expected_output.append(output)
+                predicted_output.append(p_output)
+                valid_output_mask.append((padding_mask == 1) & (output_skip_end_token_mask == 1))
+
+        expected_output = torch.cat(expected_output, dim=0)
+        predicted_output = torch.cat(predicted_output, dim=0)
+        valid_output_mask = torch.cat(valid_output_mask, dim=0)
+
+        # print('valid_output_mask = ', valid_output_mask.shape, 'cnt = ', valid_output_mask.astype(torch.int).sum())
+
+        dim_latent_code = self.input_structure['latent_code']
+
+        expected_latentcode_output = expected_output[:, :, -dim_latent_code:]
+        predicted_latentcode_output = predicted_output[:, :, -dim_latent_code:]
+
+        acc = self.latentcode_evaluator.get_accuracy(predicted_latentcode_output,
+                                                     expected_latentcode_output,
+                                                     valid_output_mask)
+
+        pred_images = self.latentcode_evaluator.screenshoot(predicted_latentcode_output, valid_output_mask, 5)
+        gt_images = self.latentcode_evaluator.screenshoot(expected_latentcode_output, valid_output_mask, 5)
+        images = []
+
+        for pred_img, gt_img in zip(pred_images, gt_images):
+            image = np.concatenate([gt_img, pred_img], axis=0)
+            images.append(image)
+
+        total_image = np.concatenate([image for image in images], axis=1)
+
+        return acc, total_image
+
+    def __call__(self):
+        assert not self.called, 'Trainer can only be called once'
+        self.called = True
+
+        for epoch_idx in range(self.n_epoch):
+
+            train_losses = self.run_epoch(epoch_idx)
+
+            self.lr_scheduler.step()
+
+            shape_acc, total_image = self.evaluate_shape_acc()
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
-
-
 
             log_data = {
                 'train_loss': torch.tensor(train_losses['loss']).mean(),
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
-                # 'shape_acc': shape_acc,
+                'shape_acc': shape_acc,
+                'shape_image': wandb.Image(total_image, caption='shape image'),
             }
-            # if img is not None:
-                # log_data['img'] = wandb.Image(img, caption='validation image: val[0]')
             self.feed_to_wandb(log_data)

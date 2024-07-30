@@ -1,5 +1,6 @@
 import torch
 import json
+import random
 import numpy as np
 import copy
 from rich import print
@@ -8,7 +9,7 @@ from pathlib import Path
 from torch.utils.data import dataset
 
 class FileSysDataset(dataset.Dataset):
-    def __init__(self, dataset_path: str, description_for_each_file: int):
+    def __init__(self, dataset_path: str, description_for_each_file: int, cut_off: int):
         self.dataset_root_path = Path(dataset_path)
 
         # import meta.json
@@ -27,6 +28,16 @@ class FileSysDataset(dataset.Dataset):
                 for file in all_json_files
             ]
 
+        random.seed(0)
+        random.shuffle(self.files_path)
+
+        if cut_off > 0:
+            self.files_path = self.files_path[:cut_off]
+
+        self.cut_off = cut_off
+
+    def get_onet_ckpt_path(self):
+        return self.meta['best_ckpt_path']
 
     def __len__(self):
         return len(self.files_path)
@@ -73,17 +84,23 @@ class FileSysDataset(dataset.Dataset):
         # Process Output
         infer_nodes = data['inferenced_token']
         output = []
+        # 1:   not end token,    0: end token
+        output_skip_end_token_mask = []
         for node in infer_nodes:
             output.append(torch.tensor(node['token'], dtype=torch.float32))
+            output_skip_end_token_mask.append(0 if node['dfn'] == -1 else 1)
 
         for _ in range(self.max_count_token - len(output)):
             output.append(copy.deepcopy(self.pad_token))
+            output_skip_end_token_mask.append(1)
 
         output = torch.stack(output)
 
-        # Process Mask
-        mask = torch.ones(self.max_count_token, dtype=torch.int16)
-        mask[total_token:] = 0
+        output_skip_end_token_mask = torch.tensor(output_skip_end_token_mask, dtype=torch.int)
+
+        # Process Padding Mask
+        padding_mask = torch.ones(self.max_count_token, dtype=torch.int16)
+        padding_mask[total_token:] = 0
 
 
         # with open(f'logs/debug/output{index}.json', 'w') as f:
@@ -98,4 +115,9 @@ class FileSysDataset(dataset.Dataset):
         # print('desc[encoded_text] = ', desc['encoded_text'].shape)
         # print('desc[text] = ', type(desc['text']), desc['text'])
 
-        return transformed_input, output, mask, desc['encoded_text'], desc['text']
+        # if self.cut_off > 0:
+        #     print('index = ', index)
+        #     print('padding_mask = ', padding_mask)
+        #     print('output_skip_end_token_mask = ', output_skip_end_token_mask)
+
+        return transformed_input, output, padding_mask, output_skip_end_token_mask, desc['encoded_text'], desc['text']

@@ -7,23 +7,16 @@ action:
   args:
     n_epoch: 1000000
     ckpt_save_name: checkpoints/transformer/v2-{epoch:05d}.ckpt
-    per_epoch_save: 300
+    per_epoch_save: 10
     betas: [0.9, 0.98]
     eps: 1e-9
-    scheduler_factor: 0.01
-    scheduler_warmup: 10000
-    evaluetaion: false # TODO: set to true after implement the evaluation.
-    n_validation_sample: 12
-    gen_visualization_per_epoch: 30
+    scheduler_factor: 0.05
+    scheduler_warmup: 30
+    # n_validation_sample: 12 # Change this by change `evaluate_dataset.cut_off`
+    latent_code_loss_ratio: 0.8
 
-    latent_code_loss_ratio: 0.9
-
-######### For evaluation ONLY, the paramerters for latentcode decoder.
-n_latent_code_validation_samples: 10000
-latent_decoder:
-  type: null
-  ckpt_path:
-######### END
+    n_pointsample_for_evaluate: 100000
+    onet_batch_size: 16
 
 # Dataset & Dataloader config
 dataset:
@@ -31,12 +24,26 @@ dataset:
   args:
     dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
+    cut_off: -1
+
+evaluate_dataset:
+  type: file
+  args:
+    dataset_path: dataset/4_transformer_dataset
+    description_for_each_file: 6
+    cut_off: 256
 
 dataloader:
   args:
-    batch_size: 64
-    num_workers: 4
+    batch_size: 256
+    num_workers: 10
     shuffle: true
+
+evaluate_dataloader:
+  args:
+    batch_size: 256
+    num_workers: 10
+    shuffle: false
 
 part_structure:
   bounding_box: 6

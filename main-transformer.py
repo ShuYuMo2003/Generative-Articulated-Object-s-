@@ -36,11 +36,18 @@ def train(config):
     trainer()
 
 def eval(config):
-    from transformer.action.evaluater import Evaluater
+    from transformer.action.evaluaterv2 import Evaluater
     print('start to eval with config: ', config)
     eval_args = config['action']['args']
     evaler = Evaluater(config=config, **eval_args)
-    while True: evaler.inference(0)
+
+    # d = 'A USB device features a rectangular shape with a swivel mechanism that allows a cover to rotate around a pivot point, revealing or concealing the USB connector.'
+    # evaler.inference(d)
+    # exit(0)
+    round = 0
+    while True:
+        evaler.inference(input(f'[{str(round)}] Input the prompt: '), round)
+        round += 1
 
 
 if __name__ == '__main__':
