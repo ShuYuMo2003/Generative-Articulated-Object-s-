@@ -30,6 +30,7 @@ def determine_latentcode_encoder():
     onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
 
     best_ckpt_path = onets_ckpt_paths[0]
+    best_ckpt_path = '../checkpoints/onet/0.9154964089393616-200.ptn'
     print('Using best ckpt:', best_ckpt_path)
 
     onet = torch.load(best_ckpt_path)
@@ -37,11 +38,12 @@ def determine_latentcode_encoder():
 
 def evaluate_latent_codes(onet):
     dataset = PartnetMobilityDataset(
-            path='../dataset/2_onet_v2_dataset',
+            path='../dataset/2_onet_v2_sdf_dataset',
             train_ratio=0,
             train=False,
             selected_categories=['*'],
             return_path_name=True,
+            sdf_dataset=True,
         )
     dataloader = torch.utils.data.DataLoader(
             dataset,
