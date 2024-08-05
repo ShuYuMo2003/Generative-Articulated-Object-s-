@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 sys.path.append('..')
-from onet_v2.dataset import PartnetMobilityDataset
+from onet.dataset import PartnetMobilityDataset
 from utils.utils import (tokenize_part_info, generate_special_tokens,
                             HighPrecisionJsonEncoder)
 from transformer.utils import str2hash
@@ -38,7 +38,7 @@ def determine_latentcode_encoder():
 
 def evaluate_latent_codes(onet):
     dataset = PartnetMobilityDataset(
-            path='../dataset/2_onet_v2_sdf_dataset',
+            path='../dataset/2_onet_sdf_dataset',
             train_ratio=0,
             train=False,
             selected_categories=['*'],

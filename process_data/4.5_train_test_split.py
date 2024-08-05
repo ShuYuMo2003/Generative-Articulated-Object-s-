@@ -4,7 +4,7 @@ import hashlib
 import os
 
 # change this before running
-onet_ds_path = Path('../dataset/2_onet_v2_sdf_dataset')
+onet_ds_path = Path('../dataset/2_onet_sdf_dataset')
 transfomer_ds_path = Path('../dataset/4_transformer_dataset')
 ###
 

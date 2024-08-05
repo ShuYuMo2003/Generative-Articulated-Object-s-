@@ -232,8 +232,8 @@ def wtobj_to_sdf_by_mesh_to_sdf(wt_obj_file, sdf_file):
 def convert_mesh(ply_file, sdf_type, clear_temp, wt_method, sdf_method):
     start_time = time.time()
     stem = ply_file.stem
-    temp_dir   = Path(f'../dataset/2_onet_v2_{sdf_type}_dataset/temp/{stem}')
-    result_dir = Path(f'../dataset/2_onet_v2_{sdf_type}_dataset/result')
+    temp_dir   = Path(f'../dataset/2_onet_{sdf_type}_dataset/temp/{stem}')
+    result_dir = Path(f'../dataset/2_onet_{sdf_type}_dataset/result')
 
     assert sdf_type in ['sdf', 'occ'], f'Invalid sdf_type {sdf_type}, only support `sdf` or `occ`.'
 
@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    shutil.rmtree('../dataset/2_onet_v2_{args.sdf_type}_dataset', ignore_errors=True)
+    shutil.rmtree('../dataset/2_onet_{args.sdf_type}_dataset', ignore_errors=True)
     all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',
                             Path('../dataset/1_preprocessed_mesh/').iterdir()))
 
