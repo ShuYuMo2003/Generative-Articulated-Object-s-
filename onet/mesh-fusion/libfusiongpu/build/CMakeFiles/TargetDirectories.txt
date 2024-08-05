@@ -1,3 +1,0 @@
-/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/fusion_gpu.dir
-/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/edit_cache.dir
-/home/shuyumo/research/GAO/onet/mesh-fusion/libfusiongpu/build/CMakeFiles/rebuild_cache.dir

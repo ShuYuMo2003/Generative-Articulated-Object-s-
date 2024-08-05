@@ -13,7 +13,6 @@ from onet.utils.utils_layers import CBatchNorm1d, CBatchNorm1d_legacy
 from onet.fourier_feature import GaussianFourierFeatureEmbedding
 
 
-
 class Decoder(nn.Module):
     ''' Decoder class.
 
@@ -36,7 +35,7 @@ class Decoder(nn.Module):
 
         # Submodules
         self.fc_p_0 = nn.Linear(hidden_size * 2, hidden_size * 2)
-        self.acti = nn.ReLU()
+        self.acti = nn.GELU()
         self.fc_p_1 = nn.Linear(hidden_size * 2, hidden_size)
 
         if not z_dim == 0:
@@ -50,10 +49,11 @@ class Decoder(nn.Module):
         self.block2 = ResnetBlockFC(hidden_size)
         self.block3 = ResnetBlockFC(hidden_size)
         self.block4 = ResnetBlockFC(hidden_size)
+        self.block5 = ResnetBlockFC(hidden_size)
 
         self.fc_out = nn.Linear(hidden_size, 1)
 
-        self.actvn = nn.ReLU()
+        self.actvn = nn.GELU()
 
     def forward(self, p, z, c=None):
         batch_size, T, D = p.size()
@@ -77,6 +77,7 @@ class Decoder(nn.Module):
         net = self.block2(net)
         net = self.block3(net)
         net = self.block4(net)
+        net = self.block5(net)
 
         out = self.fc_out(self.actvn(net))
         out = out.squeeze(-1)

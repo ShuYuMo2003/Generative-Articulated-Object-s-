@@ -109,29 +109,33 @@ def generate_obj_pics(_parts_data, percentage, cinema_position):
 
     meshs = []
     for dfn, part in dfn_to_part.items():
-        mesh = part['mesh']
-        min_bound, max_bound = mesh.bounds
-        tg_min_bound, tg_max_bound = part['bounding_box']
+        try:
+            mesh = part['mesh']
+            min_bound, max_bound = mesh.bounds
+            tg_min_bound, tg_max_bound = part['bounding_box']
 
-        min_bound, max_bound = np.array(min_bound), np.array(max_bound)
-        tg_min_bound, tg_max_bound = np.array(tg_min_bound), np.array(tg_max_bound)
+            min_bound, max_bound = np.array(min_bound), np.array(max_bound)
+            tg_min_bound, tg_max_bound = np.array(tg_min_bound), np.array(tg_max_bound)
 
-        max_bound[max_bound - min_bound < 1e-5] += 0.01
-        tg_max_bound[tg_max_bound - tg_min_bound < 1e-5] += 0.01
+            max_bound[max_bound - min_bound < 1e-5] += 0.01
+            tg_max_bound[tg_max_bound - tg_min_bound < 1e-5] += 0.01
 
-        mesh.vertices = tg_min_bound + (tg_max_bound - tg_min_bound) * (
-            (mesh.vertices - min_bound) / (max_bound - min_bound)
-        )
+            mesh.vertices = tg_min_bound + (tg_max_bound - tg_min_bound) * (
+                (mesh.vertices - min_bound) / (max_bound - min_bound)
+            )
 
-        mesh.vertices = np.concatenate((
-            mesh.vertices,
-            np.ones((mesh.vertices.shape[0], 1))
-        ), axis=1)
+            mesh.vertices = np.concatenate((
+                mesh.vertices,
+                np.ones((mesh.vertices.shape[0], 1))
+            ), axis=1)
 
-        vertices_on_ground = part['transform'] @ mesh.vertices.T
-        vertices_on_ground = vertices_on_ground[0:3, :].T
-        mesh.vertices = vertices_on_ground
-        meshs.append(mesh)
+            vertices_on_ground = part['transform'] @ mesh.vertices.T
+            vertices_on_ground = vertices_on_ground[0:3, :].T
+            mesh.vertices = vertices_on_ground
+            meshs.append(mesh)
+        except Exception as e:
+            print('Error', e, 'on generating ', dfn, part)
+
 
     # print(dfn_to_part)
     plotter = pv.Plotter(off_screen=True)

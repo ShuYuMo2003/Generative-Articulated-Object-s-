@@ -26,7 +26,7 @@ def get_or_generate_fourier_matrix_B(d_out_emb, d_in_emb):
     return B
 
 class GaussianFourierFeatureEmbedding(nn.Module):
-    def __init__(self, d_emb=256, d_in=3, emb_sigma=12., device='cuda'):
+    def __init__(self, d_emb=256, d_in=3, emb_sigma=12., device=('cuda' if torch.cuda.is_available() else 'cpu')):
         super().__init__()
         assert d_emb % 2 == 0, 'd_emb must be even. (half sin, half cos)'
         self.B = get_or_generate_fourier_matrix_B(d_emb // 2, d_in) * emb_sigma

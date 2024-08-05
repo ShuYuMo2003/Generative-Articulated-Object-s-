@@ -4,7 +4,7 @@ device: null
 action:
   type: eval
   args:
-    ckpt_filepath: checkpoints/transformer/v2-00630.ckpt
+    ckpt_filepath: checkpoints/transformer/v2-00660.ckpt
     eval_output_path: logs/eval_output
     equal_part_threshold: 0.005
     t5_max_sentence_length: 128

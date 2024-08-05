@@ -30,15 +30,14 @@ https://sapien.ucsd.edu/downloads
 
   ```
   cd process_data/
-  python 1_v2_extract_from_raw_dataset.py
+  python 1_extract_from_raw_dataset.py
   python 2_generate_onet_dataset.py
   ```
 
 - 训练 ONet
 
   ```
-  # python train-onet.py -c configs/onet/train-onet.yaml
-  python train-onet_v2.py -c configs/onet/train-onet_v2.yaml
+  python train-onet.py -c configs/onet/train-onet_v2.yaml
   ```
 
 - 利用训练好的 ONet 生成 transformer 数据集

@@ -14,8 +14,8 @@ from transformer.loaddataset.redis_parallel import identity_or_create_tensor
 
 from transformer.loaddataset import get_dataset
 from transformer.utils import to_cuda
-from onet_v2.utils.generate_3d import Generator3D
-from onet_v2.decoder import Decoder
+from onet.utils.generator_sim import Generator3DSimple
+from onet.decoder import Decoder
 
 from transformers import AutoTokenizer, T5EncoderModel
 
@@ -56,7 +56,7 @@ class Evaluater():
         self.basic_shape_structure.update(config['part_structure']['non_latent_info'])
         self.basic_shape_structure.update(config['part_structure']['latent_info'])
 
-        self.generator = Generator3D(device=self.device)
+        self.generator = Generator3DSimple(device=self.device)
 
     def compare_last_part_with_e(self, total_part):
         result = 0

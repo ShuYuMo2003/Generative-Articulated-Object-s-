@@ -6,39 +6,37 @@ from pathlib import Path
 from transformer.utils import str2hash
 
 class PartnetMobilityDataset(Dataset):
-    def __init__(self, path:list[tuple[str, str]], train_ratio:float,
-                 train:bool, unpackbits=True, return_path_name=False):
+    def __init__(self, path:str, train_ratio:float,
+                 train:bool, selected_categories:list[str],
+                 sdf_dataset:bool,
+                 return_path_name=False):
         super().__init__()
         assert 0 <= train_ratio <= 1
-        selector = ( lambda x : str2hash(x[0]) % 100 <  train_ratio * 100 if train
-                else lambda x : str2hash(x[0]) % 100 >= train_ratio * 100)
-        enc_data = sorted(list(glob(str(Path(path) / f'point-0' / '*'))))
-        dec_data = sorted(list(glob(str(Path(path) / f'point-1' / '*'))))
-        assert len(dec_data) == len(enc_data)
-        datasetpath = list(filter(selector, zip(enc_data, dec_data)))
-        self.datapath = datasetpath
-        self.unpackbits = unpackbits
+        selector = ((lambda x : str2hash(x) % 100 <  train_ratio * 100) if train
+              else (lambda x : str2hash(x) % 100 >= train_ratio * 100))
+
+        self.files = list(glob(str(Path(path) / f'result' / '*.npz')))
+        if '*' not in selected_categories:
+            self.files = list(filter(lambda x : x.split('/')[-1].split('_')[0] in selected_categories, self.files))
+        self.files.sort()
+        self.files = list(filter(selector, self.files))
         self.return_path_name = return_path_name
+        self.sdf_dataset = sdf_dataset
 
     def __len__(self):
-        return len(self.datapath)
+        return len(self.files)
 
-    def __getitem__(self, idx):
-        enc_samplepoints_dict = np.load(self.datapath[idx][0])
-        dec_samplepoints_dict = np.load(self.datapath[idx][1])
+    def process_occ_dataset(self, point, sdf):
+        enc_samplepoints, dec_samplepoints = point[0::2, ...], point[1::2, ...]
+        enc_occ, dec_occ = (sdf[0::2, ...] < 0), (sdf[1::2, ...] < 0)
 
-        enc_samplepoints = enc_samplepoints_dict['points'].astype(np.float32)
-        dec_samplepoints = dec_samplepoints_dict['points'].astype(np.float32)
-
-        enc_occ = enc_samplepoints_dict['occupancies']
-        dec_occ = dec_samplepoints_dict['occupancies']
-
-        if self.unpackbits:
-            enc_occ = np.unpackbits(enc_occ)[:enc_samplepoints.shape[0]]
-            dec_occ = np.unpackbits(dec_occ)[:dec_samplepoints.shape[0]]
+        # print('enc_samplepoints:', enc_samplepoints.shape)
 
         enc_occ = enc_occ.astype(np.float32)
         dec_occ = dec_occ.astype(np.float32)
+
+        enc_samplepoints = enc_samplepoints.astype(np.float32)
+        dec_samplepoints = dec_samplepoints.astype(np.float32)
 
         return_value = [
             torch.from_numpy(enc_samplepoints),
@@ -46,7 +44,46 @@ class PartnetMobilityDataset(Dataset):
             torch.from_numpy(dec_samplepoints),
             torch.from_numpy(dec_occ),
         ]
+
+        return return_value
+
+    def process_sdf_dataset(self, point, sdf):
+        enc_samplepoints, dec_samplepoints = point[0::2, ...], point[1::2, ...]
+        enc_sdf, dec_sdf = sdf[0::2, ...], sdf[1::2, ...]
+
+        enc_sdf = enc_sdf.astype(np.float32)
+        dec_sdf = dec_sdf.astype(np.float32)
+
+        enc_samplepoints = enc_samplepoints.astype(np.float32)
+        dec_samplepoints = dec_samplepoints.astype(np.float32)
+
+        return_value = [
+            torch.from_numpy(enc_samplepoints),
+            torch.from_numpy(enc_sdf),
+            torch.from_numpy(dec_samplepoints),
+            torch.from_numpy(dec_sdf),
+        ]
+
+        return return_value
+
+    def __getitem__(self, idx):
+        file_path = self.files[idx]
+        file = np.load(file_path)
+
+        point = file['point']
+        sdf = file['sdf']
+
+        indices = np.arange(point.shape[0])
+        np.random.shuffle(indices)
+        point = point[indices]
+        sdf = sdf[indices]
+
+        if not self.sdf_dataset:
+            return_value = self.process_occ_dataset(point, sdf)
+        else:
+            return_value = self.process_sdf_dataset(point, sdf)
+
         if self.return_path_name:
-            return_value.append(Path(self.datapath[idx][0]).stem)
+            return_value.append(Path(self.files[idx]).stem)
 
         return return_value

@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm, trange
 import pyvista as pv
-from onet_v2.utils.generate_3d import Generator3D
+from onet.utils.generator_sim import Generator3DSimple
 from pathlib import Path
 
 class LatentCodeEvaluator:
@@ -15,7 +15,7 @@ class LatentCodeEvaluator:
         self.onet.eval()
         self.onet = self.onet.to(device)
         self.onet_batch_size = onet_batch_size
-        self.generator = Generator3D(device=device, threshold=0.4, resolution0=20)
+        self.generator = Generator3DSimple(device=device, threshold=0.4, resolution0=20)
 
 
     def get_accuracy(self, generated_z: torch.Tensor, z: torch.Tensor,

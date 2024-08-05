@@ -1,20 +1,23 @@
 use_v1_dataset: false
 
+sdf_dataset: true
+
 optimizer:
   betas: [0.9, 0.98]
   eps: 1.0e-9
-  scheduler_factor: 0.15
+  scheduler_factor: 0.17
   scheduler_warmup: 15
+
+sdf_ratio: 0.1
 
 seed: love ytq.
 batch_size: 10
 total_epoch: 10000
-train_ratio: 1
+train_ratio: 0.8
 emb_sigma: 0.35
-dataset_root_path: dataset/2_onet_dataset
-checkpoint_output: checkpoints/onet
+dataset_root_path: dataset/2_onet_sdf_dataset
+checkpoint_output: checkpoints/onet_sdf
 z_dim: 128
-leaky: 0.05
 selected_categories:
  - '*'
   # - USB
