@@ -26,11 +26,11 @@ best_ckpt_path = None
 def determine_latentcode_encoder():
     global best_ckpt_path
 
-    onets_ckpt_paths = glob('../checkpoints/onet/*.ptn')
-    onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
+    # onets_ckpt_paths = glob('../checkpoints/onet/*.ptn')
+    # onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
 
-    best_ckpt_path = onets_ckpt_paths[0]
-    best_ckpt_path = '../checkpoints/onet/0.9154964089393616-200.ptn'
+    # best_ckpt_path = onets_ckpt_paths[0]
+    best_ckpt_path = '../checkpoints/onet_sdf/0.7569100260734558-700.ptn'
     print('Using best ckpt:', best_ckpt_path)
 
     onet = torch.load(best_ckpt_path)
