@@ -57,6 +57,7 @@ def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
     bpy.ops.object.select_all(action='DESELECT')
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.join()
+    # bpy.ops.object.shade_smooth()
 
     obj = bpy.context.active_object
     bpy.ops.object.mode_set(mode='EDIT')
@@ -86,9 +87,9 @@ def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
     bgmat.use_nodes = True
     edit_node = bgmat.node_tree.nodes["Principled BSDF"]
 
-    edit_node.inputs['Base Color'].default_value = (0.800204, 0.689428, 0, 1)
-    edit_node.inputs['Metallic'].default_value = 0.644109
-    edit_node.inputs['Roughness'].default_value = 0.228096
+    edit_node.inputs['Base Color'].default_value = (1, 1, 1, 1) #(0.800204, 0.689428, 0, 1)
+    edit_node.inputs['Metallic'].default_value = 0.444109
+    edit_node.inputs['Roughness'].default_value = 0.208096
     edit_node.distribution = 'GGX'
     edit_node.inputs['Emission Strength'].default_value = 1.0
 
@@ -126,7 +127,9 @@ def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
 
 
 if __name__ == '__main__':
-    objs_path = "dataset/raw/148/textured_objs"
-    bg_ply_path = "D:\\Research\\bg.ply"
-    output_path = "D:\\Research\\data\\2780\\render_output.png"
-    render_shape_blender(objs_path, bg_ply_path, output_path, False)
+    objs_path = "../dataset/raw/2780/textured_objs"
+    bg_ply_path = "bg.ply"
+    output_path = "render_output.png"
+    render_shape_blender(objs_path, bg_ply_path, output_path, True)
+
+    # /root/blender-git/blender-4.2.0-linux-x64/blender --background --cycles-device CUDA --python blender_render.py
