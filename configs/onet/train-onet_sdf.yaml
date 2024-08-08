@@ -11,10 +11,10 @@ optimizer:
 sdf_ratio: 0.1
 
 seed: love ytq.
-batch_size: 10
+batch_size: 14
 total_epoch: 10000
 train_ratio: 1
-emb_sigma: 0.35
+emb_sigma: 0.2
 dataset_root_path: dataset/2_onet_sdf_dataset
 checkpoint_output: checkpoints/onet_sdf
 z_dim: 128

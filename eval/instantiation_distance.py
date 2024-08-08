@@ -1,8 +1,9 @@
+# adapted from https://github.com/JiahuiLei/NAP/
+
 import torch, numpy as np
 import os, os.path as osp
 from pytorch3d.loss import chamfer_distance
 from tqdm import tqdm
-
 
 @torch.no_grad()
 def compute_instantiation_distance_pair(
@@ -154,15 +155,15 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--gen",
         # default="../log/test/K_8_cate_all_gt_samples",
-        default="../log/test/PCL/K_8_cate_all_v5.1.5_5455/",
+        default="../logs/test/PCL/gen",
     )
     arg_parser.add_argument(
         "--ref",
-        default="../log/test/PCL/K_8_cate_all_gt",
+        default="../logs/test/PCL/gt",
     )
     arg_parser.add_argument(
         "--save_dir",
-        default="../log/test/ID_D_matrix",
+        default="../logs/test/ID_D_matrix",
     )
     arg_parser.add_argument("--n_states", default=10, type=int)
     arg_parser.add_argument("--n_pcl", default=2048, type=int)

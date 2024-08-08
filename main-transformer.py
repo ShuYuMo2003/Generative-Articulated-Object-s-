@@ -36,7 +36,7 @@ def train(config):
     trainer()
 
 def eval(config):
-    from transformer.action.evaluaterv2 import Evaluater
+    from transformer.action.evaluater import Evaluater
     print('start to eval with config: ', config)
     eval_args = config['action']['args']
     evaler = Evaluater(config=config, **eval_args)

@@ -1,3 +1,5 @@
+# adapted from Occupancy_Networks `im2mesh/onet/generation.py`
+
 import torch
 import torch.optim as optim
 from torch import autograd
@@ -11,7 +13,7 @@ from onet.utils.libmise import MISE
 import time
 
 
-class Generator3D(object):
+class Generator3DSDF(object):
     '''  Generator class for Occupancy Networks.
 
     It provides functions to generate the final mesh as well refining options.
@@ -37,7 +39,7 @@ class Generator3D(object):
                  with_normals=False, padding=0.1, sample=False,
                  simplify_nfaces=None,
                  preprocessor=None):
-        self.model = model.to(device)
+        self.model = model
         self.points_batch_size = points_batch_size
         self.refinement_step = refinement_step
         self.threshold = threshold
@@ -50,41 +52,6 @@ class Generator3D(object):
         self.simplify_nfaces = simplify_nfaces
         self.preprocessor = preprocessor
 
-    def generate_mesh(self, data, return_stats=True):
-        ''' Generates the output mesh.
-
-        Args:
-            data (tensor): data tensor
-            return_stats (bool): whether stats should be returned
-        '''
-        self.model.eval()
-        device = self.device
-        stats_dict = {}
-
-        inputs = data.get('inputs', torch.empty(1, 0)).to(device)
-        kwargs = {}
-
-        # Preprocess if requires
-        if self.preprocessor is not None:
-            t0 = time.time()
-            with torch.no_grad():
-                inputs = self.preprocessor(inputs)
-            stats_dict['time (preprocess)'] = time.time() - t0
-
-        # Encode inputs
-        t0 = time.time()
-        with torch.no_grad():
-            c = self.model.encode_inputs(inputs)
-        stats_dict['time (encode inputs)'] = time.time() - t0
-
-        z = self.model.get_z_from_prior((1,), sample=self.sample).to(device)
-        mesh = self.generate_from_latent(z, c, stats_dict=stats_dict, **kwargs)
-
-        if return_stats:
-            return mesh, stats_dict
-        else:
-            return mesh
-
     def generate_from_latent(self, z, c=None, stats_dict={}, **kwargs):
         ''' Generates mesh from latent.
 
@@ -93,7 +60,8 @@ class Generator3D(object):
             c (tensor): latent conditioned code c
             stats_dict (dict): stats dictionary
         '''
-        threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+        # threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+        threshold = self.threshold
 
         t0 = time.time()
         # Compute bounding box size
@@ -148,11 +116,18 @@ class Generator3D(object):
         for pi in p_split:
             pi = pi.unsqueeze(0).to(self.device)
             with torch.no_grad():
-                occ_hat = self.model.decode(pi, z, c, **kwargs).logits
+                occ_hat = self.model(pi, z, c, **kwargs)
+
+            # [SYM]: when sdf < 0 means inside the object,
+            # but for original code which the output of the model is the logits of occupancy,
+            # the sign is opposite.
+            occ_hat = - occ_hat
 
             occ_hats.append(occ_hat.squeeze(0).detach().cpu())
 
         occ_hat = torch.cat(occ_hats, dim=0)
+
+        # print(occ_hat)
 
         return occ_hat
 
@@ -169,7 +144,8 @@ class Generator3D(object):
         n_x, n_y, n_z = occ_hat.shape
         box_size = 1 + self.padding
 
-        threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+        # threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+        threshold = self.threshold
 
         # Make sure that mesh is watertight
         t0 = time.time()
@@ -214,7 +190,7 @@ class Generator3D(object):
             stats_dict['time (simplify)'] = time.time() - t0
 
         # Refine mesh
-        if self.refinement_step > 0:
+        if self.refinement_step > 0 and mesh.vertices.shape[0] > 0:
             t0 = time.time()
             self.refine_mesh(mesh, occ_hat, z, c)
             stats_dict['time (refine)'] = time.time() - t0
@@ -238,7 +214,7 @@ class Generator3D(object):
         for vi in vertices_split:
             vi = vi.unsqueeze(0).to(device)
             vi.requires_grad_()
-            occ_hat = self.model.decode(vi, z, c).logits
+            occ_hat = self.model(vi, z, c)
             out = occ_hat.sum()
             out.backward()
             ni = -vi.grad
@@ -288,12 +264,10 @@ class Generator3D(object):
 
             face_v1 = face_vertex[:, 1, :] - face_vertex[:, 0, :]
             face_v2 = face_vertex[:, 2, :] - face_vertex[:, 1, :]
-            face_normal = torch.cross(face_v1, face_v2)
+            face_normal = torch.linalg.cross(face_v1, face_v2)
             face_normal = face_normal / \
                 (face_normal.norm(dim=1, keepdim=True) + 1e-10)
-            face_value = torch.sigmoid(
-                self.model.decode(face_point.unsqueeze(0), z, c).logits
-            )
+            face_value = self.model(face_point.unsqueeze(0), z, c)
             normal_target = -autograd.grad(
                 [face_value.sum()], [face_point], create_graph=True)[0]
 

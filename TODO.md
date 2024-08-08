@@ -5,3 +5,11 @@
  - [x] Tree Position Embedding.
  - [x] 验证薄片 mesh part 的 sdf 采样情况
  - [ ] 考虑特殊 Token 的赋值情况，需不需要根据每个字段的分布生成。
+ - [ ] matrice 测试。
+ - [ ] 调试 sdf 监督 O Net 训练。
+ - [ ] 原训练数据集高质量渲染。
+ - [ ] 尝试使用 Vision (CNN / ViT)类预训练大模型做 Encoder。
+    - vit, Swin Transformer, https://arxiv.org/abs/2103.14030
+    - vit, BLIP, image to text 模型, 可以取用训练完成的 Encoder, https://arxiv.org/abs/2201.12086
+    - vit, nlpconnect/vit-gpt2-image-captioning https://huggingface.co/nlpconnect/vit-gpt2-image-captioning
+    - vit, LRM, LARGE RECONSTRUCTION MODEL FOR SINGLE IMAGE TO 3D, https://yiconghong.me/LRM/

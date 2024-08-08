@@ -2,165 +2,180 @@
 import os
 import copy
 import torch
+import json
 
-from torch import nn
+from pathlib import Path
+
+import torch.utils
+from tqdm import trange
 from rich import print
-import pyvista as pv
-from torch.utils.data import DataLoader
-
-import matplotlib.pyplot as plt
-
-from transformer.loaddataset.redis_parallel import identity_or_create_tensor
-
 from transformer.loaddataset import get_dataset
-from transformer.utils import to_cuda
-from onet.utils.generator_sim import Generator3DSimple
-from onet.decoder import Decoder
-
 from transformers import AutoTokenizer, T5EncoderModel
-
-import pyrender
-
+from utils.evaluators import LatentCodeEvaluator
+from utils.utils import untokenize_part_info, generate_gif_toy
 
 class Evaluater():
-    def __init__(self, config, ckpt_filepath, eval_output_path, equal_part_threshold):
-        self.model = torch.load(ckpt_filepath, map_location=config['device'])
-
-        self.dataset = get_dataset(config)
-
-        self.latent_decoder = torch.load(self.dataset.onet_decoder_path, map_location=config['device'])
-
+    def __init__(self, config, ckpt_filepath, eval_output_path,
+                 equal_part_threshold, t5_max_sentence_length):
         self.config = config
         self.device = config['device']
+
+        self.model = torch.load(ckpt_filepath, map_location=config['device'])
+        self.model.eval()
+
+        self.dataset = get_dataset(config, train=True)
 
         self.eval_output_path = eval_output_path
         os.makedirs(self.eval_output_path, exist_ok=True)
 
-        self.s_part = copy.deepcopy(self.dataset.s_part)
-        self.e_part = copy.deepcopy(self.dataset.e_part)
+        self.start_token = copy.deepcopy(self.dataset.start_token).to(self.device)
+        self.end_token = copy.deepcopy(self.dataset.end_token).to(self.device)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(config['transformers_name'],
-                                                       cache_dir=config['pretrained_model_cache_dir'])
-        print('load tokenizer')
-        self.text_encoder = T5EncoderModel.from_pretrained(config['transformers_name'],
-                                                           cache_dir=config['pretrained_model_cache_dir'])
-        print('load text encoder')
-
-        if self.device == 'cuda':
-            self.s_part = to_cuda(self.s_part)
-            self.e_part = to_cuda(self.e_part)
+        self.tokenizer = AutoTokenizer.from_pretrained('google-t5/t5-large', cache_dir='cache/t5_cache')
+        self.text_encoder = T5EncoderModel.from_pretrained('google-t5/t5-large', cache_dir='cache/t5_cache').to(self.device)
+        #TODO: check need to do self.text_encoder.eval() or not
+        # self.text_encoder.eval()
+        self.t5_max_sentence_length = t5_max_sentence_length
 
         self.equal_part_threshold = equal_part_threshold
 
-        self.basic_shape_structure = {}
-        self.basic_shape_structure.update(config['part_structure']['non_latent_info'])
-        self.basic_shape_structure.update(config['part_structure']['latent_info'])
+        self.latentcode_evaluator = LatentCodeEvaluator(Path(self.dataset.get_onet_ckpt_path()), 100000, 16, self.device)
 
-        self.generator = Generator3DSimple(device=self.device)
+    def encode_text(self, text):
 
-    def compare_last_part_with_e(self, total_part):
-        result = 0
-        for key in self.basic_shape_structure.keys():
-            result += nn.functional.mse_loss(total_part[key][0, -1, :], self.e_part[key])
-        # print('mse loss', result)
-        return result
-
-    def add_s_part_n_add_pos(self, part_list):
-        # print('part_list', part_list)
-        # print('self.s_part', self.s_part)
-
-        for key in self.basic_shape_structure.keys():
-            if part_list.get(key, None) is not None:
-                part_list[key] = torch.cat((self.s_part[key].unsqueeze(0).unsqueeze(0), part_list[key]), dim=1)
-            else:
-                part_list[key] = self.s_part[key].unsqueeze(0).unsqueeze(0)
-
-        current_length = part_list[key].size(1)
-
-        part_list['dfn'] = torch.tensor([i  for i in range(current_length)], device=self.device).unsqueeze(0)
-        part_list['dfn_fa'] = torch.tensor([0 if i == 0 else i-1  for i in range(current_length)], device=self.device).unsqueeze(0)
-        # print('after part_list', part_list)
-        return part_list
-
-    def generate_mesh_from_latent(self, latent):
-        """
-        latent: (1, latent_dim)
-        """
-        assert latent.size(0) == 1, latent.dim() == 2
+        input_ids = self.tokenizer([text], return_tensors="pt", padding='max_length',
+                                    max_length=self.t5_max_sentence_length).input_ids
+        input_ids = input_ids.to(self.device)
         with torch.no_grad():
-            mesh = self.generator.generate_from_latent(self.latent_decoder, latent)
-        return mesh
+            outputs = self.text_encoder(input_ids)
+        encoded_text = outputs.last_hidden_state.detach()
+        return encoded_text
 
-    def generate_screenshoot_from_mesh(self, mesh):
-        """
-        mesh: Trimesh.mesh
-        """
-        mesh.export('logs/temp-validate.obj')
-        plotter = pv.Plotter()
-        try:
-            pv_mesh = pv.read('logs/temp-validate.obj')
-            plotter.add_mesh(pv_mesh)
-        except ValueError:
-            print('error')
-            pass
-        plotter.show()
-        screenshot = plotter.screenshot()
+    def generate_non_padding_mask(self, len):
+        return torch.ones(1, len).to(self.device)
 
-        return screenshot
+    def is_end_token(self, token):
+        difference = torch.nn.functional.mse_loss(token, self.end_token)
+        return difference < self.equal_part_threshold
 
-    def generate_box_bound(self, parts, meshs):
-        pyrender_mesh = pyrender.Mesh.from_trimesh(meshs[0])
-        scene = pyrender.Scene()
-        scene.add(pyrender_mesh)
-        pyrender.Viewer(scene, use_raymond_lighting=True)
+    def inference(self, text, output_round):
+        print('[1] Inference text: ', text)
+        encoded_text = self.encode_text(text)
+        exist_node = {
+            'fa': torch.tensor([0]).to(self.device),
+            'token': copy.deepcopy(self.start_token).unsqueeze(0).to(self.device),
+        }
+        all_end = False
+        round = 1
+        print('[2] Generate nodes')
+        while not all_end:
+            current_length = exist_node['token'].size(0)
+            print('   - Generate nodes round:', round, ', part count:', exist_node['token'].size(0))
+            with torch.no_grad():
+                output = self.model({
+                                        'fa': exist_node['fa'].unsqueeze(0),        # batched.
+                                        'token': exist_node['token'].unsqueeze(0),
+                                    },
+                                    self.generate_non_padding_mask(current_length).unsqueeze(0),
+                                    encoded_text)[0] # unbatched.
 
-    def genreate_each_mesh(self, total_part):
-        latent = total_part['latent']
-        meshs = []
-        for i in range(latent.size(1) - 1): # do not genreate e_part
-            mesh = self.generate_mesh_from_latent(latent[:, i, :])
+            all_end = True
+            for idx, child_node in enumerate(output):
+                if self.is_end_token(child_node):
+                    continue
+                exist_node['fa'] = torch.cat((exist_node['fa'], torch.tensor([idx]).to(self.device)), dim=0)
+                exist_node['token'] = torch.cat((exist_node['token'], child_node.unsqueeze(0)), dim=0)
+                all_end = False
 
-            screenshot = self.generate_screenshoot_from_mesh(mesh)
-            plt.imshow(screenshot)
-            plt.savefig(os.path.join(self.eval_output_path, f"{i}.png"))
-            print(os.path.join(self.eval_output_path, f"{i}.png"), 'generated')
+        processed_nodes = []
 
-            meshs.append(mesh)
-        return meshs
+        print('[3] Generate mesh')
 
-    def inference(self, idx=None):
-        self.model.eval()
-        count = 0
-        key_padding_mask = torch.ones((1, self.dataset.fix_length), device=self.device, dtype=torch.int16)
-        total_part = self.add_s_part_n_add_pos({})
-        if idx is not None:
-            test_data_sample = self.dataset[idx]
-            enc_data = identity_or_create_tensor(test_data_sample['enc_data']).to(self.device).unsqueeze(0)
-            enc_text = test_data_sample['enc_text']
-        else:
-            enc_text = input("Input prompt for generation: ").strip()
-            input_ids = self.tokenizer([enc_text], return_tensors="pt", padding=True).input_ids
-            outputs = self.text_encoder(input_ids=input_ids)
-            enc_data = outputs.last_hidden_state.to(self.device)
+        for idx in trange(exist_node['fa'].shape[0], desc='   - Generate mesh'):
+            dfn_fa = exist_node['fa'][idx].item()
+            token  = exist_node['token'][idx].cpu().tolist()
+            processed_node = {
+                'dfn': idx,
+                'dfn_fa': dfn_fa,
+            }
+            part_info = untokenize_part_info(token)
 
-        print('runing with prompt:', enc_text)
+            z = torch.tensor(part_info['latent_code']).to(self.device)
+            part_info['mesh'] = self.latentcode_evaluator.generate_mesh(z.unsqueeze(0))
 
-        with torch.no_grad():
-            while True:
-                # print(total_part)
-                total_part, _ = self.model(None, total_part, key_padding_mask[:, :total_part['dfn'].size(1)], enc_data)
-                count += 1
-                total_part = self.add_s_part_n_add_pos(total_part)
-                mse_loss_with_e_part = self.compare_last_part_with_e(total_part)
-                print('MSE Loss with E-part = ', mse_loss_with_e_part)
-                if mse_loss_with_e_part < self.equal_part_threshold:
-                    print('Same token with E-part, end inference.')
-                    break
+            processed_node.update(part_info)
+            processed_nodes.append(processed_node)
 
-        meshs = self.genreate_each_mesh(total_part)
+        output_path = (Path(self.eval_output_path) / f'output-{output_round}.gif')
+        print('[4] Generate Gif: ', output_path.as_posix())
+        generate_gif_toy(processed_nodes[1:], output_path,
+                         bar_prompt="   - Generate Frames")
+        print('[5] Done')
+    
+    def reconstruct(self, text, file_name):
+        json_path = Path(self.eval_output_path) / '1_info'
+        ply_path = Path(self.eval_output_path) / '2_mesh'
+        os.makedirs(json_path, exist_ok=True)
+        os.makedirs(ply_path, exist_ok=True)
 
-        self.generate_box_bound(total_part, meshs)
-        # print(total_part)
+        print('[1] Inference text: ', text)
+        encoded_text = self.encode_text(text)
+        exist_node = {
+            'fa': torch.tensor([0]).to(self.device),
+            'token': copy.deepcopy(self.start_token).unsqueeze(0).to(self.device),
+        }
+        all_end = False
+        round = 1
+        print('[2] Generate nodes')
+        while not all_end:
+            current_length = exist_node['token'].size(0)
+            print('   - Generate nodes round:', round, ', part count:', exist_node['token'].size(0))
+            with torch.no_grad():
+                output = self.model({
+                                        'fa': exist_node['fa'].unsqueeze(0),        # batched.
+                                        'token': exist_node['token'].unsqueeze(0),
+                                    },
+                                    self.generate_non_padding_mask(current_length).unsqueeze(0),
+                                    encoded_text)[0] # unbatched.
 
+            all_end = True
+            for idx, child_node in enumerate(output):
+                if self.is_end_token(child_node):
+                    continue
+                exist_node['fa'] = torch.cat((exist_node['fa'], torch.tensor([idx]).to(self.device)), dim=0)
+                exist_node['token'] = torch.cat((exist_node['token'], child_node.unsqueeze(0)), dim=0)
+                all_end = False
 
+        processed_nodes = []
 
+        print('[3] Generate mesh')
+        for idx in trange(exist_node['fa'].shape[0], desc='   - Generate mesh'):
+            dfn_fa = exist_node['fa'][idx].item()
+            token  = exist_node['token'][idx].cpu().tolist()
+            processed_node = {
+                'dfn': idx + 1,
+                'dfn_fa': dfn_fa + 1,
+            }
+            if processed_node['dfn'] == 1:
+                processed_node['dfn_fa'] = 0
+            part_info = untokenize_part_info(token)
+
+            z = torch.tensor(part_info['latent_code']).to(self.device)
+            # drop part_info['latent_code'] from part_info
+            part_info.pop('latent_code')
+
+            part_info['mesh'] = f'{file_name}_{idx}.ply'
+            gen_mesh = self.latentcode_evaluator.generate_mesh(z.unsqueeze(0))
+            gen_mesh.export(f'{ply_path}/{part_info["mesh"]}')
+
+            processed_node.update(part_info)
+            processed_nodes.append(processed_node)
+        
+        json_path = Path(json_path) / f'{file_name}.json'
+        print('[4] Save json: ', json_path)
+        json_file = {"meta": {}, "part": processed_nodes}
+        with open(json_path, 'w') as f:
+            json.dump(json_file, f, indent=4) 
+
+        print('[5] Done')
+        

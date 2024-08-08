@@ -1,0 +1,1 @@
+python recon.py -c configs/transformer/eval-gen.yaml

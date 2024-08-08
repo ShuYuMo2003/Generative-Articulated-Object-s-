@@ -1,0 +1,1 @@
+python sample_pcl.py --n_thread 1 --info_dir ../logs/test/output/1_info --mesh_dir ../logs/test/output/2_mesh --dst ../logs/test/PCL/gen
