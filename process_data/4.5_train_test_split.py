@@ -9,7 +9,7 @@ import os
 dataset_root_path = Path('../dataset')
 preprocessed_info_path = Path('../dataset/1_preprocessed_info')
 preprocessed_mesh_path = Path('../dataset/1_preprocessed_mesh')
-onet_ds_path = Path('../dataset/2_onet_sdf_dataset/result')
+onet_ds_path = Path('../dataset/2_onet_occ_dataset/result')
 transfomer_ds_path = Path('../dataset/4_transformer_dataset')
 ###
 
@@ -23,8 +23,8 @@ train_keys = []
 def check_filename():
     fonet_set = set()
     for fn in onet_ds_path.glob('*.npz'):
-        file_name = fn.stem        
-        if len(file_name.split('_')) < 2: 
+        file_name = fn.stem
+        if len(file_name.split('_')) < 2:
             print(f'[onet_ds] {file_name} is not a valid file name')
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
@@ -32,7 +32,7 @@ def check_filename():
     ftrans_set = set()
     for fn in transfomer_ds_path.glob('*.json'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             print(f'[transformer_ds] {file_name} is not a valid file name')
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
@@ -45,7 +45,7 @@ def check_filename():
             # print(f'[ds_check] {key} not found in onet dataset')
             match = False
             break
-    if not match:     
+    if not match:
         print("\033[31m[Warning] Onet dataset does not match transformer dataset.\033[0m")
     key_list = list(ftrans_set)
     random.seed(114514)
@@ -60,7 +60,7 @@ def split_preprocessed_info():
     test_count = 0
     for fn in preprocessed_info_path.glob('*.json'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -71,7 +71,7 @@ def split_preprocessed_info():
     check = True
     for fn in preprocessed_info_path.glob('*.json'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -89,7 +89,7 @@ def split_preprocessed_mesh():
     test_count = 0
     for fn in preprocessed_mesh_path.glob('*.ply'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -100,7 +100,7 @@ def split_preprocessed_mesh():
     check = True
     for fn in preprocessed_mesh_path.glob('*.ply'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -118,7 +118,7 @@ def split_onet_ds():
     test_count = 0
     for fn in onet_ds_path.glob('*.npz'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -130,7 +130,7 @@ def split_onet_ds():
     check = True
     for fn in onet_ds_path.glob('*.npz'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -148,7 +148,7 @@ def split_transformer_ds():
     test_count = 0
     for fn in transfomer_ds_path.glob('*.json'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -160,7 +160,7 @@ def split_transformer_ds():
     check = True
     for fn in transfomer_ds_path.glob('*.json'):
         file_name = fn.stem
-        if len(file_name.split('_')) < 2: 
+        if len(file_name.split('_')) < 2:
             continue
         file_key = file_name.split('_')[0]+'_'+file_name.split('_')[1]
         if file_key not in train_keys:
@@ -175,7 +175,7 @@ def check_empty():
     if len(list((preprocessed_info_path / 'test').glob('*.json'))) > 0:
         return False
     if len(list((preprocessed_mesh_path / 'test').glob('*.ply'))) > 0:
-        return False 
+        return False
     if len(list((onet_ds_path / 'test').glob('*.npz'))) > 0:
         return False
     if len(list((transfomer_ds_path / 'test').glob('*.json'))) > 1:

@@ -1,6 +1,7 @@
 import yaml
 import torch
 import wandb
+import trimesh
 import random
 from datetime import datetime
 import argparse
@@ -32,7 +33,7 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 def compute_loss_n_acc(onet, enc_sp, enc_occ_or_sdf, dec_sp, dec_occ_or_sdf):
-    if not _.sdf_dataset:
+    if not _.train_by_sdf:
         logits, kl_loss, mean_z = onet(enc_sp, enc_occ_or_sdf, dec_sp)
         i_loss = F.binary_cross_entropy_with_logits(
                 logits, dec_occ_or_sdf, reduction='none')
@@ -46,22 +47,23 @@ def compute_loss_n_acc(onet, enc_sp, enc_occ_or_sdf, dec_sp, dec_occ_or_sdf):
         acc = ((sdf < 0) == (dec_occ_or_sdf < 0)).float().mean()
     return loss, acc, mean_z
 
-def gen_image_from_latent(sdf_generator, mean_z):
+def gen_image_from_latent(sdf_generator, mean_z, epoch):
     mean_z = mean_z.detach()
     screenshots = []
     for batch_idx in trange(mean_z.size(0), desc='evaluating mesh'):
         stats_dict = dict()
         mesh = sdf_generator.generate_from_latent(mean_z[[batch_idx], ...], stats_dict=stats_dict)
         print(stats_dict)
+        if mesh.vertices.shape[0] == 0:
+            continue
+        mesh.export((eval_mesh_output_path / f'{epoch}_{batch_idx}.obj').as_posix(), file_type='obj')
         plotter = pv.Plotter(off_screen=True)
-        try:
-            plotter.add_mesh(mesh)
-        except ValueError:
-            print('Error in plotter.add_mesh with mesh = ', mesh)
-            pass
+        plotter.add_mesh(mesh)
         plotter.show()
         screenshot = plotter.screenshot()
         screenshots.append(screenshot)
+    if len(screenshots) == 0:
+        return np.zeros((10, 10, 3))
     screenshot = np.concatenate(screenshots, axis=1)
     return screenshot
 
@@ -74,30 +76,33 @@ _ = run.config
 
 # create checkpoint output directory
 strtime = datetime.now().strftime(r'%m-%d-%H-%M-%S')
-Path(_.checkpoint_output).mkdir(exist_ok=True)
 checkpoint_output = Path(_.checkpoint_output) / strtime
-checkpoint_output.mkdir(exist_ok=True)
+checkpoint_output.mkdir(exist_ok=True, parents=True)
+
+eval_mesh_output_path = Path(_.eval_mesh_output_path)
+eval_mesh_output_path.mkdir(exist_ok=True, parents=True)
 
 # set seed
 setup_seed(str2hash(_.seed) & ((1 << 20) - 1))
 
 # load dataset
 from onet.dataset import PartnetMobilityDataset
-train_dataset = PartnetMobilityDataset(_.dataset_root_path, train_ratio=_.train_ratio,
-                                    selected_categories=_.selected_categories, train=True, sdf_dataset=_.sdf_dataset)
+train_dataset = PartnetMobilityDataset(_.dataset_root_path, train=True, sdf_dataset=_.train_by_sdf)
+train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True, num_workers=18)
 
-train_dataloader = DataLoader(train_dataset, batch_size=_.batch_size, shuffle=True, num_workers=12)
+val_dataset = PartnetMobilityDataset(_.dataset_root_path, train=False, sdf_dataset=_.train_by_sdf)
+val_dataloader = DataLoader(val_dataset, batch_size=_.batch_size, shuffle=False, num_workers=18)
 
 # set device
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 print('running on device = ', device)
 
 # set up model
-onet        = ONet(dim_z=_.z_dim, emb_sigma=_.emb_sigma).to(device)
+onet = ONet(dim_z=_.z_dim, emb_sigma=_.emb_sigma).to(device)
 
 # set up generator for visualization
-sdf_generator = Generator3DSDF(model=onet.get_decoder(), device=device, threshold=0,
-                        refinement_step=30, simplify_nfaces=5000, upsampling_steps=5)
+sdf_generator = Generator3DSDF(model=onet.get_decoder(), device=device, threshold=0, positive_inside=True,
+                        refinement_step=40, simplify_nfaces=6000, upsampling_steps=5)
 
 # set up optimizer.
 # @from: https://nlp.seas.harvard.edu/annotated-transformer/#batches-and-masking
@@ -108,51 +113,76 @@ def lr_rate_func(step, factor, warmup, model_size=512):
         model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5))
     )
 
-optimizer = torch.optim.Adam(onet.parameters(), lr=1, betas=config['optimizer']['betas'], eps=config['optimizer']['eps'])
-lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step:
-                                        lr_rate_func(step, config['optimizer']['scheduler_factor'],
-                                                           config['optimizer']['scheduler_warmup']))
+if config['optimizer']['use_warmup']:
+    optimizer = torch.optim.Adam(onet.parameters(), lr=1,
+                                betas=config['optimizer']['betas'],
+                                eps=config['optimizer']['eps'])
 
-losses = []
+    lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer,
+            lr_lambda = lambda step:lr_rate_func(
+                    step,
+                    config['optimizer']['scheduler_factor'],
+                    config['optimizer']['scheduler_warmup'])
+        )
+else:
+    optimizer = torch.optim.Adam(onet.parameters(), lr=config['optimizer']['lr'])
+    lr_scheduler = None
 
 print('training on device = ', device)
 print('train dataset length = ', len(train_dataset))
-best_val_acc = -1
+print('val dataset length = ', len(val_dataset))
+img = np.zeros((10, 10, 3))
 for epoch in tqdm(range(_.total_epoch), desc="Training"):
+    # train
+    train_batch_loss = []
+    train_batch_acc = []
     onet.train()
+    for batch, batched_data in tqdm(enumerate(train_dataloader),
+                                    desc="Batch", total=len(train_dataloader)):
+        batched_data = list(map(lambda x: x.to(device), batched_data))
 
-    batch_loss = []
-    batch_acc = []
-
-    for batch, (enc_sp, enc_occ_or_sdf, dec_sp, dec_occ_or_sdf) in tqdm(enumerate(train_dataloader), desc="Batch", total=len(train_dataloader)):
-        enc_sp = enc_sp.to(device)
-        enc_occ_or_sdf = enc_occ_or_sdf.to(device)
-        dec_sp = dec_sp.to(device)
-        dec_occ_or_sdf = dec_occ_or_sdf.to(device)
-
-        loss, acc, mean_z = compute_loss_n_acc(onet, enc_sp, enc_occ_or_sdf, dec_sp, dec_occ_or_sdf)
+        loss, acc, mean_z_train = compute_loss_n_acc(onet, *batched_data)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        batch_loss.append(loss.item())
-        batch_acc.append(acc.item())
+        train_batch_loss.append(loss.item())
+        train_batch_acc.append(acc.item())
 
-    lr_scheduler.step()
+    # validation
+    validate_batch_loss = []
+    validate_batch_acc = []
+    onet.eval()
+    for batch, batched_data in tqdm(enumerate(val_dataloader),
+                                    desc="Validation", total=len(val_dataloader)):
+        batched_data = list(map(lambda x: x.to(device), batched_data))
 
-    img = gen_image_from_latent(sdf_generator, mean_z[:5])
+        with torch.no_grad():
+            loss, acc, mean_z = compute_loss_n_acc(onet, *batched_data)
+
+        validate_batch_loss.append(loss.item())
+        validate_batch_acc.append(acc.item())
+
+    if lr_scheduler is not None:
+        lr_scheduler.step()
+
+    if epoch % 10 == 0:
+        img = gen_image_from_latent(sdf_generator, mean_z_train[:5], epoch)
 
     info = {
-        'train_loss' : torch.tensor(batch_loss).mean(),
-        'train_acc' : torch.tensor(batch_acc).mean(),
-        'val_img' : wandb.Image(img, caption='validation image: val[0]'),
+        'train_loss' : torch.tensor(train_batch_loss).mean(),
+        'train_acc' : torch.tensor(train_batch_acc).mean(),
+        'val_loss' : torch.tensor(validate_batch_loss).mean(),
+        'val_acc' : torch.tensor(validate_batch_acc).mean(),
+        'img' : wandb.Image(img, caption='validation image: val[0]'),
         'lr': optimizer.param_groups[0]['lr']
     }
 
     wandb.log(info)
     print(f'epoch {epoch} ', info)
     if epoch % 20 == 0:
-        acc = torch.tensor(batch_acc).mean().item()
-        savepath = (checkpoint_output / f'{acc}-{epoch}.ptn').as_posix()
+        acc = torch.tensor(train_batch_acc).mean().item()
+        savepath = (checkpoint_output / f'{epoch}-{acc}.ptn').as_posix()
         torch.save(onet, savepath)

@@ -26,23 +26,18 @@ class Decoder(nn.Module):
         leaky (bool): whether to use leaky ReLUs
     '''
 
-    def __init__(self, dim=3, z_dim=128, c_dim=128, hidden_size=128, emb_sigma=12.):
+    def __init__(self, dim=3, z_dim=128, hidden_size=128, emb_sigma=12.):
         super().__init__()
         self.z_dim = z_dim
-        self.c_dim = c_dim
 
         self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=hidden_size * 2, d_in=dim, emb_sigma=emb_sigma)
 
         # Submodules
-        self.fc_p_0 = nn.Linear(hidden_size * 2, hidden_size * 2)
         self.acti = nn.GELU()
         self.fc_p_1 = nn.Linear(hidden_size * 2, hidden_size)
 
         if not z_dim == 0:
             self.fc_z = nn.Linear(z_dim, hidden_size)
-
-        if not c_dim == 0:
-            self.fc_c = nn.Linear(c_dim, hidden_size)
 
         self.block0 = ResnetBlockFC(hidden_size)
         self.block1 = ResnetBlockFC(hidden_size)
@@ -59,18 +54,12 @@ class Decoder(nn.Module):
         batch_size, T, D = p.size()
 
         p = self.fourier_feature(p)
-        # p = self.fc_p_0(p)
-        # p = self.acti(p)
         net = self.fc_p_1(p)
 
 
         if self.z_dim != 0:
             net_z = self.fc_z(z).unsqueeze(1)
             net = net + net_z
-
-        if self.c_dim != 0:
-            net_c = self.fc_c(c).unsqueeze(1)
-            net = net + net_c
 
         net = self.block0(net)
         net = self.block1(net)

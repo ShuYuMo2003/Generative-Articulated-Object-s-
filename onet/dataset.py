@@ -6,20 +6,15 @@ from pathlib import Path
 from transformer.utils import str2hash
 
 class PartnetMobilityDataset(Dataset):
-    def __init__(self, path:str, train_ratio:float,
-                 train:bool, selected_categories:list[str],
-                 sdf_dataset:bool,
-                 return_path_name=False):
+    def __init__(self, path:str, train:bool, sdf_dataset:bool, return_path_name=False):
         super().__init__()
-        assert 0 <= train_ratio <= 1
-        selector = ((lambda x : str2hash(x) % 100 <  train_ratio * 100) if train
-              else (lambda x : str2hash(x) % 100 >= train_ratio * 100))
 
-        self.files = list(glob(str(Path(path) / f'result' / '*.npz')))
-        if '*' not in selected_categories:
-            self.files = list(filter(lambda x : x.split('/')[-1].split('_')[0] in selected_categories, self.files))
+        npzs_path = Path(path) / 'result'
+        if not train:
+            npzs_path = Path(path) / 'result' / 'test'
+
+        self.files = list(npzs_path.glob('*.npz'))
         self.files.sort()
-        self.files = list(filter(selector, self.files))
         self.return_path_name = return_path_name
         self.sdf_dataset = sdf_dataset
 

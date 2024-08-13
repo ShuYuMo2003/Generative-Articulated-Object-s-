@@ -18,21 +18,17 @@ class Encoder(nn.Module):
 
     Args:
         z_dim (int): dimension if output code z
-        c_dim (int): dimension of latent conditioned code c
+        # c_dim (int): dimension of latent conditioned code c
         dim (int): input dimension
         leaky (bool): whether to use leaky ReLUs
     '''
-    def __init__(self, z_dim=128, c_dim=128, dim=3, emb_sigma=12.):
+    def __init__(self, z_dim=128, dim=3, emb_sigma=12.):
         super().__init__()
         self.z_dim = z_dim
-        self.c_dim = c_dim
 
         # Submodules
         self.fourier_feature = GaussianFourierFeatureEmbedding(d_emb=z_dim * 2, d_in=dim, emb_sigma=emb_sigma)
         self.fc_pos_1 = nn.Linear(z_dim * 2, z_dim)
-
-        if c_dim != 0:
-            self.fc_c = nn.Linear(c_dim, 128)
 
         self.fc_0 = nn.Linear(1, z_dim)
         self.fc_1 = nn.Linear(z_dim, z_dim)
@@ -44,26 +40,15 @@ class Encoder(nn.Module):
         self.actvn = nn.GELU()
         self.pool = maxpool
 
-        # if not leaky:
-        #     self.actvn = F.relu
-        #     self.pool = maxpool
-        # else:
-        #     self.actvn = F.leaky_relu
-        #     self.pool = torch.mean
 
     def forward(self, p, x, c=None, **kwargs):
         batch_size, T, D = p.size()
 
         # output size: B x T X F
         p = self.fourier_feature(p)
-        # p = self.fc_pos_0(p)
-        # p = self.pos_acti(p)
         p = self.fc_pos_1(p)
         x = self.fc_0(x.unsqueeze(-1))
         net = x + p
-
-        if self.c_dim != 0:
-            net = net + self.fc_c(c).unsqueeze(1)
 
         net = self.fc_1(self.actvn(net))
         pooled = self.pool(net, dim=1, keepdim=True).expand(net.size())

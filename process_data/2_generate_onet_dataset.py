@@ -15,9 +15,9 @@ import numpy as np
 
 manifold_path = Path('../third_party/ManifoldPlus/build/manifold')
 
-total_number_of_sample_point = 100000
-uniform_sample_ratio = 0.6
-surface_point_sigma = 0.015
+total_number_of_sample_point = None
+uniform_sample_ratio = None
+surface_point_sigma = 0.02
 points_padding = 0.05
 
 def create_folder(*paths):
@@ -59,7 +59,6 @@ def obj_to_wtobj_by_pcu(obj_file, wt_obj_file):
     # print('done')
     return "Done"
 
-
 def obj_to_wtobj_by_pcu_vf(obj_file):
     import point_cloud_utils as pcu
 
@@ -76,7 +75,6 @@ def obj_to_wtobj_by_pcu_vf(obj_file):
 
     # print('save watertight obj file', wt_obj_file)
     return vw, fw
-
 
 # @see: https://www.fwilliams.info/point-cloud-utils/sections/mesh_sdf/
 def wtobj_to_sdf_by_pcu(wt_obj_file, sdf_file, sdf_type):
@@ -124,9 +122,10 @@ def wtobj_to_sdf_by_libmesh(wt_obj_file, sdf_file):
     sys.path.append('..')
     from utils.libmesh import check_mesh_contains
 
+    print(wt_obj_file.as_posix())
     wt_obj = trimesh.load_mesh(
-        open(wt_obj_file.as_posix(), 'r'),
-        file_type='obj'
+        open(wt_obj_file.as_posix(), 'rb'),
+        file_type='ply'
     )
 
     if not wt_obj.is_watertight:
@@ -284,11 +283,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate SDF from mesh files.')
     parser.add_argument('--wt_method', type=str, default='pcu', choices=['pcu', 'manifold'], help='Method for watertight conversion')
     parser.add_argument('--sdf_method', type=str, default='pcu', choices=['pcu', 'mesh_to_sdf', 'libmesh'], help='Method for SDF generation')
-    parser.add_argument('--sdf_type', type=str, default='sdf', choices=['occ', 'sdf'], help='Type of SDF')
+    parser.add_argument('--sdf_type', type=str, default='occ', choices=['occ', 'sdf'], help='Type of SDF')
     parser.add_argument('--clear_temp_file', type=bool, default=False, help='Clear temp files')
+
+    parser.add_argument('--n_point_each', type=int, required=True, help='Number of points for each mesh')
+    parser.add_argument('--uniform_sample_ratio', type=float, required=True, help='Uniform sample ratio')
     parser.add_argument('--n_process', type=int, required=True, help='Number of process')
 
     args = parser.parse_args()
+
+    total_number_of_sample_point = args.n_point_each
+    uniform_sample_ratio = args.uniform_sample_ratio
+
+
 
     shutil.rmtree('../dataset/2_onet_{args.sdf_type}_dataset', ignore_errors=True)
     all_ply_files = list(filter(lambda x : x.as_posix()[-3:] == 'ply',

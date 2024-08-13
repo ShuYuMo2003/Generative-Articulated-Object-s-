@@ -10,8 +10,8 @@ class ONet(nn.Module):
     def __init__(self, dim_z, emb_sigma):
         super().__init__()
 
-        self.encoder = Encoder(z_dim=dim_z, c_dim=0, emb_sigma=emb_sigma)
-        self.decoder = Decoder(z_dim=dim_z, c_dim=0, emb_sigma=emb_sigma, hidden_size=dim_z)
+        self.encoder = Encoder(z_dim=dim_z, emb_sigma=emb_sigma)
+        self.decoder = Decoder(z_dim=dim_z, emb_sigma=emb_sigma, hidden_size=dim_z)
         self.dim_z = dim_z
 
     def get_decoder(self):

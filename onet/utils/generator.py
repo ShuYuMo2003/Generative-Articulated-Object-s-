@@ -31,6 +31,7 @@ class Generator3DSDF(object):
         sample (bool): whether z should be sampled
         simplify_nfaces (int): number of faces the mesh should be simplified to
         preprocessor (nn.Module): preprocessor for inputs
+        positive_inside (bool): whether the inside/outside should be flipped. positive value mean inside.
     '''
 
     def __init__(self, model, points_batch_size=100000,
@@ -38,7 +39,7 @@ class Generator3DSDF(object):
                  resolution0=16, upsampling_steps=3,
                  with_normals=False, padding=0.1, sample=False,
                  simplify_nfaces=None,
-                 preprocessor=None):
+                 preprocessor=None, positive_inside=True):
         self.model = model
         self.points_batch_size = points_batch_size
         self.refinement_step = refinement_step
@@ -51,6 +52,7 @@ class Generator3DSDF(object):
         self.sample = sample
         self.simplify_nfaces = simplify_nfaces
         self.preprocessor = preprocessor
+        self.positive_inside = positive_inside
 
     def generate_from_latent(self, z, c=None, stats_dict={}, **kwargs):
         ''' Generates mesh from latent.
@@ -121,7 +123,8 @@ class Generator3DSDF(object):
             # [SYM]: when sdf < 0 means inside the object,
             # but for original code which the output of the model is the logits of occupancy,
             # the sign is opposite.
-            occ_hat = - occ_hat
+            if not self.positive_inside:
+                occ_hat  = - occ_hat
 
             occ_hats.append(occ_hat.squeeze(0).detach().cpu())
 
