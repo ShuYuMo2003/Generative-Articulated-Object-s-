@@ -11,4 +11,3 @@ if __name__ == '__main__':
 
     for shape_path in shapes_path:
         generate_combined_mesh_n_texture(shape_path)
-        break

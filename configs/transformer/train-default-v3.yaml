@@ -50,18 +50,18 @@ part_structure:
   joint_data_origin: 3
   joint_data_direction: 3
   limit: 4
-  latent_code: 128
+  latent_code: 768
 
 # Global Model Parameters
 model_parameter:
-  tokenizer_hidden_dim: 2048
+  tokenizer_hidden_dim: 4096
 
-  d_token: 144 # 6 + 3 + 3 + 4 + 128
+  d_token: 784 # 6 + 3 + 3 + 4 + 768
   n_head: 8
   n_layer: 8
-  d_model: 512
+  d_model: 1024
   decoder_dropout: 0.1
-  dim_gru_single_emb: 64
+  dim_gru_single_emb: 128
 
   position_embedding_dropout: 0.1
 

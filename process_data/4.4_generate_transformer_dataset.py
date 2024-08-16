@@ -8,12 +8,16 @@ from rich import print
 from glob import glob
 from pathlib import Path
 from tqdm import tqdm
+from torch.utils.data import DataLoader
 
 sys.path.append('..')
-from onet.dataset import PartnetMobilityDataset
+from gensdf.dataset import GenSDFDataset
+from utils import to_cuda
 from utils.utils import (tokenize_part_info, generate_special_tokens,
                             HighPrecisionJsonEncoder)
 from transformer.utils import str2hash
+
+from utils.logging import Log, console
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -30,53 +34,52 @@ def determine_latentcode_encoder():
     # onets_ckpt_paths.sort(key=lambda x: -float(x.split('/')[-1].split('-')[0]))
 
     # best_ckpt_path = onets_ckpt_paths[0]
-    best_ckpt_path = '../checkpoints/onet_sdf/0.7569100260734558-700.ptn'
-    print('Using best ckpt:', best_ckpt_path)
 
-    onet = torch.load(best_ckpt_path)
-    return onet
+    best_ckpt_path = '../checkpoints/gensdf/08-15-22-58-51/1150.pth'
+    Log.info('Using best ckpt: %s', best_ckpt_path)
 
-def evaluate_latent_codes(onet):
-    dataset = PartnetMobilityDataset(
-            path='../dataset/2_onet_sdf_dataset',
-            train_ratio=0,
-            train=False,
-            selected_categories=['*'],
-            return_path_name=True,
-            sdf_dataset=True,
-        )
-    dataloader = torch.utils.data.DataLoader(
-            dataset,
-            batch_size=8,
-            shuffle=False,
-            num_workers=0,
+    gensdf = torch.load(best_ckpt_path)
+    return gensdf
+
+def evaluate_latent_codes(gensdf):
+    dataloader = DataLoader(
+            GenSDFDataset(
+                    dataset_dir=Path('../dataset/2_gensdf_dataset'), train=True,
+                    samples_per_mesh=16000, pc_size=4096,
+                    uniform_sample_ratio=0.3,
+                    cache_size=2000
+                ),
+            batch_size=30, num_workers=22, pin_memory=True, persistent_workers=True
         )
 
-    onet.eval()
-    onet = onet.to(device)
+    gensdf.eval()
+    gensdf = gensdf.to(device)
 
     path_to_latent = {}
+    for batch, batched_data in tqdm(enumerate(dataloader),
+                                    desc=f'Evaluating Latent Code', total=len(dataloader)):
+        x = to_cuda(batched_data)
 
-    for i, (enc_samplepoints, enc_occ, dec_samplepoints, dec_occ, path_name) in               \
-                tqdm(enumerate(dataloader), desc="Evaluating latent codes", total=len(dataloader)):
-        enc_samplepoints = enc_samplepoints.to(device)
-        enc_occ = enc_occ.to(device)
-        dec_samplepoints = dec_samplepoints.to(device)
-        dec_occ = dec_occ.to(device)
+        xyz = x['xyz'] # (B, N, 3)
+        gt = x['gt_sdf'] # (B, N)
+        pc = x['point_cloud'] # (B, 1024, 3)
 
-        mean_z, logstd_z = onet.encoder(enc_samplepoints, enc_occ)
-        # print("path_name = ", path_name)
+        with torch.no_grad():
+            plane_features = gensdf.sdf_model.pointnet.get_plane_features(pc)
+            original_features = torch.cat(plane_features, dim=1)
+            out = gensdf.vae_model(original_features) # out = [self.decode(z), input, mu, log_var, z]
 
-        for batch in range(mean_z.shape[0]):
-            latent = mean_z[batch, ...]
+        z = out[-1]
+
+        for batch in range(z.shape[0]):
+            latent = z[batch, ...]
             latent_numpy = latent.detach().cpu().numpy()
-            path = path_name[batch]
-            path = path.split('/')[-1]
-            path = Path(path).stem + ".ply"
+            path = x['filename'][batch]
+            path = Path(path).stem.replace('.sdf', '') + ".ply"
             path_to_latent[path] = latent_numpy
+            # Log.info(f"Latent code for {path} is {latent_numpy.shape}")
 
-    # print('path_to_latent', path_to_latent)
-
+    Log.info('Latent code evaluation done. count = %s', len(path_to_latent))
     return path_to_latent
 
 def process(shape_info_path:Path, transformer_dataset_path:Path, encoded_text_paths:list[Path], path_to_latent:dict):
@@ -187,9 +190,9 @@ if __name__ == '__main__':
     shutil.rmtree(transformer_dataset_path, ignore_errors=True)
     transformer_dataset_path.mkdir(exist_ok=True)
 
-    shape_info_paths = list(map(Path, glob('../dataset/1_preprocessed_info/*')))
-    onet = determine_latentcode_encoder()
-    path_to_latent = evaluate_latent_codes(onet)
+    shape_info_paths = list(map(Path, glob('../dataset/1_preprocessed_info/*.json')))
+    gensdf = determine_latentcode_encoder()
+    path_to_latent = evaluate_latent_codes(gensdf)
 
     encoded_text_path = Path('../dataset/4_screenshot_description_encoded')
     encoded_text_paths = list(map(Path, glob((encoded_text_path / '*').as_posix())))
@@ -200,7 +203,9 @@ if __name__ == '__main__':
         status = process(shape_info_path, transformer_dataset_path, encoded_text_paths, path_to_latent)
         if "Success" not in status:
             failed.append((shape_info_path.stem, status))
-        print(shape_info_path.as_posix(), status)
+            Log.error("%s: %s", shape_info_path.as_posix(), status)
+        else:
+            Log.info("%s: %s", shape_info_path.as_posix(), status)
 
     with open(transformer_dataset_path / 'meta.json', 'w') as f:
         json.dump({
@@ -211,6 +216,6 @@ if __name__ == '__main__':
             'best_ckpt_path': best_ckpt_path.replace('../', ''),
         }, f, cls=HighPrecisionJsonEncoder, indent=2)
 
-    print('Failed:', failed)
-    print('Failed count:', len(failed))
+    Log.critical('Failed count: %s', len(failed))
+    Log.critical('Failed: %s', failed)
 

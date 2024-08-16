@@ -51,9 +51,9 @@ def knn(Mxx, Mxy, Myy, k, sqrt=False):
 
 def eval_instantiation_distance(gen_name, ref_name, N_states=10, N_pcl=2048):
     results = {}
-    rs_fn = f"../log/test/ID_D_matrix/{gen_name}_{ref_name}_{N_states}_{N_pcl}.npz"
-    rr_fn = f"../log/test/ID_D_matrix/{ref_name}_{ref_name}_{N_states}_{N_pcl}.npz"
-    ss_fn = f"../log/test/ID_D_matrix/{gen_name}_{gen_name}_{N_states}_{N_pcl}.npz"
+    rs_fn = f"../logs/test/ID_D_matrix/{gen_name}_{ref_name}_{N_states}_{N_pcl}.npz"
+    rr_fn = f"../logs/test/ID_D_matrix/{ref_name}_{ref_name}_{N_states}_{N_pcl}.npz"
+    ss_fn = f"../logs/test/ID_D_matrix/{gen_name}_{gen_name}_{N_states}_{N_pcl}.npz"
     M_rs = torch.from_numpy(np.load(rs_fn)["D"])
     M_rr = torch.from_numpy(np.load(rr_fn)["D"])
     M_ss = torch.from_numpy(np.load(ss_fn)["D"])

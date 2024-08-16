@@ -9,7 +9,7 @@ import os
 dataset_root_path = Path('../dataset')
 preprocessed_info_path = Path('../dataset/1_preprocessed_info')
 preprocessed_mesh_path = Path('../dataset/1_preprocessed_mesh')
-onet_ds_path = Path('../dataset/2_onet_occ_dataset/result')
+onet_ds_path = Path('../dataset/2_gensdf_dataset/result')
 transfomer_ds_path = Path('../dataset/4_transformer_dataset')
 ###
 

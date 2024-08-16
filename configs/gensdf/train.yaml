@@ -1,0 +1,38 @@
+seed: 1234567
+usewandb: True
+
+dataloader:
+  batch_size: 30
+  n_workers: 22
+
+  dataset_dir: dataset/2_gensdf_dataset
+  samples_per_mesh: 16000
+  pc_size: 4096
+  uniform_sample_ratio: 0.3
+  cache_size: 2000
+
+SdfModelSpecs:
+  tanh_act: False
+  skip_connection: True
+  hidden_dim: 512
+  latent_dim: 256
+  pn_hidden_dim: 128
+  num_layers: 9
+
+evaluation:
+  max_batch: 262144  # 2^18
+  resolution: 128
+  count: 10
+  freq: 60
+
+
+eval_mesh_output_path: logs/gensdf/meshes
+
+num_epochs: 100001
+kld_weight: 1.0e-03
+latent_std: 0.25
+
+checkpoint_output: checkpoints/gensdf
+save_checkpoint_freq: 50 # epcho
+
+sdf_lr: 0.0001

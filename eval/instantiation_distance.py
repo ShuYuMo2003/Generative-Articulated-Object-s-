@@ -156,10 +156,12 @@ if __name__ == "__main__":
         "--gen",
         # default="../log/test/K_8_cate_all_gt_samples",
         default="../logs/test/PCL/gen",
+        # default="../logs/test/PCL/gt",
     )
     arg_parser.add_argument(
         "--ref",
-        default="../logs/test/PCL/gt",
+        # default="../logs/test/PCL/gt",
+        default="../logs/test/PCL/gen",
     )
     arg_parser.add_argument(
         "--save_dir",
