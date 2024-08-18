@@ -7,21 +7,21 @@ from rich import print
 from tqdm import tqdm
 from pathlib import Path
 from torch.nn import functional as F
+from torch.utils.data import DataLoader
 
 from transformer.utils import to_cuda
-from torch.utils.data import DataLoader
 from transformer.model import get_decoder
 from transformer.loaddataset import get_dataset
 
-from utils.evaluators import LatentCodeEvaluator
+from utils.evaluators import GenSDFLatentCodeEvaluator
+from utils.logging import Log, console
 
 torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch,
                  ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
-                 scheduler_warmup, latent_code_loss_ratio, n_pointsample_for_evaluate,
-                 onet_batch_size):
+                 scheduler_warmup, latent_code_loss_ratio):
 
         self.n_epoch = n_epoch
         self.per_epoch_save = per_epoch_save
@@ -36,21 +36,24 @@ class Trainer():
         self.train_dataloader = DataLoader(self.train_dataset, **config['dataloader']['args'])
 
         self.evaluate_dataset = get_dataset(config, train=False)
-        print('evaluate_dataset = ', len(self.evaluate_dataset))
+        Log.info('evaluate_dataset = %s.', len(self.evaluate_dataset))
         self.evaluate_dataloader = DataLoader(self.evaluate_dataset, **config['evaluate_dataloader']['args'])
-
-        self.latentcode_evaluator = LatentCodeEvaluator(Path(self.train_dataset.get_onet_ckpt_path()),
-                                                        n_pointsample_for_evaluate,
-                                                        onet_batch_size,
-                                                        self.device)
 
         self.d_model = config['model_parameter']['d_model']
         self.wandb_instance = wandb_instance
         self.called = False
 
-
         self.latent_code_loss_ratio = latent_code_loss_ratio
         assert 0 <= self.latent_code_loss_ratio <= 1, 'latent_code_loss_ratio should be in [0, 1]'
+
+        e_config = config['evaluator']
+        self.latent_code_evaluator = GenSDFLatentCodeEvaluator(
+            gensdf_model_path=Path(self.train_dataset.get_onet_ckpt_path()),
+            eval_mesh_output_path=Path(e_config['eval_mesh_output_path']),
+            resolution=e_config['resolution'],
+            max_batch=e_config['max_batch'],
+            device=self.device
+        )
 
         # lr: not important, will be overriden by the scheduler
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1, betas=betas, eps=float(eps))
@@ -95,14 +98,14 @@ class Trainer():
         return loss, loss_latent, loss_other
 
     def save_checkpoint(self, epoch):
-        print('save checkpoint at epoch', epoch, '...', end='')
+        Log.info('save checkpoint at epoch %s', epoch)
         ckptpath = self.ckpt_save_name.format(epoch=epoch)
         os.makedirs(os.path.dirname(ckptpath), exist_ok=True)
         torch.save(self.model, ckptpath)
-        print('done')
+        Log.info('done, save checkpoint at epoch %s, %s', epoch, ckptpath)
 
     def feed_to_wandb(self, args):
-        print(args)
+        Log.info('%s', args)
         if self.wandb_instance:
             self.wandb_instance.log(args)
 
@@ -128,11 +131,11 @@ class Trainer():
             train_losses['loss'].append(loss.item())
             train_losses['loss_latent'].append(loss_latent.item())
             train_losses['loss_pred'].append(loss_pred.item())
-            print({
-                    'loss': loss.item(),
-                    'loss_latent': loss_latent.item(),
-                    'loss_pred': loss_pred.item(),
-                })
+            # print({
+            #         'loss': loss.item(),
+            #         'loss_latent': loss_latent.item(),
+            #         'loss_pred': loss_pred.item(),
+            #     })
         return train_losses
 
     def evaluate_shape_acc(self):
@@ -142,11 +145,9 @@ class Trainer():
         predicted_output = []
         valid_output_mask = []
 
-        # print('evaluate_dataset = ', len(self.evaluate_dataset))
-
         with torch.no_grad():
             for idx, batched_data in tqdm(enumerate(self.evaluate_dataloader),
-                                                    desc='evaluating',
+                                                    desc='Evaluating',
                                                     total=len(self.evaluate_dataloader)):
 
                 if self.device == 'cuda':
@@ -165,19 +166,13 @@ class Trainer():
         predicted_output = torch.cat(predicted_output, dim=0)
         valid_output_mask = torch.cat(valid_output_mask, dim=0)
 
-        # print('valid_output_mask = ', valid_output_mask.shape, 'cnt = ', valid_output_mask.astype(torch.int).sum())
-
         dim_latent_code = self.input_structure['latent_code']
 
         expected_latentcode_output = expected_output[:, :, -dim_latent_code:]
         predicted_latentcode_output = predicted_output[:, :, -dim_latent_code:]
 
-        acc = self.latentcode_evaluator.get_accuracy(predicted_latentcode_output,
-                                                     expected_latentcode_output,
-                                                     valid_output_mask)
-
-        pred_images = self.latentcode_evaluator.screenshoot(predicted_latentcode_output, valid_output_mask, 5)
-        gt_images = self.latentcode_evaluator.screenshoot(expected_latentcode_output, valid_output_mask, 5)
+        pred_images = self.latent_code_evaluator.screenshoot(predicted_latentcode_output, valid_output_mask, 5)
+        gt_images = self.latent_code_evaluator.screenshoot(expected_latentcode_output, valid_output_mask, 5)
         images = []
 
         for pred_img, gt_img in zip(pred_images, gt_images):
@@ -186,7 +181,7 @@ class Trainer():
 
         total_image = np.concatenate([image for image in images], axis=1)
 
-        return acc, total_image
+        return total_image
 
     def __call__(self):
         assert not self.called, 'Trainer can only be called once'
@@ -198,7 +193,7 @@ class Trainer():
 
             self.lr_scheduler.step()
 
-            shape_acc, total_image = self.evaluate_shape_acc()
+            total_image = self.evaluate_shape_acc()
 
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
@@ -208,7 +203,6 @@ class Trainer():
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
-                'shape_acc': shape_acc,
                 'shape_image': wandb.Image(total_image, caption='shape image'),
             }
             self.feed_to_wandb(log_data)

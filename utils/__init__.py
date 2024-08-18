@@ -11,3 +11,11 @@ def to_cuda(obj):
         return (to_cuda(v) for v in obj)
     else:
         return obj
+
+import random
+import string
+
+def generate_random_string(length):
+    characters = 'abcdefghijklmnopqrstuvwxyz' + '0123456789'
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string

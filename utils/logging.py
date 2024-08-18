@@ -5,7 +5,7 @@ from rich.console import Console
 console = Console()
 
 logging.basicConfig(
-    level="NOTSET",
+    level=logging.INFO,
     format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(rich_tracebacks=True, console=console)],

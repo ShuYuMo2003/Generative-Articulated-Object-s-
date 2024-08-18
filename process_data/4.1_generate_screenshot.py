@@ -16,6 +16,7 @@ from multiprocessing import Pool, cpu_count
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
+from utils.generate_obj_pic import generate_obj_pics
 
 # def generate_screen_shot(obj_parts):
 #     dfn_to_parts = {

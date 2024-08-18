@@ -1,18 +1,34 @@
 import os
 import bpy
+import math
 import numpy as np
 from mathutils import Vector
 
 bpy.context.preferences.view.language = 'en_US'
 bpy.context.preferences.view.use_translate_interface = True
 
-resolution_x, resolution_y = (1600, 1800)
+resolution_x, resolution_y = (1024, 1024)
 resolution_percentage = 100
 
 PI = 3.14159265357389
 
+r, azimuth, elevation = float('{{r}}'), float('{{azimuth}}'), float('{{elevation}}')
+
+def spherical_to_cartesian(r, azimuth, elevation):
+    '''
+        azimuth, elevation are in degree.
+    '''
+    azimuth_rad = math.radians(azimuth)
+    elevation_rad = math.radians(elevation)
+
+    x = r * math.cos(elevation_rad) * math.cos(azimuth_rad)
+    y = r * math.cos(elevation_rad) * math.sin(azimuth_rad)
+    z = r * math.sin(elevation_rad)
+
+    return x, y, z
+
 class CameraParameters:
-    location = Vector((2.7502, -6.9099, 4.0388))
+    location = Vector(spherical_to_cartesian(r, azimuth, elevation))
     lens = 200.0
     sensor_width = 36
     type = 'PERSP'
@@ -24,12 +40,14 @@ class CameraParameters:
         camera.data.sensor_width = cls.sensor_width
         camera.data.type = cls.type
 
-def focus_object(camera, obj):
+def focus_object(obj0, obj):
+    '''
+        make obj0 focus on obj
+    '''
     obj_center = sum((Vector(b) for b in obj.bound_box), Vector()) / 8
-
-    direction = obj_center - camera.location
+    direction = obj_center - obj0.location
     rot_quat = direction.to_track_quat('-Z', 'Y')
-    camera.rotation_euler = rot_quat.to_euler()
+    obj0.rotation_euler = rot_quat.to_euler()
 
 def check_obj_bound(obj):
     vertices = [obj.matrix_world @ v.co for v in obj.data.vertices]
@@ -41,7 +59,7 @@ def check_obj_bound(obj):
     max_z = max(vertices, key=lambda v: v.z).z
     return min_x, max_x, min_y, max_y, min_z, max_z
 
-def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
+def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu: bool, transparent_bg: bool):
     try: bpy.ops.object.mode_set(mode='OBJECT')
     except RuntimeError: pass
     # Delete all existing objects
@@ -76,29 +94,43 @@ def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.transform_apply(location=True)
 
+    if transparent_bg:
+        # Make background transparent
+        bpy.context.scene.render.film_transparent = True
+
     # Load Background Mesh.
     bpy.ops.wm.ply_import(filepath=bg_ply_path)
     bpy.ops.object.shade_smooth()
 
-    ## Add Materials To BG Mesh.
+    # Add Materials To BG Mesh.
     bgmat = bpy.data.materials.new(name='bgmat')
     bgobj = bpy.context.active_object
     bgobj.data.materials.append(bgmat)
     bgmat.use_nodes = True
     edit_node = bgmat.node_tree.nodes["Principled BSDF"]
-
     edit_node.inputs['Base Color'].default_value = (1, 1, 1, 1) #(0.800204, 0.689428, 0, 1)
     edit_node.inputs['Metallic'].default_value = 0.444109
     edit_node.inputs['Roughness'].default_value = 0.208096
     edit_node.distribution = 'GGX'
     edit_node.inputs['Emission Strength'].default_value = 1.0
 
+    if transparent_bg:
+        # Open Shadow Catcher, Only show its shadow.
+        bpy.context.object.is_shadow_catcher = True
+
     # Add Lights
-    ## TOP
-    bpy.ops.object.light_add(type='POINT', location=(0, 0, 2))
+    ## Point Light
+    bpy.ops.object.light_add(type='POINT', location=(1, 1, 2))
     light = bpy.context.active_object
-    light.data.energy = 100
+    light.data.energy = 200
+    focus_object(light, obj)
+
+    ## Plain Light
+    bpy.ops.object.light_add(type='AREA', location=(0, 0, 2))
+    light = bpy.context.active_object
+    light.data.energy = 80
     light.rotation_euler = (PI, 0, 0)
+
 
     # Add new camera
     bpy.ops.object.camera_add()
@@ -127,9 +159,7 @@ def render_shape_blender(objs_path, bg_ply_path, output_path, use_gpu):
 
 
 if __name__ == '__main__':
-    objs_path = "../dataset/raw/2780/textured_objs"
-    bg_ply_path = "bg.ply"
-    output_path = "render_output.png"
-    render_shape_blender(objs_path, bg_ply_path, output_path, True)
-
-    # /root/blender-git/blender-4.2.0-linux-x64/blender --background --cycles-device CUDA --python blender_render.py
+    objs_path = "{{objs_path}}" # "D:\\Research\\data\\2780\\textured_objs"
+    bg_ply_path = "{{bg_ply_path}}" # "D:\\Research\\bg.ply"
+    output_path = "{{output_path}}" # "render_output.png"
+    render_shape_blender(objs_path, bg_ply_path, output_path, True, True)

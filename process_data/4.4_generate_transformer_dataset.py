@@ -35,7 +35,7 @@ def determine_latentcode_encoder():
 
     # best_ckpt_path = onets_ckpt_paths[0]
 
-    best_ckpt_path = '../checkpoints/gensdf/08-15-22-58-51/1150.pth'
+    best_ckpt_path = '../checkpoints/gensdf/08-16-17-52-04/800.pth'
     Log.info('Using best ckpt: %s', best_ckpt_path)
 
     gensdf = torch.load(best_ckpt_path)

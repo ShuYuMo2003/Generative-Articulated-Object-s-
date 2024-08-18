@@ -71,7 +71,7 @@ def eval_instantiation_distance(gen_name, ref_name, N_states=10, N_pcl=2048):
     final_results = {
         "1-NN-ID-acc": results["1-NN-ID-acc"],
         "lgan_mmd-ID": results["lgan_mmd-ID"],
-        "lgam_cov-ID": results["lgan_cov-ID"],
+        "lgan_cov-ID": results["lgan_cov-ID"],
     }
     # final_results = {
     #     "1-NN-ID-acc": float(results["1-NN-ID-acc"]),
