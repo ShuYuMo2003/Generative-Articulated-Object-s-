@@ -6,7 +6,7 @@ import numpy as np
 from rich import print
 from tqdm import tqdm
 from pathlib import Path
-from torch.nn import functional as F
+from datetime import datetime
 from torch.utils.data import DataLoader
 
 from transformer.utils import to_cuda
@@ -20,15 +20,20 @@ torch.autograd.set_detect_anomaly(True)
 
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch,
-                 ckpt_save_name, betas, eps, scheduler_factor, per_epoch_save,
-                 scheduler_warmup, latent_code_loss_ratio):
+                 ckpt_save_path, betas, eps, scheduler_factor, per_epoch_save,
+                 scheduler_warmup, latent_code_loss_ratio, sample_image_freq):
 
         self.n_epoch = n_epoch
         self.per_epoch_save = per_epoch_save
-        self.ckpt_save_name = ckpt_save_name
+
+        self.ckpt_save_path = Path(ckpt_save_path) / datetime.now().strftime(r'%m-%d-%H-%M-%S')
+        self.ckpt_save_path.mkdir(parents=True, exist_ok=True)
+
+
         self.device = config['device']
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
+        self.sample_image_freq = sample_image_freq
 
         assert config['decoder']['type'] == 'DecoderV2'
 
@@ -98,11 +103,10 @@ class Trainer():
         return loss, loss_latent, loss_other
 
     def save_checkpoint(self, epoch):
-        Log.info('save checkpoint at epoch %s', epoch)
-        ckptpath = self.ckpt_save_name.format(epoch=epoch)
-        os.makedirs(os.path.dirname(ckptpath), exist_ok=True)
-        torch.save(self.model, ckptpath)
-        Log.info('done, save checkpoint at epoch %s, %s', epoch, ckptpath)
+        Log.info('Save checkpoint at epoch %s', epoch)
+        ckpt_name = self.ckpt_save_path / f'ckpt_{epoch}.pth'
+        torch.save(self.model, ckpt_name.as_posix())
+        Log.info('Done, Saved checkpoint at epoch %s, %s', epoch, ckpt_name)
 
     def feed_to_wandb(self, args):
         Log.info('%s', args)
@@ -179,7 +183,7 @@ class Trainer():
             image = np.concatenate([gt_img, pred_img], axis=0)
             images.append(image)
 
-        total_image = np.concatenate([image for image in images], axis=1)
+        total_image = np.concatenate(images, axis=1)
 
         return total_image
 
@@ -193,8 +197,6 @@ class Trainer():
 
             self.lr_scheduler.step()
 
-            total_image = self.evaluate_shape_acc()
-
             if epoch_idx != 0 and epoch_idx % self.per_epoch_save == 0:
                 self.save_checkpoint(epoch_idx)
 
@@ -203,6 +205,7 @@ class Trainer():
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
-                'shape_image': wandb.Image(total_image, caption='shape image'),
             }
+            if epoch_idx != 0 and epoch_idx % self.sample_image_freq == 0:
+                log_data['shape_image'] = wandb.Image(self.evaluate_shape_acc(), caption='shape image')
             self.feed_to_wandb(log_data)

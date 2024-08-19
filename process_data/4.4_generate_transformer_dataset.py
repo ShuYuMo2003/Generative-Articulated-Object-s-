@@ -35,7 +35,7 @@ def determine_latentcode_encoder():
 
     # best_ckpt_path = onets_ckpt_paths[0]
 
-    best_ckpt_path = '../checkpoints/gensdf/08-16-17-52-04/800.pth'
+    best_ckpt_path = '../checkpoints/gensdf/08-17-09-35-29/1750.pth'
     Log.info('Using best ckpt: %s', best_ckpt_path)
 
     gensdf = torch.load(best_ckpt_path)
@@ -69,7 +69,7 @@ def evaluate_latent_codes(gensdf):
             original_features = torch.cat(plane_features, dim=1)
             out = gensdf.vae_model(original_features) # out = [self.decode(z), input, mu, log_var, z]
 
-        z = out[-1]
+        z = out[2]
 
         for batch in range(z.shape[0]):
             latent = z[batch, ...]

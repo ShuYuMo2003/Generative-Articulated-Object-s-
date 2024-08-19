@@ -7,6 +7,8 @@ import argparse
 import numpy as np
 from rich import print
 
+from utils.logging import Log, console
+
 from transformer.utils import str2hash
 
 def setup_seed(seed):
@@ -29,7 +31,7 @@ config.update({
 
 def train(config):
     from transformer.action.trainer import Trainer
-    print("start to train with config: ", config)
+    Log.info("start to train with config: %s", config)
     train_args = config['action']['args']
     wandb_instance = wandb.init(project='transformer', config=config) if config['usewandb'] else None
     trainer = Trainer(config=config, wandb_instance=wandb_instance, **train_args)
@@ -37,7 +39,7 @@ def train(config):
 
 def eval(config):
     from transformer.action.evaluater import Evaluater
-    print('start to eval with config: ', config)
+    Log.info('start to eval with config: %s', config)
     eval_args = config['action']['args']
     evaler = Evaluater(config=config, **eval_args)
 

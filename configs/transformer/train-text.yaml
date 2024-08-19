@@ -6,19 +6,20 @@ action:
   type: train
   args:
     n_epoch: 1000000
-    ckpt_save_name: checkpoints/transformer/v2-{epoch:05d}.ckpt
+    ckpt_save_path: checkpoints/transformer-text
     per_epoch_save: 10
     betas: [0.9, 0.98]
     eps: 1e-9
-    scheduler_factor: 0.05
-    scheduler_warmup: 30
+    scheduler_factor: 0.002
+    scheduler_warmup: 50
     # n_validation_sample: 12 # Change this by change `evaluate_dataset.cut_off`
     latent_code_loss_ratio: 0.8
+    sample_image_freq: 10
 
 evaluator:
   gensdf_model_path: null
   eval_mesh_output_path: logs/transformer_eval_mesh_output_path
-  resolution: 256
+  resolution: 16
   max_batch: 262144 # 2 ^ 18
 
 # Dataset & Dataloader config
@@ -27,18 +28,18 @@ dataset:
   args:
     dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
-    cut_off: -1
+    cut_off: -1 # 参与评估的数据量
 
 evaluate_dataset:
   type: file
   args:
     dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
-    cut_off: 256
+    cut_off: 256 # 参与评估的数据量
 
 dataloader:
   args:
-    batch_size: 512
+    batch_size: 256
     num_workers: 10
     shuffle: true
 
@@ -71,7 +72,7 @@ model_parameter:
   ffd_hidden_dim: 4096
   ffd_dropout: 0.2
 
-  encoder_kv_dim: 1024 # decided by pretrained model.
+  encoder_kv_dim: 1024 # decided by pretrained encoder model.
 
 ## Module Parameter Config.
 ## It will read from above parameter.
