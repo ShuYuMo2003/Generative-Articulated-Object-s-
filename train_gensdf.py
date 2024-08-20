@@ -47,7 +47,7 @@ strtime = datetime.now().strftime(r'%m-%d-%H-%M-%S')
 checkpoint_output = Path(config['checkpoint_output']) / strtime
 checkpoint_output.mkdir(exist_ok=True, parents=True)
 
-eval_mesh_output_path = Path(config['eval_mesh_output_path'])
+eval_mesh_output_path = Path(config['eval_mesh_output_path']) / strtime
 eval_mesh_output_path.mkdir(exist_ok=True, parents=True)
 
 
@@ -100,7 +100,7 @@ for epoch_idx in range(config['num_epochs']):
         losses.append(loss.item())
 
     # Generate Mesh and its screenshot for last batch
-    if epoch_idx % config['evaluation']['freq'] == 0:
+    if epoch_idx % config['evaluation']['freq'] == 0 and epoch_idx != 0:
         model.eval()
         screenshots = []
         evaluation_count = min(config['evaluation']['count'], batched_recon_latent.shape[0])

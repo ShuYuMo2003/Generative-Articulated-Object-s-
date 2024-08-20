@@ -18,11 +18,12 @@ class SDFModulationModel(nn.Module):
 
         self.config = config
         feature_dim = config["SdfModelSpecs"]["latent_dim"] # latent dim of pointnet
-        modulation_dim = feature_dim*3                      # latent dim of modulation
+        modulation_dim = feature_dim*3                      # latent dim of during modulation
         latent_std = config["latent_std"]                   # std of target gaussian distribution of latent space
+        latent_dim = config["latent_dim"]                   # latent dim of modulation
         hidden_dims = [modulation_dim, modulation_dim,
-                       modulation_dim, modulation_dim, modulation_dim]
-        self.vae_model = BetaVAE(in_channels=feature_dim*3, latent_dim=modulation_dim, hidden_dims=hidden_dims, kl_std=latent_std)
+                       modulation_dim, modulation_dim, modulation_dim ]
+        self.vae_model = BetaVAE(in_channels=feature_dim*3, latent_dim=latent_dim, hidden_dims=hidden_dims, kl_std=latent_std)
 
     def forward(self, x, current_epoch):
         xyz = x['xyz'] # (B, N, 3)

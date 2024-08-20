@@ -3,10 +3,10 @@
 
 python 2.1_generate_gensdf_dataset.py           \
             --clear_temp_file False             \
-            --n_process 15                      \
-            --n_sample_point_each 500000        \
+            --n_process 22                      \
+            --n_sample_point_each 1000000        \
             --uniform_sample_ratio 0.5              \
-            --n_point_cloud 100000                  \
+            --n_point_cloud 500000                  \
             --near_surface_sammple_method random    \
             --on_surface_sample_method poisson_disk \
 
