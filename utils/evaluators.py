@@ -36,6 +36,14 @@ class GenSDFLatentCodeEvaluator:
         Log.info('Resolution = %d', resolution)
         Log.info('Max Batch = %d', max_batch)
 
+    def generate_mesh(self, z: torch.Tensor):
+        '''
+            z: latent code with 1 * dim_z
+        '''
+        recon_latents = self.gensdf.vae_model.decode(z)
+        return self.generator.generate_from_latent(recon_latents[[0]])
+        pass
+
     def screenshoot(self, z: torch.Tensor, mask: torch.Tensor, cut_off: int):
         z = z.reshape(-1, z.size(-1))
         mask = mask.reshape(-1)

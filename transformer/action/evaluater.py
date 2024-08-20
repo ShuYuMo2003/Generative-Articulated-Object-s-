@@ -11,8 +11,9 @@ from tqdm import trange
 from rich import print
 from transformer.loaddataset import get_dataset
 from transformers import AutoTokenizer, T5EncoderModel
-from utils.evaluators import LatentCodeEvaluator
+
 from utils.utils import untokenize_part_info, generate_gif_toy
+from utils.evaluators import GenSDFLatentCodeEvaluator
 
 class Evaluater():
     def __init__(self, config, ckpt_filepath, eval_output_path,
@@ -39,7 +40,16 @@ class Evaluater():
 
         self.equal_part_threshold = equal_part_threshold
 
-        self.latentcode_evaluator = LatentCodeEvaluator(Path(self.dataset.get_onet_ckpt_path()), 100000, 16, self.device)
+        # self.latentcode_evaluator = LatentCodeEvaluator(Path(self.dataset.get_onet_ckpt_path()), 100000, 16, self.device)
+
+        e_config = config['evaluator']
+        self.latentcode_evaluator = GenSDFLatentCodeEvaluator(
+            gensdf_model_path=Path(self.dataset.get_onet_ckpt_path()),
+            eval_mesh_output_path=Path(e_config['eval_mesh_output_path']),
+            resolution=e_config['resolution'],
+            max_batch=e_config['max_batch'],
+            device=self.device
+        )
 
     def encode_text(self, text):
 
@@ -111,7 +121,7 @@ class Evaluater():
         generate_gif_toy(processed_nodes[1:], output_path,
                          bar_prompt="   - Generate Frames")
         print('[5] Done')
-    
+
     def reconstruct(self, text, file_name):
         json_path = Path(self.eval_output_path) / '1_info'
         ply_path = Path(self.eval_output_path) / '2_mesh'
@@ -170,12 +180,12 @@ class Evaluater():
 
             processed_node.update(part_info)
             processed_nodes.append(processed_node)
-        
+
         json_path = Path(json_path) / f'{file_name}.json'
         print('[4] Save json: ', json_path)
         json_file = {"meta": {}, "part": processed_nodes}
         with open(json_path, 'w') as f:
-            json.dump(json_file, f, indent=4) 
+            json.dump(json_file, f, indent=4)
 
         print('[5] Done')
-        
+

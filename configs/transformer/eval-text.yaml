@@ -4,7 +4,7 @@ device: null
 action:
   type: eval
   args:
-    ckpt_filepath: checkpoints/transformer/v2-00660.ckpt
+    ckpt_filepath: checkpoints/transformer-text/08-19-20-52-30/ckpt_380.pth
     eval_output_path: logs/test/output
     equal_part_threshold: 0.005
     t5_max_sentence_length: 128
@@ -13,9 +13,10 @@ action:
 dataset:
   type: file
   args:
-    dataset_path: dataset/4_transformer_dataset/test
+    dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
     cut_off: -1
+    enc_data_fieldname: description
 
 dataloader:
   args:
@@ -28,4 +29,10 @@ part_structure:
   joint_data_origin: 3
   joint_data_direction: 3
   limit: 4
-  latent_code: 128
+  latent_code: 768
+
+evaluator:
+  gensdf_model_path: null
+  eval_mesh_output_path: logs/transformer_eval_mesh_output_path
+  resolution: 16
+  max_batch: 262144 # 2 ^ 18

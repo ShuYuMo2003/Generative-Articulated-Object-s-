@@ -84,8 +84,8 @@ class Trainer():
         )
 
     def compute_loss(self, batched_data):
-        input, output, padding_mask, output_skip_end_token_mask, encoded_text, text = batched_data
-        predicted_output = self.model(input, padding_mask, encoded_text)
+        input, output, padding_mask, output_skip_end_token_mask, enc_data, enc_data_raw = batched_data
+        predicted_output = self.model(input, padding_mask, enc_data)
 
         dim_latent_code = self.input_structure['latent_code']
         # batch * part_idx * d_model
