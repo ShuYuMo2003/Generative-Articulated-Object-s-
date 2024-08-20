@@ -82,7 +82,7 @@ def evaluate_latent_codes(gensdf):
     Log.info('Latent code evaluation done. count = %s', len(path_to_latent))
     return path_to_latent
 
-def process(shape_info_path:Path, transformer_dataset_path:Path, encoded_text_paths:list[Path], path_to_latent:dict):
+def process(shape_info_path:Path, transformer_dataset_path:Path, encoded_text_paths:list[Path], encoded_image_paths: list[Path], path_to_latent:dict):
     global start_token, end_token, pad_token, max_count_token
 
     shape_info = json.loads(shape_info_path.read_text())
@@ -158,6 +158,10 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, encoded_text_pa
     encoded_text_paths = list(map(lambda x : x.as_posix().replace('../', ''), encoded_text_paths))
     encoded_text_paths.sort()
 
+    encoded_image_paths = list(filter(lambda x: x.stem.startswith(prefix_name), encoded_image_paths))
+    encoded_image_paths = list(map(lambda x : x.as_posix().replace('../', ''), encoded_image_paths))
+    encoded_image_paths.sort()
+
     if len(encoded_text_paths) < 2:
         return f"[Error] Encoded text path not found for {prefix_name}"
 
@@ -180,6 +184,7 @@ def process(shape_info_path:Path, transformer_dataset_path:Path, encoded_text_pa
                     'exist_node': dataset[0],
                     'inferenced_token': dataset[1],
                     'description': encoded_text_paths,
+                    'image': encoded_image_paths,
                 }, cls=HighPrecisionJsonEncoder, indent=2)
             f.write(text)
 
@@ -197,10 +202,13 @@ if __name__ == '__main__':
     encoded_text_path = Path('../dataset/4_screenshot_description_encoded')
     encoded_text_paths = list(map(Path, glob((encoded_text_path / '*').as_posix())))
 
+    encoded_image_path = Path('../dataset/4_screenshot_high_q_latent')
+    encoded_image_paths = list(map(Path, glob((encoded_image_path / '*').as_posix())))
+
     failed = []
 
     for shape_info_path in tqdm(shape_info_paths, desc="Processing shape info"):
-        status = process(shape_info_path, transformer_dataset_path, encoded_text_paths, path_to_latent)
+        status = process(shape_info_path, transformer_dataset_path, encoded_text_paths, encoded_image_paths, path_to_latent)
         if "Success" not in status:
             failed.append((shape_info_path.stem, status))
             Log.error("%s: %s", shape_info_path.as_posix(), status)

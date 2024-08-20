@@ -6,6 +6,7 @@ from transformer.utils import parse_args
 from transformer.layers.decoder_layers import NativeDecoderLayer
 from transformer.embedding import (get_tokenizer,   get_positionembedding,
                                    get_g_embedding, get_untokenizer)
+from transformer.layers.post_encoder import PostEncoder
 
 class NativeDecoder(nn.Module):
     def __init__(self, config, n_layer, device):
@@ -101,6 +102,8 @@ class DecoderV2(nn.Module):
         self.tokenizer      = get_tokenizer(config)
         self.position_emb   = get_positionembedding(config)
         self.untokenizer    = get_untokenizer(config)
+        self.postencoder    = PostEncoder(dim=config['model_parameter']['encoder_kv_dim'],
+                                          deepth=config['model_parameter']['post_encoder_deepth'])
 
         self.layers         = nn.ModuleList([
             NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
@@ -114,6 +117,7 @@ class DecoderV2(nn.Module):
 
     def forward(self, input, padding_mask, enc_data):
         # ('token'/'dfn'/'dfn_fa') * batch * part_idx * attribute_dim
+        enc_data = self.postencoder(enc_data)
         batch, n_part, d_model = input['token'].size()
 
         # print('1 input[token]', input['token'].shape, 'input[fa]', input['fa'].shape)

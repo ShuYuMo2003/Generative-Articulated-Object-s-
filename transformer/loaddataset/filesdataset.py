@@ -9,8 +9,11 @@ from pathlib import Path
 from torch.utils.data import dataset
 
 class FileSysDataset(dataset.Dataset):
-    def __init__(self, dataset_path: str, description_for_each_file: int, cut_off: int):
+    def __init__(self, dataset_path: str, description_for_each_file: int, cut_off: int, enc_data_fieldname: str):
         self.dataset_root_path = Path(dataset_path)
+
+        assert enc_data_fieldname in ['description', 'image']
+        self.enc_data_fieldname = enc_data_fieldname
 
         # import meta.json
         self.meta = json.loads((self.dataset_root_path / 'meta.json').read_text())
@@ -44,12 +47,15 @@ class FileSysDataset(dataset.Dataset):
 
     def __getitem__(self, index):
         # print('index: ', index)
-        current_desc_idx, file_path = self.files_path[index]
+        current_enc_idx, file_path = self.files_path[index]
         data = json.loads(Path(file_path).read_text())
         # print('index = ', index)
         # print('file_path = ', file_path)
-        desc_path = data['description'][current_desc_idx]
-        desc = np.load(desc_path, allow_pickle=True).item()
+        enc_path = data[self.enc_data_fieldname][current_enc_idx]
+        enc = np.load(enc_path, allow_pickle=True)
+
+        if self.enc_data_fieldname == 'description':
+            enc = enc.item()
 
         total_token = len(data['exist_node'])
         assert len(data['exist_node']) == len(data['inferenced_token'])
@@ -120,4 +126,9 @@ class FileSysDataset(dataset.Dataset):
         #     print('padding_mask = ', padding_mask)
         #     print('output_skip_end_token_mask = ', output_skip_end_token_mask)
 
-        return transformed_input, output, padding_mask, output_skip_end_token_mask, desc['encoded_text'], desc['text']
+        # print('enc', enc)
+        # print(self.enc_data_fieldname, self.enc_data_fieldname == 'description')
+
+        return [transformed_input, output, padding_mask, output_skip_end_token_mask] +   \
+                    ([enc['encoded_text'], enc['text']] if self.enc_data_fieldname == 'description'
+                else [enc.astype(np.float32), str(enc_path)])

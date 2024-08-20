@@ -29,7 +29,7 @@ dataset:
     dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
     cut_off: -1 # 参与评估的数据量
-    enc_data_fieldname: description
+    enc_data_fieldname: image
 
 evaluate_dataset:
   type: file
@@ -37,11 +37,11 @@ evaluate_dataset:
     dataset_path: dataset/4_transformer_dataset
     description_for_each_file: 6
     cut_off: 256 # 参与评估的数据量
-    enc_data_fieldname: description
+    enc_data_fieldname: image
 
 dataloader:
   args:
-    batch_size: 128
+    batch_size: 64
     num_workers: 20
     shuffle: true
     pin_memory: true
@@ -50,7 +50,7 @@ dataloader:
 
 evaluate_dataloader:
   args:
-    batch_size: 128
+    batch_size: 64
     num_workers: 22
     shuffle: false
 
@@ -77,7 +77,9 @@ model_parameter:
   ffd_hidden_dim: 8192
   ffd_dropout: 0.3
 
-  encoder_kv_dim: 1024 # decided by pretrained encoder model.
+  encoder_kv_dim: 1408 # decided by pretrained encoder model.
+
+  post_encoder_deepth: 3
 
 ## Module Parameter Config.
 ## It will read from above parameter.
