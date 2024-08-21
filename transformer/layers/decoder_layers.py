@@ -36,28 +36,40 @@ class NativeDecoderLayer(nn.Module):
         self.dropout_2 = nn.Dropout(dropout)
         self.norm_2 = nn.LayerNorm(d_model)
 
-    def forward(self, x, key_padding_mask, attn_mask, enc_data):
-        before_x = x
-        x, attn_weight = self.self_attention(x, x, x,
-                                key_padding_mask=(key_padding_mask == 0),
-                                attn_mask=(attn_mask == 0))
+        self.dropout_3 = nn.Dropout(dropout)
+        self.norm_3 = nn.LayerNorm(d_model)
 
-        x = self.dropout_0(x)
-        x = self.norm_0(x + before_x)
-
-        if enc_data is not None:
-            enc_data = self.mlp_for_enc_data(enc_data)
-
+    def forward(self, x, key_padding_mask, attn_mask, enc_data, long_connection_data=None):
+        if long_connection_data is not None:
             before_x = x
-            x, attn_weight = self.cross_attention(x, enc_data, enc_data)
+            x, attn_weight = self.self_attention(x, long_connection_data, long_connection_data,
+                                    key_padding_mask=(key_padding_mask == 0),
+                                    attn_mask=(attn_mask == 0))
+            x = self.dropout_0(x)
+            x = self.norm_0(x + before_x)
+
+        if True:
+            before_x = x
+            x, attn_weight = self.self_attention(x, x, x,
+                                    key_padding_mask=(key_padding_mask == 0),
+                                    attn_mask=(attn_mask == 0))
 
             x = self.dropout_1(x)
             x = self.norm_1(x + before_x)
 
-        before_x = x
-        x = self.ffn(x)
+        if enc_data is not None:
+            enc_data = self.mlp_for_enc_data(enc_data)
+            before_x = x
+            x, attn_weight = self.cross_attention(x, enc_data, enc_data)
 
-        x = self.dropout_2(x)
-        x = self.norm_2(x + before_x)
+            x = self.dropout_2(x)
+            x = self.norm_2(x + before_x)
+
+        if True:
+            before_x = x
+            x = self.ffn(x)
+
+            x = self.dropout_3(x)
+            x = self.norm_3(x + before_x)
 
         return x
