@@ -8,93 +8,6 @@ from transformer.embedding import (get_tokenizer,   get_positionembedding,
                                    get_g_embedding, get_untokenizer)
 from transformer.layers.post_encoder import PostEncoder
 
-class NativeDecoder(nn.Module):
-    def __init__(self, config, n_layer, device):
-        super().__init__()
-        self.device         = device
-        self.tokenizer      = get_tokenizer(config)
-        self.position_emb   = get_positionembedding(config)
-        self.g_token_emb    = get_g_embedding(config)
-        self.untokenizer    = get_untokenizer(config)
-        self.layers         = nn.ModuleList([
-            NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
-                for _ in range(n_layer)
-        ])
-
-    def generate_mask(self, n_part):
-        mask = torch.ones(n_part, n_part, device=self.device)
-        mask = torch.tril(mask)
-        return mask
-
-    def forward(self, index, raw_parts, mask=None):
-        dfn, dfn_fa, tokens = self.tokenizer(raw_parts)
-
-        g_token_dist = self.g_token_emb(index) # batch * d_model
-
-        # print(type(g_token_dist), g_token_dist)
-        g_token_sample = g_token_dist.rsample()
-        # print('dddd', g_token_sample)
-        # print('g_token_sample', g_token_sample.shape)
-        # print('tokens', tokens.shape)
-
-        # Replace the first token in each batch with g_token.
-        # Initially, the first token in each batch is a zero tensor which is defined in `redis.py`.
-        # I only need the `dfn`/`dfn_fa` for g_token determined by dataset.
-        tokens[:, 0, :] = g_token_sample
-
-        # n_batch, n_part, d_model
-        tokens = self.position_emb((dfn, dfn_fa, tokens))
-
-        n_batch, n_part, d_model = tokens.size()
-
-        mask = self.generate_mask(n_part)
-
-        for layer in self.layers:
-            tokens = layer(tokens, mask)
-
-        p_token = tokens[:, 0, :]
-
-        part_info = self.untokenizer(p_token)
-
-        return part_info, g_token_dist
-
-class ParallelDecoder(nn.Module):
-    def __init__(self, config, n_layer, device):
-        super().__init__()
-        self.device         = device
-        self.tokenizer      = get_tokenizer(config)
-        self.position_emb   = get_positionembedding(config)
-        self.untokenizer    = get_untokenizer(config)
-        self.layers         = nn.ModuleList([
-            NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
-                for _ in range(n_layer)
-        ])
-
-    def generate_mask(self, n_part):
-        mask = torch.ones(n_part, n_part, device=self.device, dtype=torch.int16)
-        mask = torch.tril(mask)
-        return mask
-
-    def forward(self, index, raw_parts, key_padding_mask, enc_data):
-        dfn, dfn_fa, tokens = self.tokenizer(raw_parts)
-
-        # print(dfn.shape, dfn_fa.shape, tokens.shape)
-
-        # n_batch, n_part, d_model
-        tokens = self.position_emb((dfn, dfn_fa, tokens))
-
-        n_batch, n_part, d_model = tokens.size()
-
-        attn_mask = self.generate_mask(n_part)
-
-        # TODO: Add long connection
-        for layer in self.layers:
-            tokens = layer(tokens, key_padding_mask, attn_mask, enc_data)
-
-        part_info = self.untokenizer(tokens)
-
-        return part_info, None
-
 class DecoderV2(nn.Module):
     def __init__(self, config, n_layer, device):
         super().__init__()
@@ -105,9 +18,16 @@ class DecoderV2(nn.Module):
         self.postencoder    = PostEncoder(dim=config['model_parameter']['encoder_kv_dim'],
                                           deepth=config['model_parameter']['post_encoder_deepth'])
 
-        self.layers         = nn.ModuleList([
+        assert n_layer % 2 == 0, "n_layer must be even number"
+        self.n_half_layer = n_layer // 2
+
+        self.front_layers   = nn.ModuleList([
             NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
-                for _ in range(n_layer)
+                for _ in range(self.n_half_layer)
+        ])
+        self.rear_layers    = nn.ModuleList([
+            NativeDecoderLayer(config, **parse_args(config, config['decoder']['layer_arges']))
+                for _ in range(self.n_half_layer)
         ])
 
     def generate_mask(self, n_part):
@@ -129,9 +49,14 @@ class DecoderV2(nn.Module):
 
         attn_mask = self.generate_mask(n_part)
 
-        # TODO: Add long connection
-        for layer in self.layers:
-            tokens = layer(tokens, padding_mask, attn_mask, enc_data)
+        x_stack = []
+        for idx, layer in enumerate(self.front_layers):
+            tokens = layer(tokens, padding_mask, attn_mask, enc_data, None)
+            if idx < self.n_half_layer - 1: x_stack.append(tokens)
+
+        for idx, layer in enumerate(self.rear_layers):
+            long_connection_data = x_stack.pop() if idx > 0 else None
+            tokens = layer(tokens, padding_mask, attn_mask, enc_data, long_connection_data)
 
         tokens = self.untokenizer(tokens)
 

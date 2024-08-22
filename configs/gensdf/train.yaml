@@ -29,7 +29,7 @@ evaluation:
 eval_mesh_output_path: logs/gensdf/meshes
 
 num_epochs: 1000001
-kld_weight: 0.01
+kld_weight: 0.1
 latent_std: 0.25
 latent_dim: 786 # original 786 = SdfModelSpecs.latent_dim * 3
 
