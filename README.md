@@ -9,11 +9,16 @@
  - [ ] matrice 测试。
  - [x] 调试 sdf 监督 O Net 训练。
  - [x] 原训练数据集高质量渲染。
+ - [ ] 检查 Position Embedding 的实现是否正确。
  - [x] 尝试使用 Vision (CNN / ViT)类预训练大模型做 Encoder。
     - [ ] vit, Swin Transformer, https://arxiv.org/abs/2103.14030
     - [x] vit, BLIP, image to text 模型, 可以取用训练完成的 Encoder, https://arxiv.org/abs/2201.12086
     - [ ] vit, nlpconnect/vit-gpt2-image-captioning https://huggingface.co/nlpconnect/vit-gpt2-image-captioning
     - [ ] vit, LRM, LARGE RECONSTRUCTION MODEL FOR SINGLE IMAGE TO 3D, https://yiconghong.me/LRM/
+
+ - [ ] text condition 多样化，考虑分三个等级。
+ - [ ] 模糊的描述词  生成多样的物体 + editing
+
 
 
 # Notes
@@ -21,7 +26,12 @@
 GenSDF:
  - stilted-puddle-76, kl_weight=0.01, latent_dim=256, 测试 latent_dim 的下界，transformer 测试表明 kl_weight=1e-3的时候影响生成质量不错，kl_weight 可以考虑放宽。
  - true-sky-74, kl_weight=0.1, latent_dim=256, 中间效果不好，中止。
- - golden-cosmos-59, kl_weight=1e-3, latent_dim=768
+
+ - golden-cosmos-59, kl_weight=1e-3, latent_dim=768, 充分训练，质量好
+ - curious-snow-85, kl_weight=0.001, latent_dim=256, 充分训练，质量还可以
+ - sandy-lion-83, kl_weight=0.01, latent_dim=256, 充分训练，质量还可以。
+ - colorful-salad-87, kl_weight=0.1, latent_dim=786, 正在训练。
+ - sandy-water-86, kl_weight=0.01, lattent_dim=786, 正在训练。
 
 Transformer:
  - bumbling-dust-26, image condition 首次测试，加入了 Post Encoder。Loss 表现优于 zesty-cloud-24
