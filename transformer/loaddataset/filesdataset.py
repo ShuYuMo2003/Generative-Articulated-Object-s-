@@ -62,8 +62,8 @@ class FileSysDataset(dataset.Dataset):
 
         # Process Input
         input = data['exist_node']
-        with open('input.json', 'w') as f:
-            json.dump(input, f, indent=4)
+        # with open('input.json', 'w') as f:
+        #     json.dump(input, f, indent=4)
 
         for node_idx, node in enumerate(input):
             node['token'] = torch.tensor(node['token'], dtype=torch.float32)
