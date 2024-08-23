@@ -9,7 +9,7 @@ class PositionGRUEmbedding(nn.Module):
 
         self.fc0_comp = nn.Linear(d_model, d_model)
         self.dropout_comp = nn.Dropout(dropout)
-        self.act_comp = nn.GELU()
+        self.act_comp = nn.ReLU()
         self.fc1_comp = nn.Linear(d_model, dim_single_emb)
 
         self.combine_fc = nn.Linear(2 * d_model, d_model)

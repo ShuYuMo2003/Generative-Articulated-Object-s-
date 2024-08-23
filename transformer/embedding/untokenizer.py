@@ -4,7 +4,7 @@ class MLPUnTokenizerV2(nn.Module):
     def __init__(self, d_token, d_hidden, d_model, drop_out):
         super().__init__()
         self.fc_0 = nn.Linear(d_model, d_hidden)
-        self.acti = nn.GELU()
+        self.acti = nn.Mish()
         self.drop = nn.Dropout(drop_out)
         self.fc_1 = nn.Linear(d_hidden, d_token)
 
@@ -15,7 +15,7 @@ class MLPUnTokenizerV2(nn.Module):
         x = self.fc_1(x)
         return x
 
-
+# Deprecated
 class NativeMLPUnTokenizer(nn.Module):
     def __init__(self, input_structure, d_model, expanded_d_model, latent_code_dim, dropout):
         super().__init__()

@@ -46,7 +46,7 @@ def untokenize_part_info(token):
         'limit': token[12:16],
         'latent_code': token[16:],
     }
-    assert len(token[16:]) == 768
+    assert len(token[16:]) == 256
     return part_info
 
 def generate_gif_toy(tokens, shape_output_path: Path, bar_prompt:str, n_frame: int=100,

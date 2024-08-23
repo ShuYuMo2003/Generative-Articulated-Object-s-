@@ -45,6 +45,8 @@ class ResnetBlockFC(nn.Module):
         self.fc_1 = nn.Linear(size_h, size_out)
         self.actvn = nn.LeakyReLU(0.2)
 
+        self.droupout = nn.Dropout(0.2)
+
         if size_in == size_out:
             self.shortcut = None
         else:
@@ -54,6 +56,7 @@ class ResnetBlockFC(nn.Module):
 
     def forward(self, x):
         net = self.fc_0(self.actvn(x))
+        net = self.droupout(net)
         dx = self.fc_1(self.actvn(net))
 
         if self.shortcut is not None:

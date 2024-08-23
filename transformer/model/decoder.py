@@ -8,15 +8,24 @@ from transformer.embedding import (get_tokenizer,   get_positionembedding,
                                    get_g_embedding, get_untokenizer)
 from transformer.layers.post_encoder import PostEncoder
 
+from transformer.layers.quantizer import VectorQuantizer
+
 class DecoderV2(nn.Module):
     def __init__(self, config, n_layer, device):
         super().__init__()
         self.device         = device
+        self.d_model        = config['model_parameter']['d_model']
         self.tokenizer      = get_tokenizer(config)
         self.position_emb   = get_positionembedding(config)
         self.untokenizer    = get_untokenizer(config)
         self.postencoder    = PostEncoder(dim=config['model_parameter']['encoder_kv_dim'],
                                           deepth=config['model_parameter']['post_encoder_deepth'])
+
+        vq_config = config['model_parameter']['vectorQuantizer']
+        self.vq = VectorQuantizer(n_e=vq_config['n_e'], e_dim=vq_config['e_dim'],
+                                  d_model=self.d_model, n_channel=vq_config['n_channel'],
+                                  temperature=vq_config['temperature'], beta=vq_config['beta'],
+                                  device = self.device)
 
         assert n_layer % 2 == 0, "n_layer must be even number"
         self.n_half_layer = n_layer // 2
@@ -38,6 +47,7 @@ class DecoderV2(nn.Module):
     def forward(self, input, padding_mask, enc_data):
         # ('token'/'dfn'/'dfn_fa') * batch * part_idx * attribute_dim
         enc_data = self.postencoder(enc_data)
+
         batch, n_part, d_model = input['token'].size()
 
         # print('1 input[token]', input['token'].shape, 'input[fa]', input['fa'].shape)
@@ -52,12 +62,13 @@ class DecoderV2(nn.Module):
         x_stack = []
         for idx, layer in enumerate(self.front_layers):
             tokens = layer(tokens, padding_mask, attn_mask, enc_data, None)
-            if idx < self.n_half_layer - 1: x_stack.append(tokens)
+            x_stack.append(tokens)
+
+        vq_loss, tokens = self.vq(tokens)
 
         for idx, layer in enumerate(self.rear_layers):
-            long_connection_data = x_stack.pop() if idx > 0 else None
-            tokens = layer(tokens, padding_mask, attn_mask, enc_data, long_connection_data)
+            tokens = layer(tokens, padding_mask, attn_mask, enc_data, x_stack.pop())
 
         tokens = self.untokenizer(tokens)
 
-        return tokens
+        return vq_loss, tokens

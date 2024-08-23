@@ -21,7 +21,7 @@ torch.autograd.set_detect_anomaly(True)
 class Trainer():
     def __init__(self, wandb_instance, config, n_epoch,
                  ckpt_save_path, betas, eps, scheduler_factor, per_epoch_save,
-                 scheduler_warmup, latent_code_loss_ratio, sample_image_freq):
+                 scheduler_warmup, latent_code_loss_ratio, sample_image_freq, vq_loss_ratio):
 
         self.n_epoch = n_epoch
         self.per_epoch_save = per_epoch_save
@@ -34,6 +34,7 @@ class Trainer():
         self.input_structure = config['part_structure']
         self.model = get_decoder(config).to(self.device)
         self.sample_image_freq = sample_image_freq
+        self.vq_loss_ratio = vq_loss_ratio
 
         assert config['decoder']['type'] == 'DecoderV2'
 
@@ -85,7 +86,7 @@ class Trainer():
 
     def compute_loss(self, batched_data):
         input, output, padding_mask, output_skip_end_token_mask, enc_data, enc_data_raw = batched_data
-        predicted_output = self.model(input, padding_mask, enc_data)
+        vq_loss, predicted_output = self.model(input, padding_mask, enc_data)
 
         dim_latent_code = self.input_structure['latent_code']
         # batch * part_idx * d_model
@@ -100,7 +101,9 @@ class Trainer():
 
         loss = self.latent_code_loss_ratio * loss_latent + (1 - self.latent_code_loss_ratio) * loss_other
 
-        return loss, loss_latent, loss_other
+        loss = loss + self.vq_loss_ratio * vq_loss
+
+        return loss, loss_latent, loss_other, vq_loss
 
     def save_checkpoint(self, epoch):
         Log.info('Save checkpoint at epoch %s', epoch)
@@ -119,6 +122,7 @@ class Trainer():
             'loss': [],
             'loss_latent': [],
             'loss_pred': [],
+            'loss_vq': [],
         }
         for idx, batched_data in tqdm(enumerate(self.train_dataloader),
                                                 desc=f'epoch = {epoch_idx}',
@@ -127,7 +131,7 @@ class Trainer():
             if self.device == 'cuda':
                 batched_data = to_cuda(batched_data)
 
-            loss, loss_latent, loss_pred = self.compute_loss(batched_data)
+            loss, loss_latent, loss_pred, vq_loss = self.compute_loss(batched_data)
 
             self.zero_gred()
             loss.backward()
@@ -135,6 +139,7 @@ class Trainer():
             train_losses['loss'].append(loss.item())
             train_losses['loss_latent'].append(loss_latent.item())
             train_losses['loss_pred'].append(loss_pred.item())
+            train_losses['loss_vq'].append(vq_loss.item())
             # print({
             #         'loss': loss.item(),
             #         'loss_latent': loss_latent.item(),
@@ -160,7 +165,7 @@ class Trainer():
                 input, output, padding_mask, output_skip_end_token_mask,  \
                             encoded_text, text = batched_data
 
-                p_output = self.model(input, padding_mask, encoded_text)
+                vq_loss, p_output = self.model(input, padding_mask, encoded_text)
 
                 expected_output.append(output)
                 predicted_output.append(p_output)
@@ -204,6 +209,7 @@ class Trainer():
                 'train_loss': torch.tensor(train_losses['loss']).mean(),
                 'train_loss_latent': torch.tensor(train_losses['loss_latent']).mean(),
                 'train_loss_pred': torch.tensor(train_losses['loss_pred']).mean(),
+                'train_loss_vq': torch.tensor(train_losses['loss_vq']).mean(),
                 'lr': self.optimizer.param_groups[0]['lr'],
             }
             if epoch_idx != 0 and epoch_idx % self.sample_image_freq == 0:

@@ -13,7 +13,8 @@ action:
     scheduler_factor: 0.0025
     scheduler_warmup: 30
     # n_validation_sample: 12 # Change this by change `evaluate_dataset.cut_off`
-    latent_code_loss_ratio: 0.99
+    latent_code_loss_ratio: 0.8
+    vq_loss_ratio: 0.1
     sample_image_freq: 10
 
 evaluator:
@@ -41,7 +42,7 @@ evaluate_dataset:
 
 dataloader:
   args:
-    batch_size: 128
+    batch_size: 256
     num_workers: 20
     shuffle: true
     pin_memory: true
@@ -50,7 +51,7 @@ dataloader:
 
 evaluate_dataloader:
   args:
-    batch_size: 128
+    batch_size: 256
     num_workers: 22
     shuffle: false
 
@@ -59,29 +60,38 @@ part_structure:
   joint_data_origin: 3
   joint_data_direction: 3
   limit: 4
-  latent_code: 768
+  latent_code: 256
 
 # Global Model Parameters
 model_parameter:
-  tokenizer_hidden_dim: 4096
+  tokenizer_hidden_dim: 2048
 
-  d_token: 784 # 6 + 3 + 3 + 4 + 768
+  d_token: 272 # 6 + 3 + 3 + 4 + 256
   n_head: 8
   n_layer: 8
-  d_model: 2048
+  d_model: 1024
   decoder_dropout: 0.1
   dim_gru_single_emb: 256
 
   position_embedding_dropout: 0.1
 
-  ffd_hidden_dim: 8192
+  ffd_hidden_dim: 4096
   ffd_dropout: 0.3
 
   encoder_kv_dim: 1024 # decided by pretrained encoder model.
+  post_encoder_deepth: 3
+
+  vectorQuantizer:
+    n_e: 512
+    e_dim: 128
+    n_channel: 128
+    temperature: 0.5
+    beta: 0.25
 
 ## Module Parameter Config.
 ## It will read from above parameter.
 ## No need to change here.
+
 tokenizer:
   type: MLPTokenizerV2
   args:

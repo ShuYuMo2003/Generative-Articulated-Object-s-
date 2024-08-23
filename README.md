@@ -27,11 +27,11 @@ GenSDF:
  - stilted-puddle-76, kl_weight=0.01, latent_dim=256, 测试 latent_dim 的下界，transformer 测试表明 kl_weight=1e-3的时候影响生成质量不错，kl_weight 可以考虑放宽。
  - true-sky-74, kl_weight=0.1, latent_dim=256, 中间效果不好，中止。
 
- - golden-cosmos-59, kl_weight=1e-3, latent_dim=768, 充分训练，质量好
- - curious-snow-85, kl_weight=0.001, latent_dim=256, 充分训练，质量还可以
+ - golden-cosmos-59, kl_weight=1e-3, latent_dim=768, 充分训练，质量好。
+ - curious-snow-85, kl_weight=0.001, latent_dim=256, 充分训练，质量还可以。
  - sandy-lion-83, kl_weight=0.01, latent_dim=256, 充分训练，质量还可以。
- - colorful-salad-87, kl_weight=0.1, latent_dim=786, 正在训练。
- - sandy-water-86, kl_weight=0.01, lattent_dim=786, 正在训练。
+ - colorful-salad-87, kl_weight=0.1, latent_dim=786, 充分训练，效果一般。
+ - sandy-water-86, kl_weight=0.01, lattent_dim=786, 充分训练，效果可以。
 
 Transformer:
  - bumbling-dust-26, image condition 首次测试，加入了 Post Encoder。Loss 表现优于 zesty-cloud-24
